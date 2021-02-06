@@ -1,10 +1,14 @@
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'JaCoCo Report'
+description: 'Publishes the JaCoCo report as a comment in the Pull Request'
 inputs:
   who-to-greet:  # id of input
     description: 'Who to greet'
     required: true
     default: 'World'
+  path:
+    description: 'Path of the generated xml file'
+    required: true
+
 outputs:
   time: # id of output
     description: 'The time we greeted you'
