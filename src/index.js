@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const fs = require('fs');
+const parser = require('xml2js');
 
 try {
     // `who-to-greet` input defined in action metadata file
@@ -20,6 +21,13 @@ try {
             core.setFailed(err.message);
         } else {
             console.log("Report Xml -> ", data);
+            parser.parseString(data, function (err, value) {
+                if (err) {
+                    core.setFailed(err.message);
+                } else {
+                    console.log("Report Json -> ", value);
+                }
+            });
         }
     });
 
