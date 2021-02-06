@@ -5788,6 +5788,8 @@ function wrappy (fn, cb) {
 
 const core = __nccwpck_require__(934);
 const github = __nccwpck_require__(794);
+const fs = __nccwpck_require__(747);
+// const parser = require('xml2json');
 
 try {
     // `who-to-greet` input defined in action metadata file
@@ -5801,6 +5803,15 @@ try {
 
     const reportPath = core.getInput('path');
     console.log(`Path is ${reportPath}`);
+
+    fs.readFile(reportPath, function (err, data) {
+        if (err) {
+            core.setFailed(err.message);
+        } else {
+            console.log("Report Xml -> ", data);
+        }
+    });
+
 } catch (error) {
     core.setFailed(error.message);
 }

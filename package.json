@@ -19,6 +19,7 @@
   "homepage": "https://github.com/Madrapps/jacoco-report#readme",
   "dependencies": {
     "@actions/core": "^1.2.6",
-    "@actions/github": "^4.0.0"
+    "@actions/github": "^4.0.0",
+    "xml2json": "^0.12.0"
   }
 }
