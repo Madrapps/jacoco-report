@@ -12,6 +12,11 @@ try {
     // Get the JSON webhook payload for the event that triggered the workflow
     const payload = JSON.stringify(github.context.payload, undefined, 2)
     console.log(`The event payload: ${payload}`);
+    const isPR = github.context.payload.pull_request != null
+
+    if (isPR) {
+        console.log(`Invoked as a result of Pull Request`);
+    }
 
     const reportPath = core.getInput('path');
     console.log(`Path is ${reportPath}`);
