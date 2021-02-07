@@ -12379,6 +12379,8 @@ try {
 
     if (isPR) {
         console.log(`Invoked as a result of Pull Request`);
+        const prNumber = github.context.payload.pull_request.number
+        console.log(`PR Number = `, prNumber);
     }
 
     const reportPath = core.getInput('path');
