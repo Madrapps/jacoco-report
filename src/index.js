@@ -3,6 +3,8 @@ const github = require('@actions/github');
 const fs = require('fs');
 const parser = require('xml2js');
 
+const client = new github.GitHub(core.getInput("token"));
+
 try {
     // `who-to-greet` input defined in action metadata file
     const nameToGreet = core.getInput('who-to-greet');
@@ -18,6 +20,8 @@ try {
         console.log(`Invoked as a result of Pull Request`);
         const prNumber = github.context.payload.pull_request.number
         console.log(`PR Number = `, prNumber);
+
+        addComment(prNumber, "Sample Data pushed")
     }
 
     const reportPath = core.getInput('path');
@@ -38,6 +42,15 @@ try {
         }
     });
 
+
 } catch (error) {
     core.setFailed(error.message);
+}
+
+function addComment(prNumber, comment) {
+    client.issues.createComment({
+        issue_number: prNumber,
+        body: comment,
+        ...github.context.repo
+    });
 }

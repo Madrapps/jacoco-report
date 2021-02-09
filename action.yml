@@ -8,6 +8,9 @@ inputs:
   path:
     description: 'Path of the generated xml file'
     required: true
+  token:
+    description: 'Github personal token to add commit to Pull Request'
+    required: true
 
 outputs:
   time: # id of output
