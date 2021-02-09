@@ -3,7 +3,7 @@ const github = require('@actions/github');
 const fs = require('fs');
 const parser = require('xml2js');
 
-const client = new github.GitHub(core.getInput("token"));
+const client = github.getOctokit(core.getInput("token"));
 
 try {
     // `who-to-greet` input defined in action metadata file

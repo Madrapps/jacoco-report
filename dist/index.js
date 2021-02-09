@@ -12366,7 +12366,7 @@ const github = __nccwpck_require__(6794);
 const fs = __nccwpck_require__(5747);
 const parser = __nccwpck_require__(1532);
 
-const client = new github.GitHub(core.getInput("token"));
+const client = github.getOctokit(core.getInput("token"));
 
 try {
     // `who-to-greet` input defined in action metadata file
