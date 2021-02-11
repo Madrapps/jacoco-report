@@ -12400,6 +12400,7 @@ try {
                     core.setFailed(err.message);
                 } else {
                     console.log("Report Json -> ", value);
+                    console.log("Report Json -> ", value["report"]);
                 }
             });
         }
