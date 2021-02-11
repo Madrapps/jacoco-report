@@ -21,7 +21,7 @@ try {
         const prNumber = github.context.payload.pull_request.number
         console.log(`PR Number = `, prNumber);
 
-        addComment(prNumber, "Sample Data pushed")
+        // addComment(prNumber, "Sample Data pushed")
     }
 
     const reportPath = core.getInput('path');
@@ -36,13 +36,24 @@ try {
                 if (err) {
                     core.setFailed(err.message);
                 } else {
-                    console.log("Report Json -> ", value);
-                    console.log("Report Json -> ", value["report"]);
+                    const report = value["report"];
+                    const counters = report["counter"]
+                    counters.forEach(counter => {
+                        const attr = counter["$"]
+                        if (attr["type"] == "INSTRUCTION") {
+                            missed = parseFloat(attr["missed"])
+                            const covered = parseFloat(attr["covered"])
+                            const coverage = covered / (covered + missed) * 100
+
+                            if (isPR) {
+                                addComment(prNumber, "Coverage = " + coverage + "%")
+                            }
+                        }
+                    });
                 }
             });
         }
     });
-
 
 } catch (error) {
     core.setFailed(error.message);
