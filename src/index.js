@@ -30,27 +30,14 @@ try {
                     core.setFailed(err.message);
                 } else {
                     const report = value["report"];
-                    const counters = report["counter"]
-                    const overallCoverage = getOverallCoverage(counters);
+                    const counters = report["counter"];
+                    const overallCoverage = getCoverage(counters);
                     if (overallCoverage != null && isPR) {
                         console.log(`Invoked as a result of Pull Request`);
                         const prNumber = github.context.payload.pull_request.number;
                         console.log(`PR Number = `, prNumber);
-                        addComment(prNumber, mdOverallCoverage(overallCoverage, passPercentage));
+                        addComment(prNumber, mdPrComment(report, passPercentage));
                     }
-
-                    const packages = report["package"];
-                    packages.forEach(package => {
-                        const packageName = package["$"];
-                        const sourceFiles = package.sourcefile;
-                        console.log(`Package: ${packageName}`);
-                        sourceFiles.forEach(sourceFile => {
-                            const fileName = sourceFile["$"];
-                            const counters = sourceFile["counter"];
-                            const coverage = getOverallCoverage(counters);
-                            console.log(`File: ${fileName} : ${coverage.toFixed(2)}%`);
-                        });
-                    });
                 }
             });
         }
@@ -60,7 +47,16 @@ try {
     core.setFailed(error.message);
 }
 
-function getOverallCoverage(counters) {
+function mdPrComment(report, minCoverage) {
+    const fileTable = mdFileCoverage(report, minCoverage);
+
+    const counters = report["counter"];
+    const overallCoverage = getCoverage(counters);
+    const overall = mdOverallCoverage(overallCoverage, minCoverage);
+    return fileTable + `\n\n` + overall;
+}
+
+function getCoverage(counters) {
     var coverage;
     counters.forEach(counter => {
         const attr = counter["$"]
@@ -71,6 +67,38 @@ function getOverallCoverage(counters) {
         }
     });
     return coverage
+}
+
+function mdFileCoverage(report, minCoverage) {
+    const tableHeader = `|File|Coverage| Status|`
+    const tableStructure = `|:-|:-:|:-:|`
+
+    const table = tableHeader + `\n` + tableStructure;
+    const packages = report["package"];
+    packages.forEach(package => {
+        const packageName = package["$"].name;
+        const sourceFiles = package.sourcefile;
+        console.log(`Package: ${packageName}`);
+        sourceFiles.forEach(sourceFile => {
+            const fileName = sourceFile["$"].name;
+            const counters = sourceFile["counter"];
+            const coverage = getCoverage(counters);
+            console.log(`File: ${fileName} : ${coverage.toFixed(2)}%`);
+            table = table + `\n` + mdFileCoverageRow(sourceFile, minCoverage);
+        });
+    });
+    return table;
+}
+
+function mdFileCoverageRow(sourceFile, minCoverage) {
+    const fileName = sourceFile["$"].name;
+    const counters = sourceFile["counter"];
+    const coverage = getCoverage(counters);
+    var status = `:green_apple:`;
+    if (coverage < minCoverage) {
+        status = `:x:`;
+    }
+    return `|${fileName}|${coverage.toFixed(2)}|${status}|`
 }
 
 function mdOverallCoverage(coverage, minCoverage) {
