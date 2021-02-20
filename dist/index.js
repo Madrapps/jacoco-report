@@ -12437,8 +12437,8 @@ try {
     core.setFailed(error.message);
 }
 
-async function comparePR() {
-    const response = await client.repos.compareCommits({
+function comparePR() {
+    const response = client.repos.compareCommits({
         base,
         head,
         owner: github.context.repo.owner,
