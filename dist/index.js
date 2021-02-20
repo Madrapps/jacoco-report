@@ -12436,7 +12436,7 @@ function mdFileCoverage(report, minCoverage) {
     const tableHeader = `|File|Coverage| Status|`
     const tableStructure = `|:-|:-:|:-:|`
 
-    const table = tableHeader + `\n` + tableStructure;
+    var table = tableHeader + `\n` + tableStructure;
     const packages = report["package"];
     packages.forEach(package => {
         const packageName = package["$"].name;
