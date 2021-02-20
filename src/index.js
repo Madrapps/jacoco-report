@@ -48,7 +48,7 @@ async function action() {
         console.log(`Base = ${base}`);
         console.log(`Head = ${head}`);
 
-        const response = await comparePR();
+        const response = await comparePR(base, head);
         console.log(response);
 
         fs.readFile(reportPath, "utf8", function (err, data) {
@@ -79,7 +79,7 @@ async function action() {
     }
 }
 
-async function comparePR() {
+async function comparePR(base, head) {
     const response = await client.repos.compareCommits({
         base,
         head,
