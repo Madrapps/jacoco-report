@@ -42,7 +42,6 @@ try {
                                 console.log(`Invoked as a result of Pull Request`);
                                 const prNumber = github.context.payload.pull_request.number;
                                 console.log(`PR Number = `, prNumber);
-                                addComment(prNumber, "Coverage = " + coverage.toFixed(2) + "%");
                                 addComment(prNumber, formatCoverage(coverage, passPercentage));
                             }
                         }
