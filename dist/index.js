@@ -12359,7 +12359,7 @@ function wrappy (fn, cb) {
 /***/ }),
 
 /***/ 4281:
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __nccwpck_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(4934);
 const github = __nccwpck_require__(6794);
@@ -12368,77 +12368,79 @@ const parser = __nccwpck_require__(1532);
 
 const client = github.getOctokit(core.getInput("token"));
 
-try {
-    // `who-to-greet` input defined in action metadata file
-    const nameToGreet = core.getInput('who-to-greet');
-    const passPercentage = parseFloat(core.getInput('pass-percentage'));
-    console.log(`Hello ${nameToGreet}!`);
-    const time = (new Date()).toTimeString();
-    core.setOutput("time", time);
-    // Get the JSON webhook payload for the event that triggered the workflow
-    const payload = JSON.stringify(github.context.payload, undefined, 2)
-    console.log(`The event payload: ${payload}`);
-    const isPR = github.context.payload.pull_request != null
+async function action(payload) {
+    try {
+        // `who-to-greet` input defined in action metadata file
+        const nameToGreet = core.getInput('who-to-greet');
+        const passPercentage = parseFloat(core.getInput('pass-percentage'));
+        console.log(`Hello ${nameToGreet}!`);
+        const time = (new Date()).toTimeString();
+        core.setOutput("time", time);
+        // Get the JSON webhook payload for the event that triggered the workflow
+        const payload = JSON.stringify(github.context.payload, undefined, 2)
+        console.log(`The event payload: ${payload}`);
+        const isPR = github.context.payload.pull_request != null
 
-    const reportPath = core.getInput('path');
-    console.log(`Path is ${reportPath}`);
+        const reportPath = core.getInput('path');
+        console.log(`Path is ${reportPath}`);
 
-    const event = github.context.eventName;
-    console.log(`Event = ${event}`);
+        const event = github.context.eventName;
+        console.log(`Event = ${event}`);
 
-    var base;
-    var head;
-    switch (event) {
-        case 'pull_request':
-            base = github.context.payload.pull_request.base.sha;
-            head = github.context.payload.pull_request.head.sha;
-            break
-        case 'push':
-            base = github.context.payload.before
-            head = github.context.payload.after
-            break
-        default:
-            core.setFailed(
-                `Only pull requests and pushes are supported, ${context.eventName} not supported.`
-            )
-    }
-
-    console.log(`Base = ${base}`);
-    console.log(`Head = ${head}`);
-
-    const response = comparePR();
-
-    console.log(response);
-
-    fs.readFile(reportPath, "utf8", function (err, data) {
-        if (err) {
-            core.setFailed(err.message);
-        } else {
-            console.log("Report Xml -> ", data);
-            parser.parseString(data, function (err, value) {
-                if (err) {
-                    core.setFailed(err.message);
-                } else {
-                    const report = value["report"];
-                    const counters = report["counter"];
-                    const overallCoverage = getCoverage(counters);
-                    if (overallCoverage != null && isPR) {
-                        console.log(`Invoked as a result of Pull Request`);
-                        const prNumber = github.context.payload.pull_request.number;
-                        console.log(`PR Number = `, prNumber);
-                        addComment(prNumber, mdPrComment(report, passPercentage));
-                    }
-                }
-            });
+        var base;
+        var head;
+        switch (event) {
+            case 'pull_request':
+                base = github.context.payload.pull_request.base.sha;
+                head = github.context.payload.pull_request.head.sha;
+                break
+            case 'push':
+                base = github.context.payload.before
+                head = github.context.payload.after
+                break
+            default:
+                core.setFailed(
+                    `Only pull requests and pushes are supported, ${context.eventName} not supported.`
+                )
         }
-    });
 
-} catch (error) {
-    core.setFailed(error.message);
+        console.log(`Base = ${base}`);
+        console.log(`Head = ${head}`);
+
+        const response = comparePR();
+
+        console.log(response);
+
+        fs.readFile(reportPath, "utf8", function (err, data) {
+            if (err) {
+                core.setFailed(err.message);
+            } else {
+                console.log("Report Xml -> ", data);
+                parser.parseString(data, function (err, value) {
+                    if (err) {
+                        core.setFailed(err.message);
+                    } else {
+                        const report = value["report"];
+                        const counters = report["counter"];
+                        const overallCoverage = getCoverage(counters);
+                        if (overallCoverage != null && isPR) {
+                            console.log(`Invoked as a result of Pull Request`);
+                            const prNumber = github.context.payload.pull_request.number;
+                            console.log(`PR Number = `, prNumber);
+                            addComment(prNumber, mdPrComment(report, passPercentage));
+                        }
+                    }
+                });
+            }
+        });
+
+    } catch (error) {
+        core.setFailed(error.message);
+    }
 }
 
-function comparePR() {
-    const response = client.repos.compareCommits({
+async function comparePR() {
+    const response = await client.repos.compareCommits({
         base,
         head,
         owner: github.context.repo.owner,
@@ -12446,6 +12448,7 @@ function comparePR() {
     });
     return response;
 }
+
 function mdPrComment(report, minCoverage) {
     const fileTable = mdFileCoverage(report, minCoverage);
 
@@ -12518,6 +12521,9 @@ function addComment(prNumber, comment) {
     });
 }
 
+module.exports = {
+    action
+};  
 
 /***/ }),
 
