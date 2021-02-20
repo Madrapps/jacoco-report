@@ -12371,6 +12371,7 @@ const client = github.getOctokit(core.getInput("token"));
 try {
     // `who-to-greet` input defined in action metadata file
     const nameToGreet = core.getInput('who-to-greet');
+    const passPercentage = parseFloat(core.getInput('pass-percentage'));
     console.log(`Hello ${nameToGreet}!`);
     const time = (new Date()).toTimeString();
     core.setOutput("time", time);
@@ -12405,7 +12406,7 @@ try {
                                 const prNumber = github.context.payload.pull_request.number;
                                 console.log(`PR Number = `, prNumber);
                                 addComment(prNumber, "Coverage = " + coverage.toFixed(2) + "%");
-                                addComment(prNumber, formatCoverage(coverage));
+                                addComment(prNumber, formatCoverage(coverage, passPercentage));
                             }
                         }
                     });
@@ -12418,9 +12419,9 @@ try {
     core.setFailed(error.message);
 }
 
-function formatCoverage(coverage) {
+function formatCoverage(coverage, minCoverage) {
     var status = `:green_apple:`;
-    if (coverage < 90) {
+    if (coverage < minCoverage) {
         status = `:x:`;
     }
     const tableHeader = `|Total Project Coverage|${coverage.toFixed(2)}%|${status}|`
