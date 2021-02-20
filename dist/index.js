@@ -12365,6 +12365,7 @@ const core = __nccwpck_require__(4934);
 const github = __nccwpck_require__(6794);
 const fs = __nccwpck_require__(5747);
 const parser = __nccwpck_require__(1532);
+const util = __nccwpck_require__(1669);
 
 const client = github.getOctokit(core.getInput("token"));
 
@@ -12413,6 +12414,7 @@ async function action() {
 
         const response = await comparePR(base, head);
         console.log(response);
+        console.log(util.inspect(response, false, null, true));
 
         fs.readFile(reportPath, "utf8", function (err, data) {
             if (err) {

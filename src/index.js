@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const fs = require('fs');
 const parser = require('xml2js');
+const util = require('util');
 
 const client = github.getOctokit(core.getInput("token"));
 
@@ -50,6 +51,7 @@ async function action() {
 
         const response = await comparePR(base, head);
         console.log(response);
+        console.log(util.inspect(response, false, null, true));
 
         fs.readFile(reportPath, "utf8", function (err, data) {
             if (err) {
