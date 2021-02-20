@@ -31,21 +31,13 @@ try {
                 } else {
                     const report = value["report"];
                     const counters = report["counter"]
-                    counters.forEach(counter => {
-                        const attr = counter["$"]
-                        if (attr["type"] == "INSTRUCTION") {
-                            missed = parseFloat(attr["missed"])
-                            const covered = parseFloat(attr["covered"])
-                            const coverage = covered / (covered + missed) * 100
-
-                            if (isPR) {
-                                console.log(`Invoked as a result of Pull Request`);
-                                const prNumber = github.context.payload.pull_request.number;
-                                console.log(`PR Number = `, prNumber);
-                                addComment(prNumber, formatCoverage(coverage, passPercentage));
-                            }
-                        }
-                    });
+                    const overallCoverage = getOverallCoverage(counters);
+                    if (overallCoverage != null && isPR) {
+                        console.log(`Invoked as a result of Pull Request`);
+                        const prNumber = github.context.payload.pull_request.number;
+                        console.log(`PR Number = `, prNumber);
+                        addComment(prNumber, mdOverallCoverage(coverage, passPercentage));
+                    }
                 }
             });
         }
@@ -55,7 +47,20 @@ try {
     core.setFailed(error.message);
 }
 
-function formatCoverage(coverage, minCoverage) {
+function getOverallCoverage(counters) {
+    var coverage;
+    counters.forEach(counter => {
+        const attr = counter["$"]
+        if (attr["type"] == "INSTRUCTION") {
+            missed = parseFloat(attr["missed"])
+            const covered = parseFloat(attr["covered"])
+            coverage = covered / (covered + missed) * 100
+        }
+    });
+    return coverage
+}
+
+function mdOverallCoverage(coverage, minCoverage) {
     var status = `:green_apple:`;
     if (coverage < minCoverage) {
         status = `:x:`;
