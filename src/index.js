@@ -20,6 +20,33 @@ try {
     const reportPath = core.getInput('path');
     console.log(`Path is ${reportPath}`);
 
+    const event = github.context.eventName;
+    console.log(`Event = ${event}`);
+
+    var base;
+    var head;
+    switch (event) {
+        case 'pull_request':
+            base = context.payload.pull_request?.base?.sha;
+            head = context.payload.pull_request?.head?.sha;
+            break
+        case 'push':
+            base = context.payload.before
+            head = context.payload.after
+            break
+        default:
+            core.setFailed(
+                `Only pull requests and pushes are supported, ${context.eventName} not supported.`
+            )
+    }
+
+    console.log(`Base = ${base}`);
+    console.log(`Head = ${head}`);
+
+    const response = comparePR();
+
+    console.log(response);
+
     fs.readFile(reportPath, "utf8", function (err, data) {
         if (err) {
             core.setFailed(err.message);
@@ -47,6 +74,15 @@ try {
     core.setFailed(error.message);
 }
 
+async function comparePR() {
+    const response = await client.repos.compareCommits({
+        base,
+        head,
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo
+    });
+    return response;
+}
 function mdPrComment(report, minCoverage) {
     const fileTable = mdFileCoverage(report, minCoverage);
 
@@ -70,7 +106,7 @@ function getCoverage(counters) {
 }
 
 function mdFileCoverage(report, minCoverage) {
-    const tableHeader = `|File|Coverage| Status|`
+    const tableHeader = `|File|Coverage||`
     const tableStructure = `|:-|:-:|:-:|`
 
     var table = tableHeader + `\n` + tableStructure;
@@ -80,10 +116,6 @@ function mdFileCoverage(report, minCoverage) {
         const sourceFiles = package.sourcefile;
         console.log(`Package: ${packageName}`);
         sourceFiles.forEach(sourceFile => {
-            const fileName = sourceFile["$"].name;
-            const counters = sourceFile["counter"];
-            const coverage = getCoverage(counters);
-            console.log(`File: ${fileName} : ${coverage.toFixed(2)}%`);
             table = table + `\n` + mdFileCoverageRow(sourceFile, minCoverage);
         });
     });
@@ -98,7 +130,7 @@ function mdFileCoverageRow(sourceFile, minCoverage) {
     if (coverage < minCoverage) {
         status = `:x:`;
     }
-    return `|${fileName}|${coverage.toFixed(2)}|${status}|`
+    return `|${fileName}|${formatCoverage(coverage)}|${status}|`
 }
 
 function mdOverallCoverage(coverage, minCoverage) {
@@ -106,9 +138,13 @@ function mdOverallCoverage(coverage, minCoverage) {
     if (coverage < minCoverage) {
         status = `:x:`;
     }
-    const tableHeader = `|Total Project Coverage|${coverage.toFixed(2)}%|${status}|`
+    const tableHeader = `|Total Project Coverage|${formatCoverage(coverage)}|${status}|`
     const tableStructure = `|:-|:-:|:-:|`
     return tableHeader + `\n` + tableStructure;
+}
+
+function formatCoverage(coverage) {
+    return `${parseFloat(coverage.toFixed(2))}%`
 }
 
 function addComment(prNumber, comment) {
