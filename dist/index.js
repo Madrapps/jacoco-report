@@ -12399,8 +12399,21 @@ try {
                         console.log(`Invoked as a result of Pull Request`);
                         const prNumber = github.context.payload.pull_request.number;
                         console.log(`PR Number = `, prNumber);
-                        addComment(prNumber, mdOverallCoverage(coverage, passPercentage));
+                        addComment(prNumber, mdOverallCoverage(overallCoverage, passPercentage));
                     }
+
+                    const packages = report["package"];
+                    packages.forEach(package => {
+                        const packageName = package["$"];
+                        const sourceFiles = package.sourcefile;
+                        console.log(`Package: ${packageName}`);
+                        sourceFiles.forEach(sourceFile => {
+                            const fileName = sourceFile["$"];
+                            const counters = sourceFile["counter"];
+                            const coverage = getOverallCoverage(counters);
+                            console.log(`File: ${fileName} : ${coverage.toFixed(2)}%`);
+                        });
+                    });
                 }
             });
         }
