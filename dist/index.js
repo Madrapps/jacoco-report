@@ -12368,7 +12368,11 @@ const parser = __nccwpck_require__(1532);
 
 const client = github.getOctokit(core.getInput("token"));
 
-async function action(payload) {
+action().catch(error => {
+    core.setFailed(error.message);
+});
+
+async function action() {
     try {
         // `who-to-greet` input defined in action metadata file
         const nameToGreet = core.getInput('who-to-greet');
@@ -12407,8 +12411,7 @@ async function action(payload) {
         console.log(`Base = ${base}`);
         console.log(`Head = ${head}`);
 
-        const response = comparePR();
-
+        const response = await comparePR();
         console.log(response);
 
         fs.readFile(reportPath, "utf8", function (err, data) {
