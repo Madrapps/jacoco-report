@@ -160,7 +160,3 @@ function addComment(prNumber, comment) {
         ...github.context.repo
     });
 }
-
-module.exports = {
-    action
-};  
