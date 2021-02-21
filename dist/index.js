@@ -12445,7 +12445,7 @@ async function action() {
 }
 
 async function getChangedFiles(base, head) {
-    const response = await client.repos.compareCommits({
+    const response = client.repos.compareCommits({
         base,
         head,
         owner: github.context.repo.owner,
