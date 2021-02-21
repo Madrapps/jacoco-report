@@ -49,7 +49,7 @@ async function action() {
         const data = await fs.promises.readFile(reportPath, "utf-8");
         console.log("Report Xml -> ", data);
 
-        const value = parser.parseStringPromise(data);
+        const value = await parser.parseStringPromise(data);
         console.log("XML Value -> ", value);
 
         const report = value["report"];
