@@ -41,7 +41,7 @@ function getCoverage(counters) {
     return coverage
 }
 
-export default {
+module.exports = {
     getFileCoverage,
     getOverallCoverage
 };
