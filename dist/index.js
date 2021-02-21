@@ -12501,7 +12501,7 @@ function mdFileCoverage(report, minCoverage, changedFiles) {
             });
             if (file != null) {
                 console.log("File changed");
-                table = table + `\n` + mdFileCoverageRow(sourceFile, minCoverage);
+                table = table + `\n` + mdFileCoverageRow(sourceFile, file.url, minCoverage);
             } else {
                 console.log("File not changed");
             }
@@ -12511,7 +12511,7 @@ function mdFileCoverage(report, minCoverage, changedFiles) {
     return table;
 }
 
-function mdFileCoverageRow(sourceFile, minCoverage) {
+function mdFileCoverageRow(sourceFile, url, minCoverage) {
     const fileName = sourceFile["$"].name;
     const counters = sourceFile["counter"];
     const coverage = getCoverage(counters);
@@ -12519,7 +12519,7 @@ function mdFileCoverageRow(sourceFile, minCoverage) {
     if (coverage < minCoverage) {
         status = `:x:`;
     }
-    return `|${fileName}|${formatCoverage(coverage)}|${status}|`
+    return `|[${fileName}](${url})|${formatCoverage(coverage)}|${status}|`
 }
 
 function mdOverallCoverage(report, minCoverage) {
