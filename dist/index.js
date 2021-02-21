@@ -12495,7 +12495,16 @@ function mdFileCoverage(report, minCoverage, changedFiles) {
         const sourceFiles = package.sourcefile;
         console.log(`Package: ${packageName}`);
         sourceFiles.forEach(sourceFile => {
-            table = table + `\n` + mdFileCoverageRow(sourceFile, minCoverage);
+            const sourceFileName = sourceFile["$"].name;
+            var file = changedFiles.find(function (el) {
+                return el.name.endsWith(`${packageName}/${sourceFileName}`);
+            });
+            if (file != null) {
+                console.log("File changed");
+                table = table + `\n` + mdFileCoverageRow(sourceFile, minCoverage);
+            } else {
+                console.log("File not changed");
+            }
         });
     });
     console.log(changedFiles);

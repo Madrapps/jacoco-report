@@ -28,3 +28,25 @@ test("Read from Report xml", () => {
     console.log("End");
     console.log(missed);
 });
+
+test("find file from changed files", () => {
+    var changedFile = [
+        {
+            name: '.github/workflows/coverage.yml',
+            url: 'https://github.com/thsaravana/jacoco-playground/blob/7e928205a14b3c5f08be3fa2f2005beecb7738b4/.github/workflows/coverage.yml'
+        },
+        {
+            name: 'src/main/java/com/madrapps/jacoco/Utils.java',
+            url: 'https://github.com/thsaravana/jacoco-playground/blob/7e928205a14b3c5f08be3fa2f2005beecb7738b4/src/main/java/com/madrapps/jacoco/Utils.java'
+        },
+        {
+            name: 'src/main/kotlin/com/madrapps/jacoco/Math.kt',
+            url: 'https://github.com/thsaravana/jacoco-playground/blob/7e928205a14b3c5f08be3fa2f2005beecb7738b4/src/main/kotlin/com/madrapps/jacoco/Math.kt'
+        }
+    ]
+    const sourceFileName = "com/madrapps/jacoco" + "/" + "Math.kt"
+    var file = changedFile.find(function (el) {
+        return el.name.endsWith(sourceFileName);
+    });
+    console.log(file);
+});
