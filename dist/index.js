@@ -12417,13 +12417,14 @@ async function action() {
             console.log(`Invoked as a result of Pull Request`);
             const prNumber = github.context.payload.pull_request.number;
             console.log(`PR Number = `, prNumber);
-            await addComment(prNumber, mdPrComment(report, passPercentage, changedFiles));
 
             const files = getFileCoverage(report, changedFiles);
             console.log(files);
             const overallCoverage = getOverallCoverage(report);
             console.log(overallCoverage);
-            core.setOutput("coverage-overall", overallCoverage);
+            core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
+
+            await addComment(prNumber, getPRComment(overallCoverage, files, passPercentage));
         }
 
     } catch (error) {
@@ -12459,11 +12460,33 @@ async function getChangedFiles(base, head) {
     return changedFiles;
 }
 
+function getPRComment(overallCoverage, files, minCoverage) {
+    const fileTable = getFileCoverageTable(files, minCoverage);
+    const overallTable = mdOverallCoverage(overallCoverage, minCoverage);
+    return fileTable + `\n\n` + overallTable;
+}
+
 function mdPrComment(report, minCoverage, changedFiles) {
     const fileTable = mdFileCoverage(report, minCoverage, changedFiles);
     const overallCoverage = getOverallCoverage(report);
     const overall = mdOverallCoverage(overallCoverage, minCoverage);
     return fileTable + `\n\n` + overall;
+}
+
+function getFileCoverageTable(files, minCoverage) {
+    const tableHeader = `|File|Coverage||`
+    const tableStructure = `|:-|:-:|:-:|`
+
+    var table = tableHeader + `\n` + tableStructure;
+    files.forEach(file => {
+        const coverage = file.coverage;
+        var status = `:green_apple:`;
+        if (coverage < minCoverage) {
+            status = `:x:`;
+        }
+        table = table + `\n` + `|[${file.name}](${file.url})|${formatCoverage(coverage)}|${status}|`
+    });
+    return table;
 }
 
 function mdFileCoverage(report, minCoverage, changedFiles) {
@@ -12511,17 +12534,6 @@ function mdOverallCoverage(coverage, minCoverage) {
     const tableHeader = `|Total Project Coverage|${formatCoverage(coverage)}|${status}|`
     const tableStructure = `|:-|:-:|:-:|`
     return tableHeader + `\n` + tableStructure;
-}
-
-function mdFileCoverageRow(sourceFile, url, minCoverage) {
-    const fileName = sourceFile["$"].name;
-    const counters = sourceFile["counter"];
-    const coverage = getCoverage(counters);
-    var status = `:green_apple:`;
-    if (coverage < minCoverage) {
-        status = `:x:`;
-    }
-    return `|[${fileName}](${url})|${formatCoverage(coverage)}|${status}|`
 }
 
 function getFileCoverage(report, files) {
