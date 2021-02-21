@@ -1,10 +1,6 @@
 name: "JaCoCo Report"
 description: "Publishes the JaCoCo report as a comment in the Pull Request"
 inputs:
-  who-to-greet: # id of input
-    description: "Who to greet"
-    required: true
-    default: "World"
   path:
     description: "Path of the generated xml file"
     required: true
@@ -17,8 +13,9 @@ inputs:
     default: "80"
 
 outputs:
-  time: # id of output
-    description: "The time we greeted you"
+  coverage-overall:
+    description: "The overall coverage of the project"
+
 runs:
   using: "node12"
   main: "dist/index.js"

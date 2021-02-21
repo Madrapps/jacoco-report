@@ -12,38 +12,31 @@ action().catch(error => {
 
 async function action() {
     try {
-        // `who-to-greet` input defined in action metadata file
-        const nameToGreet = core.getInput('who-to-greet');
         const passPercentage = parseFloat(core.getInput('pass-percentage'));
-        console.log(`Hello ${nameToGreet}!`);
-        const time = (new Date()).toTimeString();
-        core.setOutput("time", time);
-        // Get the JSON webhook payload for the event that triggered the workflow
-        const payload = JSON.stringify(github.context.payload, undefined, 2)
-        console.log(`The event payload: ${payload}`);
-        const isPR = github.context.payload.pull_request != null
+        console.log(`Pass percentage = ${passPercentage}`);
 
         const reportPath = core.getInput('path');
-        console.log(`Path is ${reportPath}`);
+        console.log(`Path = ${reportPath}`);
 
         const event = github.context.eventName;
         console.log(`Event = ${event}`);
 
         var base;
         var head;
+        var isPR;
         switch (event) {
             case 'pull_request':
                 base = github.context.payload.pull_request.base.sha;
                 head = github.context.payload.pull_request.head.sha;
+                isPR = true;
                 break
             case 'push':
-                base = github.context.payload.before
-                head = github.context.payload.after
+                base = github.context.payload.before;
+                head = github.context.payload.after;
+                isPR = false;
                 break
             default:
-                core.setFailed(
-                    `Only pull requests and pushes are supported, ${context.eventName} not supported.`
-                )
+                core.setFailed(`Only pull requests and pushes are supported, ${context.eventName} not supported.`);
         }
 
         console.log(`Base = ${base}`);
@@ -73,6 +66,7 @@ async function action() {
                 });
             }
         });
+        core.setOutput("coverage-overall", 50);
 
     } catch (error) {
         core.setFailed(error.message);
