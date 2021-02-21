@@ -12417,6 +12417,9 @@ async function action() {
             const prNumber = github.context.payload.pull_request.number;
             console.log(`PR Number = `, prNumber);
             await addComment(prNumber, mdPrComment(report, passPercentage, changedFiles));
+
+            const files = getFileCoverage(report, changedFiles);
+            console.log(`Modified Files = ${files}`);
         }
 
         core.setOutput("coverage-overall", 50);
@@ -12445,7 +12448,7 @@ async function getChangedFiles(base, head) {
     var changedFiles = [];
     response.data.files.forEach(file => {
         var changedFile = {
-            "name": file.filename,
+            "filePath": file.filename,
             "url": file.blob_url
         }
         changedFiles.push(changedFile);
@@ -12461,19 +12464,6 @@ function mdPrComment(report, minCoverage, changedFiles) {
     return fileTable + `\n\n` + overall;
 }
 
-function getCoverage(counters) {
-    var coverage;
-    counters.forEach(counter => {
-        const attr = counter["$"]
-        if (attr["type"] == "INSTRUCTION") {
-            missed = parseFloat(attr["missed"])
-            const covered = parseFloat(attr["covered"])
-            coverage = covered / (covered + missed) * 100
-        }
-    });
-    return coverage
-}
-
 function mdFileCoverage(report, minCoverage, changedFiles) {
     const tableHeader = `|File|Coverage||`
     const tableStructure = `|:-|:-:|:-:|`
@@ -12487,7 +12477,7 @@ function mdFileCoverage(report, minCoverage, changedFiles) {
         sourceFiles.forEach(sourceFile => {
             const sourceFileName = sourceFile["$"].name;
             var file = changedFiles.find(function (el) {
-                return el.name.endsWith(`${packageName}/${sourceFileName}`);
+                return el.filePath.endsWith(`${packageName}/${sourceFileName}`);
             });
             if (file != null) {
                 console.log("File changed");
@@ -12497,7 +12487,6 @@ function mdFileCoverage(report, minCoverage, changedFiles) {
             }
         });
     });
-    console.log(changedFiles);
     return table;
 }
 
@@ -12522,10 +12511,58 @@ function mdOverallCoverage(coverage, minCoverage) {
     return tableHeader + `\n` + tableStructure;
 }
 
+function mdFileCoverageRow(sourceFile, url, minCoverage) {
+    const fileName = sourceFile["$"].name;
+    const counters = sourceFile["counter"];
+    const coverage = getCoverage(counters);
+    var status = `:green_apple:`;
+    if (coverage < minCoverage) {
+        status = `:x:`;
+    }
+    return `|[${fileName}](${url})|${formatCoverage(coverage)}|${status}|`
+}
+
+function getFileCoverage(report, files) {
+    const result = [];
+    const packages = report["package"];
+    packages.forEach(package => {
+        const packageName = package["$"].name;
+        const sourceFiles = package.sourcefile;
+        sourceFiles.forEach(sourceFile => {
+            const sourceFileName = sourceFile["$"].name;
+            var file = files.find(function (f) {
+                return f.filePath.endsWith(`${packageName}/${sourceFileName}`);
+            });
+            if (file != null) {
+                const fileName = sourceFile["$"].name;
+                const counters = sourceFile["counter"];
+                const coverage = getCoverage(counters);
+                file["name"] = fileName;
+                file["coverage"] = coverage;
+                result.push(file);
+            }
+        });
+    });
+    console.log(`Result Files = ${result}`);
+}
+
 function getOverallCoverage(report) {
     const counters = report["counter"];
     const coverage = getCoverage(counters);
     return coverage;
+}
+
+function getCoverage(counters) {
+    var coverage;
+    counters.forEach(counter => {
+        const attr = counter["$"]
+        if (attr["type"] == "INSTRUCTION") {
+            missed = parseFloat(attr["missed"])
+            const covered = parseFloat(attr["covered"])
+            coverage = covered / (covered + missed) * 100
+        }
+    });
+    return coverage
 }
 
 function formatCoverage(coverage) {
