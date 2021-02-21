@@ -12404,23 +12404,19 @@ async function action() {
         console.log(`Base = ${base}`);
         console.log(`Head = ${head}`);
 
-        const reportJsonAsync = getReportJson(reportPath);
-        console.log("Get Changed Files");
+        const reportJsonAsync = getJsonReport(reportPath);
         const changedFiles = await getChangedFiles(base, head);
-        console.log("Changed Files Obtained");
         console.log(changedFiles);
 
-        // const reportData = await reportXmlAsync;
-        // console.log("Report Xml -> ", reportData);
         const value = await reportJsonAsync;
-        console.log("XML Value -> ", value);
+        console.log("Report JSON -> ", value);
 
         const report = value["report"];
         if (isPR) {
             console.log(`Invoked as a result of Pull Request`);
             const prNumber = github.context.payload.pull_request.number;
             console.log(`PR Number = `, prNumber);
-            addComment(prNumber, mdPrComment(report, passPercentage, changedFiles));
+            await addComment(prNumber, mdPrComment(report, passPercentage, changedFiles));
         }
 
         core.setOutput("coverage-overall", 50);
@@ -12430,12 +12426,9 @@ async function action() {
     }
 }
 
-async function getReportJson(xmlPath) {
-    console.log("Get Report from path");
+async function getJsonReport(xmlPath) {
     const reportXml = await fs.promises.readFile(xmlPath, "utf-8");
-    console.log("Obtained XML report");
     const reportJson = await parser.parseStringPromise(reportXml);
-    console.log("Obtained JSON report");
     return reportJson;
 }
 
@@ -12463,7 +12456,8 @@ async function getChangedFiles(base, head) {
 
 function mdPrComment(report, minCoverage, changedFiles) {
     const fileTable = mdFileCoverage(report, minCoverage, changedFiles);
-    const overall = mdOverallCoverage(report, minCoverage);
+    const overallCoverage = getOverallCoverage(report);
+    const overall = mdOverallCoverage(overallCoverage, minCoverage);
     return fileTable + `\n\n` + overall;
 }
 
@@ -12518,9 +12512,7 @@ function mdFileCoverageRow(sourceFile, url, minCoverage) {
     return `|[${fileName}](${url})|${formatCoverage(coverage)}|${status}|`
 }
 
-function mdOverallCoverage(report, minCoverage) {
-    const counters = report["counter"];
-    const coverage = getCoverage(counters);
+function mdOverallCoverage(coverage, minCoverage) {
     var status = `:green_apple:`;
     if (coverage < minCoverage) {
         status = `:x:`;
@@ -12530,12 +12522,18 @@ function mdOverallCoverage(report, minCoverage) {
     return tableHeader + `\n` + tableStructure;
 }
 
+function getOverallCoverage(report) {
+    const counters = report["counter"];
+    const coverage = getCoverage(counters);
+    return coverage;
+}
+
 function formatCoverage(coverage) {
     return `${parseFloat(coverage.toFixed(2))}%`
 }
 
-function addComment(prNumber, comment) {
-    client.issues.createComment({
+async function addComment(prNumber, comment) {
+    await client.issues.createComment({
         issue_number: prNumber,
         body: comment,
         ...github.context.repo
