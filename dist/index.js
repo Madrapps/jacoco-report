@@ -12365,7 +12365,7 @@ const core = __nccwpck_require__(7296);
 const github = __nccwpck_require__(2536);
 const fs = __nccwpck_require__(5747);
 const parser = __nccwpck_require__(958);
-const util = __nccwpck_require__(1669);
+const process = __nccwpck_require__(1248);
 
 const client = github.getOctokit(core.getInput("token"));
 
@@ -12418,9 +12418,9 @@ async function action() {
             const prNumber = github.context.payload.pull_request.number;
             console.log(`PR Number = `, prNumber);
 
-            const files = getFileCoverage(report, changedFiles);
+            const files = process.getFileCoverage(report, changedFiles);
             console.log(files);
-            const overallCoverage = getOverallCoverage(report);
+            const overallCoverage = process.getOverallCoverage(report);
             console.log(overallCoverage);
             core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
 
@@ -12461,19 +12461,12 @@ async function getChangedFiles(base, head) {
 }
 
 function getPRComment(overallCoverage, files, minCoverage) {
-    const fileTable = getFileCoverageTable(files, minCoverage);
-    const overallTable = mdOverallCoverage(overallCoverage, minCoverage);
+    const fileTable = getFileTable(files, minCoverage);
+    const overallTable = getOverallTable(overallCoverage, minCoverage);
     return fileTable + `\n\n` + overallTable;
 }
 
-function mdPrComment(report, minCoverage, changedFiles) {
-    const fileTable = mdFileCoverage(report, minCoverage, changedFiles);
-    const overallCoverage = getOverallCoverage(report);
-    const overall = mdOverallCoverage(overallCoverage, minCoverage);
-    return fileTable + `\n\n` + overall;
-}
-
-function getFileCoverageTable(files, minCoverage) {
+function getFileTable(files, minCoverage) {
     const tableHeader = `|File|Coverage||`
     const tableStructure = `|:-|:-:|:-:|`
 
@@ -12489,44 +12482,7 @@ function getFileCoverageTable(files, minCoverage) {
     return table;
 }
 
-function mdFileCoverage(report, minCoverage, changedFiles) {
-    const tableHeader = `|File|Coverage||`
-    const tableStructure = `|:-|:-:|:-:|`
-
-    var table = tableHeader + `\n` + tableStructure;
-    const packages = report["package"];
-    packages.forEach(package => {
-        const packageName = package["$"].name;
-        const sourceFiles = package.sourcefile;
-        console.log(`Package: ${packageName}`);
-        sourceFiles.forEach(sourceFile => {
-            const sourceFileName = sourceFile["$"].name;
-            var file = changedFiles.find(function (el) {
-                return el.filePath.endsWith(`${packageName}/${sourceFileName}`);
-            });
-            if (file != null) {
-                console.log("File changed");
-                table = table + `\n` + mdFileCoverageRow(sourceFile, file.url, minCoverage);
-            } else {
-                console.log("File not changed");
-            }
-        });
-    });
-    return table;
-}
-
-function mdFileCoverageRow(sourceFile, url, minCoverage) {
-    const fileName = sourceFile["$"].name;
-    const counters = sourceFile["counter"];
-    const coverage = getCoverage(counters);
-    var status = `:green_apple:`;
-    if (coverage < minCoverage) {
-        status = `:x:`;
-    }
-    return `|[${fileName}](${url})|${formatCoverage(coverage)}|${status}|`
-}
-
-function mdOverallCoverage(coverage, minCoverage) {
+function getOverallTable(coverage, minCoverage) {
     var status = `:green_apple:`;
     if (coverage < minCoverage) {
         status = `:x:`;
@@ -12536,12 +12492,35 @@ function mdOverallCoverage(coverage, minCoverage) {
     return tableHeader + `\n` + tableStructure;
 }
 
+function formatCoverage(coverage) {
+    return `${parseFloat(coverage.toFixed(2))}%`
+}
+
+async function addComment(prNumber, comment) {
+    await client.issues.createComment({
+        issue_number: prNumber,
+        body: comment,
+        ...github.context.repo
+    });
+}
+
+
+/***/ }),
+
+/***/ 1248:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => __WEBPACK_DEFAULT_EXPORT__
+/* harmony export */ });
 function getFileCoverage(report, files) {
     const result = [];
     const packages = report["package"];
-    packages.forEach(package => {
-        const packageName = package["$"].name;
-        const sourceFiles = package.sourcefile;
+    packages.forEach(item => {
+        const packageName = item["$"].name;
+        const sourceFiles = item.sourcefile;
         sourceFiles.forEach(sourceFile => {
             const sourceFileName = sourceFile["$"].name;
             var file = files.find(function (f) {
@@ -12579,17 +12558,10 @@ function getCoverage(counters) {
     return coverage
 }
 
-function formatCoverage(coverage) {
-    return `${parseFloat(coverage.toFixed(2))}%`
-}
-
-async function addComment(prNumber, comment) {
-    await client.issues.createComment({
-        issue_number: prNumber,
-        body: comment,
-        ...github.context.repo
-    });
-}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+    getFileCoverage,
+    getOverallCoverage
+});
 
 
 /***/ }),
@@ -12754,6 +12726,34 @@ module.exports = require("zlib");;
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop)
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	__nccwpck_require__.ab = __dirname + "/";/************************************************************************/
