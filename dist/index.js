@@ -12411,27 +12411,26 @@ async function action() {
 
         const data = await fs.promises.readFile(reportPath, "utf-8");
         console.log("Report Xml -> ", data);
-        parser.parseString(data, function (err, value) {
-            if (err) {
-                core.setFailed(err.message);
-            } else {
-                const report = value["report"];
-                if (isPR) {
-                    console.log(`Invoked as a result of Pull Request`);
-                    const prNumber = github.context.payload.pull_request.number;
-                    console.log(`PR Number = `, prNumber);
-                    addComment(prNumber, mdPrComment(report, passPercentage, changedFiles));
-                }
-            }
-        });
 
-        // fs.readFile(reportPath, "utf8", function (err, data) {
+        const value = parser.parseStringPromise(data);
+        console.log("XML Value -> ", value);
+
+        const report = value["report"];
+        if (isPR) {
+            console.log(`Invoked as a result of Pull Request`);
+            const prNumber = github.context.payload.pull_request.number;
+            console.log(`PR Number = `, prNumber);
+            addComment(prNumber, mdPrComment(report, passPercentage, changedFiles));
+        }
+
+        // parser.parseString(data, function (err, value) {
         //     if (err) {
         //         core.setFailed(err.message);
         //     } else {
 
         //     }
         // });
+
         core.setOutput("coverage-overall", 50);
 
     } catch (error) {
