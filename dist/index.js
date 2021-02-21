@@ -12365,7 +12365,6 @@ const core = __nccwpck_require__(7296);
 const github = __nccwpck_require__(2536);
 const fs = __nccwpck_require__(5747);
 const parser = __nccwpck_require__(958);
-const util = __nccwpck_require__(1669);
 
 const client = github.getOctokit(core.getInput("token"));
 
@@ -12405,14 +12404,15 @@ async function action() {
         console.log(`Base = ${base}`);
         console.log(`Head = ${head}`);
 
+        const reportJsonAsync = getReportJson(reportPath);
+        console.log("Get Changed Files");
         const changedFiles = await getChangedFiles(base, head);
-        console.log("Changed Files");
+        console.log("Changed Files Obtained");
         console.log(changedFiles);
 
-        const data = await fs.promises.readFile(reportPath, "utf-8");
-        console.log("Report Xml -> ", data);
-
-        const value = await parser.parseStringPromise(data);
+        // const reportData = await reportXmlAsync;
+        // console.log("Report Xml -> ", reportData);
+        const value = await reportJsonAsync;
         console.log("XML Value -> ", value);
 
         const report = value["report"];
@@ -12423,19 +12423,20 @@ async function action() {
             addComment(prNumber, mdPrComment(report, passPercentage, changedFiles));
         }
 
-        // parser.parseString(data, function (err, value) {
-        //     if (err) {
-        //         core.setFailed(err.message);
-        //     } else {
-
-        //     }
-        // });
-
         core.setOutput("coverage-overall", 50);
 
     } catch (error) {
         core.setFailed(error.message);
     }
+}
+
+async function getReportJson(xmlPath) {
+    console.log("Get Report from path");
+    const reportXml = await fs.promises.readFile(xmlPath, "utf-8");
+    console.log("Obtained XML report");
+    const reportJson = await parser.parseStringPromise(reportXml);
+    console.log("Obtained JSON report");
+    return reportJson;
 }
 
 async function getChangedFiles(base, head) {
@@ -12446,7 +12447,6 @@ async function getChangedFiles(base, head) {
         repo: github.context.repo.repo
     });
 
-    // console.log(response);
     // console.log(util.inspect(response, false, null, true));
 
     var changedFiles = [];
