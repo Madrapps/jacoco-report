@@ -53,7 +53,7 @@ async function action() {
         console.log(response);
         console.log(util.inspect(response, false, null, true));
 
-        var changedFiles;
+        var changedFiles = [];
         response.data.files.forEach(file => {
             var changedFile = {
                 "name": file.filename,
