@@ -49,18 +49,7 @@ async function action() {
         console.log(`Base = ${base}`);
         console.log(`Head = ${head}`);
 
-        const response = await comparePR(base, head);
-        console.log(response);
-        console.log(util.inspect(response, false, null, true));
-
-        var changedFiles = [];
-        response.data.files.forEach(file => {
-            var changedFile = {
-                "name": file.filename,
-                "url": file.blob_url
-            }
-            changedFiles.push(changedFile);
-        });
+        const changedFiles = await getChangedFiles(base, head);
         console.log("Changed Files");
         console.log(changedFiles);
 
@@ -92,14 +81,27 @@ async function action() {
     }
 }
 
-async function comparePR(base, head) {
+async function getChangedFiles(base, head) {
     const response = await client.repos.compareCommits({
         base,
         head,
         owner: github.context.repo.owner,
         repo: github.context.repo.repo
     });
-    return response;
+
+    // console.log(response);
+    // console.log(util.inspect(response, false, null, true));
+
+    var changedFiles = [];
+    response.data.files.forEach(file => {
+        var changedFile = {
+            "name": file.filename,
+            "url": file.blob_url
+        }
+        changedFiles.push(changedFile);
+    });
+
+    return changedFiles;
 }
 
 function mdPrComment(report, minCoverage) {
