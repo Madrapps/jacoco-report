@@ -44,9 +44,22 @@ test("find file from changed files", () => {
             url: 'https://github.com/thsaravana/jacoco-playground/blob/7e928205a14b3c5f08be3fa2f2005beecb7738b4/src/main/kotlin/com/madrapps/jacoco/Math.kt'
         }
     ]
+    const result = getFileCoverage(changedFile);
+    console.log(`Result = ${result}`);
+    console.log(result);
+    console.log(`ChangedFile = ${changedFile}`);
+    console.log(changedFile);
+});
+
+function getFileCoverage(files) {
+    const results = [];
     const sourceFileName = "com/madrapps/jacoco" + "/" + "Math.kt"
-    var file = changedFile.find(function (el) {
+    var file = files.find(function (el) {
         return el.name.endsWith(sourceFileName);
     });
+    file["fileName"] = "FileName";
+    file["coverage"] = 56.89;
     console.log(file);
-});
+    results.push(file);
+    return results;
+}

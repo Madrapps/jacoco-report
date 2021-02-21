@@ -12420,12 +12420,11 @@ async function action() {
             await addComment(prNumber, mdPrComment(report, passPercentage, changedFiles));
 
             const files = getFileCoverage(report, changedFiles);
-            console.log(`Modified Files1 = ${files}`);
-            console.log(`Modified Files2 = ${changedFiles}`);
-            util.inspect(changedFiles, false, null, true);
+            console.log(files);
+            const overallCoverage = getOverallCoverage(report);
+            console.log(overallCoverage);
+            core.setOutput("coverage-overall", overallCoverage);
         }
-
-        core.setOutput("coverage-overall", 50);
 
     } catch (error) {
         core.setFailed(error.message);
@@ -12546,8 +12545,6 @@ function getFileCoverage(report, files) {
             }
         });
     });
-    console.log(`Result Files = ${result}`);
-    util.inspect(result, false, null, true);
     return result;
 }
 
