@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const fs = require('fs');
 const parser = require('xml2js');
+const util = require('util');
 
 const client = github.getOctokit(core.getInput("token"));
 
@@ -56,7 +57,9 @@ async function action() {
             await addComment(prNumber, mdPrComment(report, passPercentage, changedFiles));
 
             const files = getFileCoverage(report, changedFiles);
-            console.log(`Modified Files = ${files}`);
+            console.log(`Modified Files1 = ${files}`);
+            console.log(`Modified Files2 = ${changedFiles}`);
+            util.inspect(changedFiles, false, null, true);
         }
 
         core.setOutput("coverage-overall", 50);
@@ -181,6 +184,8 @@ function getFileCoverage(report, files) {
         });
     });
     console.log(`Result Files = ${result}`);
+    util.inspect(result, false, null, true);
+    return result;
 }
 
 function getOverallCoverage(report) {
