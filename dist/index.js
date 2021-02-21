@@ -12416,6 +12416,17 @@ async function action() {
         console.log(response);
         console.log(util.inspect(response, false, null, true));
 
+        var changedFiles;
+        response.data.files.forEach(file => {
+            var changedFile = {
+                "name": file.filename,
+                "url": file.blob_url
+            }
+            changedFiles.push(changedFile);
+        });
+        console.log("Changed Files");
+        console.log(changedFiles);
+
         fs.readFile(reportPath, "utf8", function (err, data) {
             if (err) {
                 core.setFailed(err.message);
