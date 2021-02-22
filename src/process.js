@@ -31,11 +31,11 @@ function getOverallCoverage(report) {
 function getCoverage(counters) {
     var coverage;
     counters.forEach(counter => {
-        const attr = counter["$"]
+        const attr = counter["$"];
         if (attr["type"] == "INSTRUCTION") {
-            missed = parseFloat(attr["missed"])
-            const covered = parseFloat(attr["covered"])
-            coverage = covered / (covered + missed) * 100
+            missed = parseFloat(attr["missed"]);
+            const covered = parseFloat(attr["covered"]);
+            coverage = parseFloat((covered / (covered + missed) * 100).toFixed(2));
         }
     });
     return coverage
