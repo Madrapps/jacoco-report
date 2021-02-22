@@ -8,8 +8,8 @@ function getFileTable(files, minCoverage) {
     if (files.length === 0) {
         return `> There is no coverage information present for the Files changed`;
     }
-    const tableHeader = `|File|Coverage||`
-    const tableStructure = `|:-|:-:|:-:|`
+    const tableHeader = `|File|Coverage||`;
+    const tableStructure = `|:-|:-:|:-:|`;
 
     var table = tableHeader + `\n` + tableStructure;
     files.forEach(file => {
@@ -18,7 +18,7 @@ function getFileTable(files, minCoverage) {
         if (coverage < minCoverage) {
             status = `:x:`;
         }
-        table = table + `\n` + `|[${file.name}](${file.url})|${formatCoverage(coverage)}|${status}|`
+        table = table + `\n` + `|[${file.name}](${file.url})|${formatCoverage(coverage)}|${status}|`;
     });
     return table;
 }
@@ -28,8 +28,8 @@ function getOverallTable(coverage, minCoverage) {
     if (coverage < minCoverage) {
         status = `:x:`;
     }
-    const tableHeader = `|Total Project Coverage|${formatCoverage(coverage)}|${status}|`
-    const tableStructure = `|:-|:-:|:-:|`
+    const tableHeader = `|Total Project Coverage|${formatCoverage(coverage)}|${status}|`;
+    const tableStructure = `|:-|:-:|:-:|`;
     return tableHeader + `\n` + tableStructure;
 }
 

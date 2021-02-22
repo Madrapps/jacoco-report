@@ -12489,11 +12489,11 @@ function getOverallCoverage(report) {
 function getCoverage(counters) {
     var coverage;
     counters.forEach(counter => {
-        const attr = counter["$"]
+        const attr = counter["$"];
         if (attr["type"] == "INSTRUCTION") {
-            missed = parseFloat(attr["missed"])
-            const covered = parseFloat(attr["covered"])
-            coverage = covered / (covered + missed) * 100
+            missed = parseFloat(attr["missed"]);
+            const covered = parseFloat(attr["covered"]);
+            coverage = parseFloat((covered / (covered + missed) * 100).toFixed(2));
         }
     });
     return coverage
@@ -12517,8 +12517,11 @@ function getPRComment(overallCoverage, files, minCoverage) {
 }
 
 function getFileTable(files, minCoverage) {
-    const tableHeader = `|File|Coverage||`
-    const tableStructure = `|:-|:-:|:-:|`
+    if (files.length === 0) {
+        return `> There is no coverage information present for the Files changed`;
+    }
+    const tableHeader = `|File|Coverage||`;
+    const tableStructure = `|:-|:-:|:-:|`;
 
     var table = tableHeader + `\n` + tableStructure;
     files.forEach(file => {
@@ -12527,7 +12530,7 @@ function getFileTable(files, minCoverage) {
         if (coverage < minCoverage) {
             status = `:x:`;
         }
-        table = table + `\n` + `|[${file.name}](${file.url})|${formatCoverage(coverage)}|${status}|`
+        table = table + `\n` + `|[${file.name}](${file.url})|${formatCoverage(coverage)}|${status}|`;
     });
     return table;
 }
@@ -12537,8 +12540,8 @@ function getOverallTable(coverage, minCoverage) {
     if (coverage < minCoverage) {
         status = `:x:`;
     }
-    const tableHeader = `|Total Project Coverage|${formatCoverage(coverage)}|${status}|`
-    const tableStructure = `|:-|:-:|:-:|`
+    const tableHeader = `|Total Project Coverage|${formatCoverage(coverage)}|${status}|`;
+    const tableStructure = `|:-|:-:|:-:|`;
     return tableHeader + `\n` + tableStructure;
 }
 
