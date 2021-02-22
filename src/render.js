@@ -5,6 +5,9 @@ function getPRComment(overallCoverage, files, minCoverage) {
 }
 
 function getFileTable(files, minCoverage) {
+    if (files.length === 0) {
+        return `> There is no coverage information present for the Files changed`;
+    }
     const tableHeader = `|File|Coverage||`
     const tableStructure = `|:-|:-:|:-:|`
 
