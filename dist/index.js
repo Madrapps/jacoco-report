@@ -12358,8 +12358,8 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 4281:
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __nccwpck_require__) => {
+/***/ 1047:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(4934);
 const github = __nccwpck_require__(6794);
@@ -12370,13 +12370,10 @@ const render = __nccwpck_require__(8279);
 
 const client = github.getOctokit(core.getInput("token"));
 
-action().catch(error => {
-    core.setFailed(error.message);
-});
-
 async function action() {
     try {
         const reportPath = core.getInput('path');
+        console.log("REPORT = " + reportPath);
         const passPercentage = parseFloat(core.getInput('pass-percentage'));
         const event = github.context.eventName;
         core.info(`Event is ${event}`);
@@ -12396,7 +12393,7 @@ async function action() {
                 isPR = false;
                 break
             default:
-                core.setFailed(`Only pull requests and pushes are supported, ${context.eventName} not supported.`);
+                core.setFailed(`Only pull requests and pushes are supported, ${github.context.eventName} not supported.`);
         }
 
         core.info(`base sha: ${base}`);
@@ -12449,6 +12446,22 @@ async function addComment(prNumber, comment) {
         ...github.context.repo
     });
 }
+
+module.exports = {
+    action
+}
+
+/***/ }),
+
+/***/ 4281:
+/***/ ((__unused_webpack_module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(4934);
+const action = __nccwpck_require__(1047);
+
+action.action().catch(error => {
+    core.setFailed(error.message);
+});
 
 
 /***/ }),
