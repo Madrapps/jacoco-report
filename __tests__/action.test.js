@@ -1,0 +1,90 @@
+const action = require('../src/action');
+const core = require('@actions/core');
+const github = require('@actions/github');
+
+jest.mock("@actions/core");
+jest.mock("@actions/github");
+
+const compareCommitsResponse = {
+    "data": {
+        "files": [
+            {
+                "filename": "src/main/kotlin/com/madrapps/jacoco/Math.kt",
+                "blob_url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt",
+            },
+            {
+                "filename": "src/main/java/com/madrapps/jacoco/operation/StringOp.java",
+                "blob_url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java",
+            }
+        ]
+    }
+};
+
+const comment = jest.fn();
+const output = jest.fn();
+
+beforeAll(() => {
+    core.getInput = jest.fn(c => {
+        switch (c) {
+            case 'path':
+                return "./__tests__/__fixtures__/report.xml";
+            case 'pass-percentage':
+                return 45;
+        }
+    });
+    github.getOctokit = jest.fn(() => {
+        return {
+            repos: {
+                compareCommits: jest.fn(() => {
+                    return compareCommitsResponse
+                })
+            },
+            issues: {
+                createComment: comment
+            }
+        }
+    });
+    core.setFailed = jest.fn(c => {
+        fail(c);
+    });
+})
+
+describe("Pull Request event", function () {
+    const context = {
+        "eventName": "pull_request",
+        "payload": {
+            "pull_request": {
+                "number": "45",
+                "base": {
+                    "sha": "guasft7asdtf78asfd87as6df7y2u3"
+                },
+                "head": {
+                    "sha": "aahsdflais76dfa78wrglghjkaghkj"
+                }
+            }
+        },
+        "repo": "jacoco-playground",
+        "owner": "madrapps"
+    };
+    github.context = context
+
+    it("publish proper comment", async () => {
+        await action.action();
+
+        expect(comment.mock.calls[0][0].body).toEqual(`|File|Coverage||
+|:-|:-:|:-:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|
+|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
+
+|Total Project Coverage|49.02%|:green_apple:|
+|:-|:-:|:-:|`);
+    })
+
+    it("set overall coverage output", async () => {
+        core.setOutput = output;
+        await action.action();
+
+        const out = output.mock.calls[0];
+        expect(out).toEqual(['coverage-overall', 49.02]);
+    })
+});
