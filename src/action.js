@@ -27,7 +27,7 @@ async function action() {
                 isPR = false;
                 break
             default:
-                core.setFailed(`Only pull requests and pushes are supported, ${github.context.eventName} not supported.`);
+                throw `Only pull requests and pushes are supported, ${github.context.eventName} not supported.`;
         }
 
         core.info(`base sha: ${base}`);
@@ -40,14 +40,16 @@ async function action() {
 
         const value = await reportJsonAsync;
         const report = value["report"];
+
+        const overallCoverage = process.getOverallCoverage(report);
+        core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
+
         if (prNumber != null) {
             const files = process.getFileCoverage(report, changedFiles);
-            const overallCoverage = process.getOverallCoverage(report);
-            core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
             await addComment(prNumber, render.getPRComment(overallCoverage, files, passPercentage), client);
         }
     } catch (error) {
-        core.setFailed(error.message);
+        core.setFailed(error);
     }
 }
 

@@ -66,9 +66,10 @@ describe("Pull Request event", function () {
         "repo": "jacoco-playground",
         "owner": "madrapps"
     };
-    github.context = context
 
     it("publish proper comment", async () => {
+        github.context = context
+
         await action.action();
 
         expect(comment.mock.calls[0][0].body).toEqual(`|File|Coverage||
@@ -82,9 +83,48 @@ describe("Pull Request event", function () {
 
     it("set overall coverage output", async () => {
         core.setOutput = output;
+
         await action.action();
 
         const out = output.mock.calls[0];
         expect(out).toEqual(['coverage-overall', 49.02]);
+    })
+});
+
+describe("Push event", function () {
+    const context = {
+        "eventName": "push",
+        "payload": {
+            "before": "guasft7asdtf78asfd87as6df7y2u3",
+            "after": "aahsdflais76dfa78wrglghjkaghkj"
+        },
+        "repo": "jacoco-playground",
+        "owner": "madrapps"
+    }
+
+    it("set overall coverage output", async () => {
+        github.context = context
+        core.setOutput = output;
+
+        await action.action();
+
+        const out = output.mock.calls[0];
+        expect(out).toEqual(['coverage-overall', 49.02]);
+    })
+});
+
+describe("Other than push or pull_request event", function () {
+    const context = {
+        "eventName": "pr_review"
+    }
+
+    it("Fail by throwing appropriate error", async () => {
+        github.context = context
+        core.setFailed = jest.fn(c => {
+            expect(c).toEqual("Only pull requests and pushes are supported, pr_review not supported.");
+        });
+        core.setOutput = output;
+
+        await action.action();
     })
 });
