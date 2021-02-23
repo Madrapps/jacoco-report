@@ -5,12 +5,9 @@ const parser = require('xml2js');
 const process = require('./process');
 const render = require('./render');
 
-const client = github.getOctokit(core.getInput("token"));
-
 async function action() {
     try {
         const reportPath = core.getInput('path');
-        console.log("REPORT = " + reportPath);
         const passPercentage = parseFloat(core.getInput('pass-percentage'));
         const event = github.context.eventName;
         core.info(`Event is ${event}`);
@@ -36,8 +33,10 @@ async function action() {
         core.info(`base sha: ${base}`);
         core.info(`head sha: ${head}`);
 
+        const client = github.getOctokit(core.getInput("token"));
+
         const reportJsonAsync = getJsonReport(reportPath);
-        const changedFiles = await getChangedFiles(base, head);
+        const changedFiles = await getChangedFiles(base, head, client);
 
         const value = await reportJsonAsync;
         const report = value["report"];
@@ -45,7 +44,7 @@ async function action() {
             const files = process.getFileCoverage(report, changedFiles);
             const overallCoverage = process.getOverallCoverage(report);
             core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
-            await addComment(prNumber, render.getPRComment(overallCoverage, files, passPercentage));
+            await addComment(prNumber, render.getPRComment(overallCoverage, files, passPercentage), client);
         }
     } catch (error) {
         core.setFailed(error.message);
@@ -57,7 +56,7 @@ async function getJsonReport(xmlPath) {
     return await parser.parseStringPromise(reportXml);
 }
 
-async function getChangedFiles(base, head) {
+async function getChangedFiles(base, head, client) {
     const response = await client.repos.compareCommits({
         base,
         head,
@@ -76,7 +75,7 @@ async function getChangedFiles(base, head) {
     return changedFiles;
 }
 
-async function addComment(prNumber, comment) {
+async function addComment(prNumber, comment, client) {
     await client.issues.createComment({
         issue_number: prNumber,
         body: comment,
