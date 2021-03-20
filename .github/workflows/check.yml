@@ -20,7 +20,11 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: '12.x'
-        
+
+    - name: Install jest
+      run: |
+        npm install -g jest
+
     - name: Run unit tests
       run: |
         jest --coverage
