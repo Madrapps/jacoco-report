@@ -5,7 +5,7 @@ inputs:
     description: "Path of the generated xml file"
     required: true
   token:
-    description: "Github personal token to add commit to Pull Request"
+    description: "Github personal token to add commits to Pull Request"
     required: true
   min-coverage-overall:
     description: "The minimum code coverage that is required to pass for overall project"
