@@ -28,9 +28,9 @@ beforeAll(() => {
         switch (c) {
             case 'path':
                 return "./__tests__/__fixtures__/report.xml";
-            case 'pass-percentage-overall':
+            case 'min-coverage-overall':
                 return 45;
-            case `pass-percentage-changed-files`:
+            case `min-coverage-changed-files`:
                 return 60;
         }
     });

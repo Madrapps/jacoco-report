@@ -8,8 +8,8 @@ const render = require('./render');
 async function action() {
     try {
         const reportPath = core.getInput('path');
-        const passPercentageOverall = parseFloat(core.getInput('pass-percentage-overall'));
-        const passPercentageChangedFiles = parseFloat(core.getInput('pass-percentage-changed-files'));
+        const minCoverageOverall = parseFloat(core.getInput('min-coverage-overall'));
+        const minCoverageChangedFiles = parseFloat(core.getInput('min-coverage-changed-files'));
         const event = github.context.eventName;
         core.info(`Event is ${event}`);
 
@@ -48,7 +48,7 @@ async function action() {
         core.setOutput("coverage-changed-files", parseFloat(filesCoverage.percentage.toFixed(2)));
 
         if (prNumber != null) {
-            await addComment(prNumber, render.getPRComment(overallCoverage, filesCoverage, passPercentageOverall, passPercentageChangedFiles), client);
+            await addComment(prNumber, render.getPRComment(overallCoverage, filesCoverage, minCoverageOverall, minCoverageChangedFiles), client);
         }
     } catch (error) {
         core.setFailed(error);
