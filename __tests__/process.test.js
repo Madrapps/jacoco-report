@@ -14,7 +14,7 @@ describe("get file coverage", function () {
         const report = await getReport();
         const changedFiles = [];
         const actual = process.getFileCoverage(report, changedFiles);
-        expect(actual).toEqual([]);
+        expect(actual.files).toEqual([]);
     });
 
     it("one file changed", async () => {
@@ -26,16 +26,19 @@ describe("get file coverage", function () {
             }
         ];
         const actual = process.getFileCoverage(report, changedFiles);
-        expect(actual).toEqual([
-            {
-                "filePath": "src/main/java/com/madrapps/jacoco/operation/StringOp.java",
-                "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java",
-                "name": "StringOp.java",
-                "covered": 7,
-                "missed": 0,
-                "percentage": 100,
-            }
-        ]);
+        expect(actual).toEqual({
+            "files": [
+                {
+                    "filePath": "src/main/java/com/madrapps/jacoco/operation/StringOp.java",
+                    "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java",
+                    "name": "StringOp.java",
+                    "covered": 7,
+                    "missed": 0,
+                    "percentage": 100,
+                }
+            ],
+            "percentage": 100
+        });
     });
 
     it("multiple files changed", async () => {
@@ -55,24 +58,27 @@ describe("get file coverage", function () {
             },
         ];
         const actual = process.getFileCoverage(report, changedFiles);
-        expect(actual).toEqual([
-            {
-                "filePath": "src/main/java/com/madrapps/jacoco/operation/StringOp.java",
-                "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java",
-                "name": "StringOp.java",
-                "covered": 7,
-                "missed": 0,
-                "percentage": 100,
-            },
-            {
-                "covered": 7,
-                "missed": 8,
-                "percentage": 46.67,
-                "filePath": "src/main/kotlin/com/madrapps/jacoco/Math.kt",
-                "name": "Math.kt",
-                "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt",
-            },
-        ]);
+        expect(actual).toEqual({
+            "files": [
+                {
+                    "filePath": "src/main/java/com/madrapps/jacoco/operation/StringOp.java",
+                    "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java",
+                    "name": "StringOp.java",
+                    "covered": 7,
+                    "missed": 0,
+                    "percentage": 100,
+                },
+                {
+                    "covered": 7,
+                    "missed": 8,
+                    "percentage": 46.67,
+                    "filePath": "src/main/kotlin/com/madrapps/jacoco/Math.kt",
+                    "name": "Math.kt",
+                    "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt",
+                },
+            ],
+            "percentage": 63.64
+        })
     });
 })
 

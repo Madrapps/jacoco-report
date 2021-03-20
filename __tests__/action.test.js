@@ -28,8 +28,10 @@ beforeAll(() => {
         switch (c) {
             case 'path':
                 return "./__tests__/__fixtures__/report.xml";
-            case 'pass-percentage':
+            case 'pass-percentage-overall':
                 return 45;
+            case `pass-percentage-changed-files`:
+                return 60;
         }
     });
     github.getOctokit = jest.fn(() => {
@@ -75,19 +77,30 @@ describe("Pull Request event", function () {
         expect(comment.mock.calls[0][0].body).toEqual(`|File|Coverage [63.64%]|:green_apple:|
 |:-|:-:|:-:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|
 
 |Total Project Coverage|49.02%|:green_apple:|
 |:-|:-:|:-:|`);
     })
 
     it("set overall coverage output", async () => {
+        github.context = context
         core.setOutput = output;
 
         await action.action();
 
         const out = output.mock.calls[0];
         expect(out).toEqual(['coverage-overall', 49.02]);
+    })
+
+    it("set changed files coverage output", async () => {
+        github.context = context
+        core.setOutput = output;
+
+        await action.action();
+
+        const out = output.mock.calls[1];
+        expect(out).toEqual(['coverage-changed-files', 63.64]);
     })
 });
 
@@ -110,6 +123,16 @@ describe("Push event", function () {
 
         const out = output.mock.calls[0];
         expect(out).toEqual(['coverage-overall', 49.02]);
+    })
+
+    it("set changed files coverage output", async () => {
+        github.context = context
+        core.setOutput = output;
+
+        await action.action();
+
+        const out = output.mock.calls[1];
+        expect(out).toEqual(['coverage-changed-files', 63.64]);
     })
 });
 

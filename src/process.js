@@ -1,5 +1,6 @@
 function getFileCoverage(report, files) {
-    const result = [];
+    const result = {};
+    const resultFiles = [];
     const packages = report["package"];
     packages.forEach(item => {
         const packageName = item["$"].name;
@@ -17,12 +18,26 @@ function getFileCoverage(report, files) {
                 file["missed"] = coverage.missed;
                 file["covered"] = coverage.covered;
                 file["percentage"] = coverage.percentage;
-                result.push(file);
+                resultFiles.push(file);
             }
         });
-        result.sort((a, b) => b.percentage - a.percentage)
+        resultFiles.sort((a, b) => b.percentage - a.percentage)
     });
+    result.files = resultFiles;
+    if (resultFiles.length != 0) {
+        result.percentage = getTotalPercentage(resultFiles);
+    }
     return result;
+}
+
+function getTotalPercentage(files) {
+    var missed = 0;
+    var covered = 0;
+    files.forEach(file => {
+        missed += file.missed;
+        covered += file.covered;
+    });
+    return parseFloat((covered / (covered + missed) * 100).toFixed(2));
 }
 
 function getOverallCoverage(report) {

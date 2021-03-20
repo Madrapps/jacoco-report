@@ -7,14 +7,20 @@ inputs:
   token:
     description: "Github personal token to add commit to Pull Request"
     required: true
-  pass-percentage:
-    description: "The minimum code coverage that is required to pass"
+  pass-percentage-overall:
+    description: "The minimum code coverage that is required to pass for overall project"
+    required: false
+    default: "80"
+  pass-percentage-changed-files:
+    description: "The minimum code coverage that is required to pass for changed files"
     required: false
     default: "80"
 
 outputs:
   coverage-overall:
     description: "The overall coverage of the project"
+  coverage-changed-files:
+    description: "The total coverage of all changed files"
 
 runs:
   using: "node12"

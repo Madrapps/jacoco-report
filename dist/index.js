@@ -12371,7 +12371,8 @@ const render = __nccwpck_require__(8279);
 async function action() {
     try {
         const reportPath = core.getInput('path');
-        const passPercentage = parseFloat(core.getInput('pass-percentage'));
+        const passPercentageOverall = parseFloat(core.getInput('pass-percentage-overall'));
+        const passPercentageChangedFiles = parseFloat(core.getInput('pass-percentage-changed-files'));
         const event = github.context.eventName;
         core.info(`Event is ${event}`);
 
@@ -12406,10 +12407,11 @@ async function action() {
 
         const overallCoverage = process.getOverallCoverage(report);
         core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
+        const filesCoverage = process.getFileCoverage(report, changedFiles);
+        core.setOutput("coverage-changed-files", parseFloat(filesCoverage.percentage.toFixed(2)));
 
         if (prNumber != null) {
-            const files = process.getFileCoverage(report, changedFiles);
-            await addComment(prNumber, render.getPRComment(overallCoverage, files, passPercentage), client);
+            await addComment(prNumber, render.getPRComment(overallCoverage, filesCoverage, passPercentageOverall, passPercentageChangedFiles), client);
         }
     } catch (error) {
         core.setFailed(error);
@@ -12471,7 +12473,8 @@ action.action().catch(error => {
 /***/ ((module) => {
 
 function getFileCoverage(report, files) {
-    const result = [];
+    const result = {};
+    const resultFiles = [];
     const packages = report["package"];
     packages.forEach(item => {
         const packageName = item["$"].name;
@@ -12489,12 +12492,26 @@ function getFileCoverage(report, files) {
                 file["missed"] = coverage.missed;
                 file["covered"] = coverage.covered;
                 file["percentage"] = coverage.percentage;
-                result.push(file);
+                resultFiles.push(file);
             }
         });
-        result.sort((a, b) => b.percentage - a.percentage)
+        resultFiles.sort((a, b) => b.percentage - a.percentage)
     });
+    result.files = resultFiles;
+    if (resultFiles.length != 0) {
+        result.percentage = getTotalPercentage(resultFiles);
+    }
     return result;
+}
+
+function getTotalPercentage(files) {
+    var missed = 0;
+    var covered = 0;
+    files.forEach(file => {
+        missed += file.missed;
+        covered += file.covered;
+    });
+    return parseFloat((covered / (covered + missed) * 100).toFixed(2));
 }
 
 function getOverallCoverage(report) {
@@ -12529,18 +12546,19 @@ module.exports = {
 /***/ 8279:
 /***/ ((module) => {
 
-function getPRComment(overallCoverage, files, minCoverage) {
-    const fileTable = getFileTable(files, minCoverage);
-    const overallTable = getOverallTable(overallCoverage, minCoverage);
+function getPRComment(overallCoverage, filesCoverage, minCoverageOverall, minCoverageChangedFiles) {
+    const fileTable = getFileTable(filesCoverage, minCoverageChangedFiles);
+    const overallTable = getOverallTable(overallCoverage, minCoverageOverall);
     return fileTable + `\n\n` + overallTable;
 }
 
-function getFileTable(files, minCoverage) {
+function getFileTable(filesCoverage, minCoverage) {
+    const files = filesCoverage.files;
     if (files.length === 0) {
         return `> There is no coverage information present for the Files changed`;
     }
 
-    const tableHeader = getHeader(getTotalPercentage(files));
+    const tableHeader = getHeader(filesCoverage.percentage);
     const tableStructure = `|:-|:-:|:-:|`;
     var table = tableHeader + `\n` + tableStructure;
     files.forEach(file => {
@@ -12565,16 +12583,6 @@ function getFileTable(files, minCoverage) {
     function addRow(row) {
         table = table + `\n` + row;
     }
-}
-
-function getTotalPercentage(files) {
-    var missed = 0;
-    var covered = 0;
-    files.forEach(file => {
-        missed += file.missed;
-        covered += file.covered;
-    });
-    return parseFloat(covered / (covered + missed) * 100);
 }
 
 function getOverallTable(coverage, minCoverage) {

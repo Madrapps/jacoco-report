@@ -1,15 +1,16 @@
-function getPRComment(overallCoverage, files, minCoverage) {
-    const fileTable = getFileTable(files, minCoverage);
-    const overallTable = getOverallTable(overallCoverage, minCoverage);
+function getPRComment(overallCoverage, filesCoverage, minCoverageOverall, minCoverageChangedFiles) {
+    const fileTable = getFileTable(filesCoverage, minCoverageChangedFiles);
+    const overallTable = getOverallTable(overallCoverage, minCoverageOverall);
     return fileTable + `\n\n` + overallTable;
 }
 
-function getFileTable(files, minCoverage) {
+function getFileTable(filesCoverage, minCoverage) {
+    const files = filesCoverage.files;
     if (files.length === 0) {
         return `> There is no coverage information present for the Files changed`;
     }
 
-    const tableHeader = getHeader(getTotalPercentage(files));
+    const tableHeader = getHeader(filesCoverage.percentage);
     const tableStructure = `|:-|:-:|:-:|`;
     var table = tableHeader + `\n` + tableStructure;
     files.forEach(file => {
@@ -34,16 +35,6 @@ function getFileTable(files, minCoverage) {
     function addRow(row) {
         table = table + `\n` + row;
     }
-}
-
-function getTotalPercentage(files) {
-    var missed = 0;
-    var covered = 0;
-    files.forEach(file => {
-        missed += file.missed;
-        covered += file.covered;
-    });
-    return parseFloat(covered / (covered + missed) * 100);
 }
 
 function getOverallTable(coverage, minCoverage) {
