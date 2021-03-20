@@ -30,7 +30,9 @@ describe("get PR Comment", function () {
 
         const files = [
             {
-                "coverage": 46.67,
+                "covered": 7,
+                "missed": 8,
+                "percentage": 46.67,
                 "filePath": "src/main/kotlin/com/madrapps/jacoco/Math.kt",
                 "name": "Math.kt",
                 "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt",
@@ -39,7 +41,9 @@ describe("get PR Comment", function () {
                 "filePath": "src/main/java/com/madrapps/jacoco/operation/StringOp.java",
                 "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java",
                 "name": "StringOp.java",
-                "coverage": 100,
+                "covered": 7,
+                "missed": 0,
+                "percentage": 100,
             },
         ];
 

@@ -13,7 +13,7 @@ function getFileTable(files, minCoverage) {
 
     var table = tableHeader + `\n` + tableStructure;
     files.forEach(file => {
-        const coverage = file.coverage;
+        const coverage = file.percentage;
         var status = getStatus(coverage, minCoverage);
         table = table + `\n` + `|[${file.name}](${file.url})|${formatCoverage(coverage)}|${status}|`;
     });
