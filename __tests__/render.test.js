@@ -30,20 +30,20 @@ describe("get PR Comment", function () {
 
         const files = [
             {
-                "covered": 7,
-                "missed": 8,
-                "percentage": 46.67,
-                "filePath": "src/main/kotlin/com/madrapps/jacoco/Math.kt",
-                "name": "Math.kt",
-                "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt",
-            },
-            {
                 "filePath": "src/main/java/com/madrapps/jacoco/operation/StringOp.java",
                 "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java",
                 "name": "StringOp.java",
                 "covered": 7,
                 "missed": 0,
                 "percentage": 100,
+            },
+            {
+                "covered": 7,
+                "missed": 8,
+                "percentage": 46.67,
+                "filePath": "src/main/kotlin/com/madrapps/jacoco/Math.kt",
+                "name": "Math.kt",
+                "url": "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt",
             },
         ];
 
@@ -52,8 +52,8 @@ describe("get PR Comment", function () {
             expect(comment).toEqual(
                 `|File|Coverage [63.64%]|:green_apple:|
 |:-|:-:|:-:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|
 
 |Total Project Coverage|49.23%|:green_apple:|
 |:-|:-:|:-:|`
@@ -65,8 +65,8 @@ describe("get PR Comment", function () {
             expect(comment).toEqual(
                 `|File|Coverage [63.64%]|:x:|
 |:-|:-:|:-:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|
 
 |Total Project Coverage|49.23%|:x:|
 |:-|:-:|:-:|`

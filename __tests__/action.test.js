@@ -74,8 +74,8 @@ describe("Pull Request event", function () {
 
         expect(comment.mock.calls[0][0].body).toEqual(`|File|Coverage [63.64%]|:green_apple:|
 |:-|:-:|:-:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|
 
 |Total Project Coverage|49.02%|:green_apple:|
 |:-|:-:|:-:|`);

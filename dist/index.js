@@ -12492,6 +12492,7 @@ function getFileCoverage(report, files) {
                 result.push(file);
             }
         });
+        result.sort((a, b) => b.percentage - a.percentage)
     });
     return result;
 }
