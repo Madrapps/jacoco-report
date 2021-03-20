@@ -23,6 +23,7 @@ jobs:
 
     - name: Install jest
       run: |
+        npm install
         npm install -g jest
 
     - name: Run unit tests
