@@ -50,7 +50,7 @@ describe("get PR Comment", function () {
         it("coverage greater than min coverage", function () {
             const comment = render.getPRComment(49.23, files, 30);
             expect(comment).toEqual(
-                `|File|Coverage||
+                `|File|Coverage [63.64%]|:green_apple:|
 |:-|:-:|:-:|
 |[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
@@ -63,7 +63,7 @@ describe("get PR Comment", function () {
         it("coverage lesser than min coverage", function () {
             const comment = render.getPRComment(49.23, files, 70);
             expect(comment).toEqual(
-                `|File|Coverage||
+                `|File|Coverage [63.64%]|:x:|
 |:-|:-:|:-:|
 |[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|

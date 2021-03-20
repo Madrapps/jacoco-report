@@ -12551,16 +12551,42 @@ function getFileTable(files, minCoverage) {
     if (files.length === 0) {
         return `> There is no coverage information present for the Files changed`;
     }
-    const tableHeader = `|File|Coverage||`;
-    const tableStructure = `|:-|:-:|:-:|`;
 
+    const tableHeader = getHeader(getTotalPercentage(files));
+    const tableStructure = `|:-|:-:|:-:|`;
     var table = tableHeader + `\n` + tableStructure;
     files.forEach(file => {
-        const coverage = file.percentage;
-        var status = getStatus(coverage, minCoverage);
-        table = table + `\n` + `|[${file.name}](${file.url})|${formatCoverage(coverage)}|${status}|`;
+        renderFileRow(`[${file.name}](${file.url})`, file.percentage);
     });
     return table;
+
+    function renderFileRow(name, coverage) {
+        addRow(getRow(name, coverage));
+    }
+
+    function getHeader(coverage) {
+        var status = getStatus(coverage, minCoverage);
+        return `|File|Coverage [${formatCoverage(coverage)}]|${status}|`;
+    }
+
+    function getRow(name, coverage) {
+        var status = getStatus(coverage, minCoverage);
+        return `|${name}|${formatCoverage(coverage)}|${status}|`;
+    }
+
+    function addRow(row) {
+        table = table + `\n` + row;
+    }
+}
+
+function getTotalPercentage(files) {
+    var missed = 0;
+    var covered = 0;
+    files.forEach(file => {
+        missed += file.missed;
+        covered += file.covered;
+    });
+    return parseFloat(covered / (covered + missed) * 100);
 }
 
 function getOverallTable(coverage, minCoverage) {
