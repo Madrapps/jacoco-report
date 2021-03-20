@@ -26,21 +26,8 @@ function getFileCoverage(report, files) {
 
 function getOverallCoverage(report) {
     const counters = report["counter"];
-    const coverage = getCoverage(counters);
-    return coverage;
-}
-
-function getCoverage(counters) {
-    var coverage;
-    counters.forEach(counter => {
-        const attr = counter["$"];
-        if (attr["type"] == "INSTRUCTION") {
-            missed = parseFloat(attr["missed"]);
-            const covered = parseFloat(attr["covered"]);
-            coverage = parseFloat((covered / (covered + missed) * 100).toFixed(2));
-        }
-    });
-    return coverage
+    const coverage = getDetailedCoverage(counters, "INSTRUCTION");
+    return coverage.percentage;
 }
 
 function getDetailedCoverage(counters, type) {
