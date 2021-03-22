@@ -12365,6 +12365,7 @@ const core = __nccwpck_require__(4934);
 const github = __nccwpck_require__(6794);
 const fs = __nccwpck_require__(5747);
 const parser = __nccwpck_require__(1532);
+const { parseBooleans } = __nccwpck_require__(2526);
 const process = __nccwpck_require__(6332);
 const render = __nccwpck_require__(8279);
 
@@ -12373,6 +12374,7 @@ async function action() {
         const reportPath = core.getInput('path');
         const minCoverageOverall = parseFloat(core.getInput('min-coverage-overall'));
         const minCoverageChangedFiles = parseFloat(core.getInput('min-coverage-changed-files'));
+        const debugMode = parseBooleans(core.getInput('debug-mode'));
         const event = github.context.eventName;
         core.info(`Event is ${event}`);
 
@@ -12399,15 +12401,20 @@ async function action() {
 
         const client = github.getOctokit(core.getInput("token"));
 
+        if (debugMode) core.info(`reportPath: ${reportPath}`);
         const reportJsonAsync = getJsonReport(reportPath);
         const changedFiles = await getChangedFiles(base, head, client);
+        if (debugMode) core.info(`changedFiles: ${changedFiles}`);
 
         const value = await reportJsonAsync;
+        if (debugMode) core.info(`report: ${value}`);
         const report = value["report"];
 
         const overallCoverage = process.getOverallCoverage(report);
+        if (debugMode) core.info(`overallCoverage: ${overallCoverage}`);
         core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
         const filesCoverage = process.getFileCoverage(report, changedFiles);
+        if (debugMode) core.info(`filesCoverage: ${filesCoverage}`);
         core.setOutput("coverage-changed-files", parseFloat(filesCoverage.percentage.toFixed(2)));
 
         if (prNumber != null) {
@@ -12500,6 +12507,8 @@ function getFileCoverage(report, files) {
     result.files = resultFiles;
     if (resultFiles.length != 0) {
         result.percentage = getTotalPercentage(resultFiles);
+    } else {
+        result.percentage = 100;
     }
     return result;
 }

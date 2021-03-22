@@ -26,6 +26,8 @@ function getFileCoverage(report, files) {
     result.files = resultFiles;
     if (resultFiles.length != 0) {
         result.percentage = getTotalPercentage(resultFiles);
+    } else {
+        result.percentage = 100;
     }
     return result;
 }

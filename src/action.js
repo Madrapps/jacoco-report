@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const fs = require('fs');
 const parser = require('xml2js');
+const { parseBooleans } = require('xml2js/lib/processors');
 const process = require('./process');
 const render = require('./render');
 
@@ -10,6 +11,7 @@ async function action() {
         const reportPath = core.getInput('path');
         const minCoverageOverall = parseFloat(core.getInput('min-coverage-overall'));
         const minCoverageChangedFiles = parseFloat(core.getInput('min-coverage-changed-files'));
+        const debugMode = parseBooleans(core.getInput('debug-mode'));
         const event = github.context.eventName;
         core.info(`Event is ${event}`);
 
@@ -36,15 +38,20 @@ async function action() {
 
         const client = github.getOctokit(core.getInput("token"));
 
+        if (debugMode) core.info(`reportPath: ${reportPath}`);
         const reportJsonAsync = getJsonReport(reportPath);
         const changedFiles = await getChangedFiles(base, head, client);
+        if (debugMode) core.info(`changedFiles: ${changedFiles}`);
 
         const value = await reportJsonAsync;
+        if (debugMode) core.info(`report: ${value}`);
         const report = value["report"];
 
         const overallCoverage = process.getOverallCoverage(report);
+        if (debugMode) core.info(`overallCoverage: ${overallCoverage}`);
         core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
         const filesCoverage = process.getFileCoverage(report, changedFiles);
+        if (debugMode) core.info(`filesCoverage: ${filesCoverage}`);
         core.setOutput("coverage-changed-files", parseFloat(filesCoverage.percentage.toFixed(2)));
 
         if (prNumber != null) {
