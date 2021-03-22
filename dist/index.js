@@ -12426,7 +12426,7 @@ async function action() {
 }
 
 function debug(obj) {
-    JSON.stringify(obj, " ", 4)
+    return JSON.stringify(obj, " ", 4)
 }
 
 async function getJsonReport(xmlPath) {
