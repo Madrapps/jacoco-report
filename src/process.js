@@ -13,12 +13,14 @@ function getFileCoverage(report, files) {
             if (file != null) {
                 const fileName = sourceFile["$"].name;
                 const counters = sourceFile["counter"];
-                const coverage = getDetailedCoverage(counters, "INSTRUCTION");
-                file["name"] = fileName;
-                file["missed"] = coverage.missed;
-                file["covered"] = coverage.covered;
-                file["percentage"] = coverage.percentage;
-                resultFiles.push(file);
+                if (counters != null && counters.length != 0) {
+                    const coverage = getDetailedCoverage(counters, "INSTRUCTION");
+                    file["name"] = fileName;
+                    file["missed"] = coverage.missed;
+                    file["covered"] = coverage.covered;
+                    file["percentage"] = coverage.percentage;
+                    resultFiles.push(file);
+                }
             }
         });
         resultFiles.sort((a, b) => b.percentage - a.percentage)
@@ -26,6 +28,8 @@ function getFileCoverage(report, files) {
     result.files = resultFiles;
     if (resultFiles.length != 0) {
         result.percentage = getTotalPercentage(resultFiles);
+    } else {
+        result.percentage = 100;
     }
     return result;
 }
