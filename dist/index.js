@@ -12404,17 +12404,17 @@ async function action() {
         if (debugMode) core.info(`reportPath: ${reportPath}`);
         const reportJsonAsync = getJsonReport(reportPath);
         const changedFiles = await getChangedFiles(base, head, client);
-        if (debugMode) core.info(`changedFiles: ${changedFiles}`);
+        if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`);
 
         const value = await reportJsonAsync;
-        if (debugMode) core.info(`report: ${value}`);
+        if (debugMode) core.info(`report: ${debug(report)}`);
         const report = value["report"];
 
         const overallCoverage = process.getOverallCoverage(report);
         if (debugMode) core.info(`overallCoverage: ${overallCoverage}`);
         core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
         const filesCoverage = process.getFileCoverage(report, changedFiles);
-        if (debugMode) core.info(`filesCoverage: ${filesCoverage}`);
+        if (debugMode) core.info(`filesCoverage: ${debug(filesCoverage)}`);
         core.setOutput("coverage-changed-files", parseFloat(filesCoverage.percentage.toFixed(2)));
 
         if (prNumber != null) {
@@ -12423,6 +12423,10 @@ async function action() {
     } catch (error) {
         core.setFailed(error);
     }
+}
+
+function debug(obj) {
+    JSON.stringify(obj, " ", 4)
 }
 
 async function getJsonReport(xmlPath) {
