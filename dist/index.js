@@ -12407,7 +12407,7 @@ async function action() {
         if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`);
 
         const value = await reportJsonAsync;
-        if (debugMode) core.info(`report: ${debug(report)}`);
+        if (debugMode) core.info(`report value: ${debug(value)}`);
         const report = value["report"];
 
         const overallCoverage = process.getOverallCoverage(report);
