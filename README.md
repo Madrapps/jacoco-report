@@ -12,7 +12,7 @@ Create a workflow `.yml` file in your repositories `.github/workflows` directory
 
 * `path` - [**required**] Path of the generated xml file.
 * `token` - [**required**] Github personal token to add commits to Pull Request
-* `min-coverage-overall` - [*optional*] The minimum code coverage that is required to pass for changed files
+* `min-coverage-overall` - [*optional*] The minimum code coverage that is required to pass for overall project
 * `min-coverage-changed-files` - [*optional*] The minimum code coverage that is required to pass for changed files
 
 ### Outputs
