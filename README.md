@@ -1,7 +1,7 @@
 # jacoco-report
 [![Tests](https://github.com/Madrapps/jacoco-report/actions/workflows/check.yml/badge.svg)](https://github.com/Madrapps/jacoco-report/actions/workflows/check.yml)
 
-Github action that publishes the JaCoCo report as a comment in the Pull Request
+A Github action that publishes the JaCoCo report as a comment in the Pull Request with customizable pass percentage for modified files and for the entire project.
 
 ## Usage
 
@@ -52,7 +52,7 @@ jobs:
           min-coverage-changed-files: 60
 ```
 <br>
-<img src="/preview/screenshot.png" alt="output screenshot" title="output screenshot"/>
+<img src="/preview/screenshot.png" alt="output screenshot" title="output screenshot" width="500" />
 
 ### Example Project
 For a working project refer to [jacoco-playgound](https://github.com/thsaravana/jacoco-playground) project. Check out the PR's in
