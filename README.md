@@ -51,6 +51,8 @@ jobs:
           min-coverage-overall: 40
           min-coverage-changed-files: 60
 ```
+<br>
+<img src="/preview/screenshot.png" alt="output screenshot" title="output screenshot"/>
 
 ### Example Project
 For a working project refer to [jacoco-playgound](https://github.com/thsaravana/jacoco-playground) project. Check out the PR's in
