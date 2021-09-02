@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC
+    "-//JACOCO//DTD Report 1.1//EN" "report.dtd">
+<report name="text">
+    <sessioninfo dump="1630475840767" id="FWS-CHE-LT-2648-35e84bdf" start="1630475837836" />
+    <package name="com/madrapps/text">
+        <class name="com/madrapps/text/StringOperation" sourcefilename="StringOperation.java" />
+        <class name="com/madrapps/text/StringOp" sourcefilename="StringOp.java">
+            <method name="&lt;init&gt;" desc="()V" line="3">
+                <counter covered="3" missed="0" type="INSTRUCTION" />
+                <counter covered="1" missed="0" type="LINE" />
+                <counter covered="1" missed="0" type="COMPLEXITY" />
+                <counter covered="1" missed="0" type="METHOD" />
+            </method>
+            <method name="endsWith" desc="(Ljava/lang/String;Ljava/lang/String;)Z" line="7">
+                <counter covered="4" missed="0" type="INSTRUCTION" />
+                <counter covered="1" missed="0" type="LINE" />
+                <counter covered="1" missed="0" type="COMPLEXITY" />
+                <counter covered="1" missed="0" type="METHOD" />
+            </method>
+            <method name="startsWith" desc="(Ljava/lang/String;Ljava/lang/String;)Z" line="12">
+                <counter covered="4" missed="0" type="INSTRUCTION" />
+                <counter covered="1" missed="0" type="LINE" />
+                <counter covered="1" missed="0" type="COMPLEXITY" />
+                <counter covered="1" missed="0" type="METHOD" />
+            </method>
+            <counter covered="11" missed="0" type="INSTRUCTION" />
+            <counter covered="3" missed="0" type="LINE" />
+            <counter covered="3" missed="0" type="COMPLEXITY" />
+            <counter covered="3" missed="0" type="METHOD" />
+            <counter covered="1" missed="0" type="CLASS" />
+        </class>
+        <sourcefile name="StringOp.java">
+            <line cb="0" ci="3" mb="0" mi="0" nr="3" />
+            <line cb="0" ci="4" mb="0" mi="0" nr="7" />
+            <line cb="0" ci="4" mb="0" mi="0" nr="12" />
+            <counter covered="11" missed="0" type="INSTRUCTION" />
+            <counter covered="3" missed="0" type="LINE" />
+            <counter covered="3" missed="0" type="COMPLEXITY" />
+            <counter covered="3" missed="0" type="METHOD" />
+            <counter covered="1" missed="0" type="CLASS" />
+        </sourcefile>
+        <sourcefile name="StringOperation.java" />
+        <counter covered="11" missed="0" type="INSTRUCTION" />
+        <counter covered="3" missed="0" type="LINE" />
+        <counter covered="3" missed="0" type="COMPLEXITY" />
+        <counter covered="3" missed="0" type="METHOD" />
+        <counter covered="1" missed="0" type="CLASS" />
+    </package>
+    <counter covered="11" missed="0" type="INSTRUCTION" />
+    <counter covered="3" missed="0" type="LINE" />
+    <counter covered="3" missed="0" type="COMPLEXITY" />
+    <counter covered="3" missed="0" type="METHOD" />
+    <counter covered="1" missed="0" type="CLASS" />
+</report>
