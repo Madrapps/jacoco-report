@@ -50,14 +50,14 @@ async function action() {
 
     const reportsJson = await reportsJsonAsync;
     if (debugMode) core.info(`report value: ${debug(reportsJson)}`);
-    const reports = reportsJson.map((p) => p["report"]);
+    const reports = reportsJson.map((report) => report["report"]);
 
     // Module and overall coverage
     const overallCoverage = process.getOverallCoverage(reports[0]);
     if (debugMode) core.info(`overallCoverage: ${overallCoverage}`);
     core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
 
-    const filesCoverage = process.getFileCoverage(reports[0], changedFiles);
+    const filesCoverage = process.getFileCoverage(reports, changedFiles);
     if (debugMode) core.info(`filesCoverage: ${debug(filesCoverage)}`);
     core.setOutput(
       "coverage-changed-files",
