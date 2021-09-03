@@ -2,10 +2,22 @@ const fs = require("fs");
 const parser = require("xml2js");
 const process = require("../src/process");
 
-test("get overall coverage", async () => {
-  const report = await getSingleReport();
-  const coverage = process.getOverallCoverage(report[0]);
-  expect(coverage).toBeCloseTo(49.01, 1);
+describe("get overall coverage", function () {
+  describe("single report", function () {
+    test("get project coverage", async () => {
+      const reports = await getSingleReport();
+      const coverage = process.getOverallCoverage(reports);
+      expect(coverage.project).toBeCloseTo(49.01, 1);
+    });
+  });
+
+  describe("multiple reports", function () {
+    test("get project coverage", async () => {
+      const reports = await getMultipleReports();
+      const coverage = process.getOverallCoverage(reports);
+      expect(coverage.project).toBeCloseTo(25.32, 1);
+    });
+  });
 });
 
 describe("get file coverage", function () {

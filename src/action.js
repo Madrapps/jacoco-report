@@ -52,10 +52,12 @@ async function action() {
     if (debugMode) core.info(`report value: ${debug(reportsJson)}`);
     const reports = reportsJson.map((report) => report["report"]);
 
-    // Module and overall coverage
-    const overallCoverage = process.getOverallCoverage(reports[0]);
+    const overallCoverage = process.getOverallCoverage(reports);
     if (debugMode) core.info(`overallCoverage: ${overallCoverage}`);
-    core.setOutput("coverage-overall", parseFloat(overallCoverage.toFixed(2)));
+    core.setOutput(
+      "coverage-overall",
+      parseFloat(overallCoverage.project.toFixed(2))
+    );
 
     const filesCoverage = process.getFileCoverage(reports, changedFiles);
     if (debugMode) core.info(`filesCoverage: ${debug(filesCoverage)}`);
@@ -68,7 +70,7 @@ async function action() {
       await addComment(
         prNumber,
         render.getPRComment(
-          overallCoverage,
+          overallCoverage.project,
           filesCoverage,
           minCoverageOverall,
           minCoverageChangedFiles

@@ -48,10 +48,38 @@ function getTotalPercentage(files) {
   return parseFloat(((covered / (covered + missed)) * 100).toFixed(2));
 }
 
-function getOverallCoverage(report) {
+function getOverallCoverage(reports) {
+  const coverage = {};
+  const modules = [];
+  reports.forEach((report) => {
+    const moduleName = report["$"].name;
+    const moduleCoverage = getModuleCoverage(report);
+    modules.push({
+      module: moduleName,
+      coverage: moduleCoverage,
+    });
+  });
+  coverage.project = getProjectCoverage(reports);
+  coverage.modules = modules;
+  return coverage;
+}
+
+function getModuleCoverage(report) {
   const counters = report["counter"];
   const coverage = getDetailedCoverage(counters, "INSTRUCTION");
   return coverage.percentage;
+}
+
+function getProjectCoverage(reports) {
+  const coverages = reports.map((report) =>
+    getDetailedCoverage(report["counter"], "INSTRUCTION")
+  );
+  const covered = coverages.reduce(
+    (acc, coverage) => acc + coverage.covered,
+    0
+  );
+  const missed = coverages.reduce((acc, coverage) => acc + coverage.missed, 0);
+  return parseFloat(((covered / (covered + missed)) * 100).toFixed(2));
 }
 
 function getDetailedCoverage(counters, type) {
