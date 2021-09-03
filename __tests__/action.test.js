@@ -26,7 +26,7 @@ const output = jest.fn();
 beforeAll(() => {
     core.getInput = jest.fn(c => {
         switch (c) {
-            case 'path':
+            case 'paths':
                 return "./__tests__/__fixtures__/report.xml";
             case 'min-coverage-overall':
                 return 45;
