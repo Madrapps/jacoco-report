@@ -1,8 +1,8 @@
 name: "JaCoCo Report"
 description: "Publishes the JaCoCo report as a comment in the Pull Request"
 inputs:
-  path:
-    description: "Path of the generated xml file"
+  paths:
+    description: "Comma separated paths of the generated jacoco xml files"
     required: true
   token:
     description: "Github personal token to add commits to Pull Request"
@@ -15,6 +15,9 @@ inputs:
     description: "The minimum code coverage that is required to pass for changed files"
     required: false
     default: "80"
+  title:
+    description: "Optional title for the Pull Request comment"
+    required: false
   debug-mode:
     description: "Run the action in debug mode and get debug logs printed in console"
     required: false
