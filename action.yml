@@ -15,6 +15,9 @@ inputs:
     description: "The minimum code coverage that is required to pass for changed files"
     required: false
     default: "80"
+  title:
+    description: "Optional title for the Pull Request comment"
+    required: false
   debug-mode:
     description: "Run the action in debug mode and get debug logs printed in console"
     required: false

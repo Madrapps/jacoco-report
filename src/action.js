@@ -16,6 +16,7 @@ async function action() {
     const minCoverageChangedFiles = parseFloat(
       core.getInput("min-coverage-changed-files")
     );
+    const title = core.getInput("title");
     const debugMode = parseBooleans(core.getInput("debug-mode"));
     const event = github.context.eventName;
     core.info(`Event is ${event}`);
@@ -73,7 +74,8 @@ async function action() {
           overallCoverage.project,
           filesCoverage,
           minCoverageOverall,
-          minCoverageChangedFiles
+          minCoverageChangedFiles,
+          title
         ),
         client
       );
