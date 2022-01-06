@@ -106,6 +106,35 @@ describe("Single report", function () {
     });
   });
 
+  describe("Pull Request Target event", function () {
+    const context = {
+      eventName: "pull_request_target",
+      payload: {
+        pull_request: {
+          number: "45",
+          base: {
+            sha: "guasft7asdtf78asfd87as6df7y2u3",
+          },
+          head: {
+            sha: "aahsdflais76dfa78wrglghjkaghkj",
+          },
+        },
+      },
+      repo: "jacoco-playground",
+      owner: "madrapps",
+    };
+
+    it("set overall coverage output", async () => {
+      github.context = context;
+      core.setOutput = output;
+
+      await action.action();
+
+      const out = output.mock.calls[0];
+      expect(out).toEqual(["coverage-overall", 49.02]);
+    });
+  })
+
   describe("Push event", function () {
     const context = {
       eventName: "push",
@@ -138,7 +167,7 @@ describe("Single report", function () {
     });
   });
 
-  describe("Other than push or pull_request event", function () {
+  describe("Other than push or pull_request or pull_request_target event", function () {
     const context = {
       eventName: "pr_review",
     };
