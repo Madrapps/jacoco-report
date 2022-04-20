@@ -75,4 +75,5 @@ function formatCoverage(coverage) {
 
 module.exports = {
   getPRComment,
+  getTitle,
 };
