@@ -6,8 +6,47 @@ jest.mock("@actions/core");
 jest.mock("@actions/github");
 
 describe("Single report", function () {
-  const comment = jest.fn();
-  const output = jest.fn();
+  let createComment;
+  let listComments;
+  let updateComment;
+  let output;
+
+  function getInput(key) {
+    switch (key) {
+      case "paths":
+        return "./__tests__/__fixtures__/report.xml";
+      case "min-coverage-overall":
+        return 45;
+      case `min-coverage-changed-files`:
+        return 60;
+    }
+  }
+
+  beforeEach(() => {
+    createComment = jest.fn();
+    listComments = jest.fn();
+    updateComment = jest.fn();
+    output = jest.fn();
+
+    core.getInput = jest.fn(getInput);
+    github.getOctokit = jest.fn(() => {
+      return {
+        repos: {
+          compareCommits: jest.fn(() => {
+            return compareCommitsResponse;
+          }),
+        },
+        issues: {
+          createComment: createComment,
+          listComments: listComments,
+          updateComment: updateComment,
+        },
+      };
+    });
+    core.setFailed = jest.fn((c) => {
+      fail(c);
+    });
+  })
 
   const compareCommitsResponse = {
     data: {
@@ -25,32 +64,6 @@ describe("Single report", function () {
       ],
     },
   };
-
-  core.getInput = jest.fn((c) => {
-    switch (c) {
-      case "paths":
-        return "./__tests__/__fixtures__/report.xml";
-      case "min-coverage-overall":
-        return 45;
-      case `min-coverage-changed-files`:
-        return 60;
-    }
-  });
-  github.getOctokit = jest.fn(() => {
-    return {
-      repos: {
-        compareCommits: jest.fn(() => {
-          return compareCommitsResponse;
-        }),
-      },
-      issues: {
-        createComment: comment,
-      },
-    };
-  });
-  core.setFailed = jest.fn((c) => {
-    fail(c);
-  });
 
   describe("Pull Request event", function () {
     const context = {
@@ -75,7 +88,7 @@ describe("Single report", function () {
 
       await action.action();
 
-      expect(comment.mock.calls[0][0].body)
+      expect(createComment.mock.calls[0][0].body)
         .toEqual(`|File|Coverage [63.64%]|:green_apple:|
 |:-|:-:|:-:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
@@ -83,6 +96,34 @@ describe("Single report", function () {
 
 |Total Project Coverage|49.02%|:green_apple:|
 |:-|:-:|:-:|`);
+    });
+
+    it("updates a previous comment", async () => {
+      github.context = context;
+
+      const title = 'JaCoCo Report'
+      core.getInput = jest.fn((c) => {
+        switch (c) {
+          case "title":
+            return title;
+          case "update-comment":
+            return "true";
+          default:
+            return getInput(c)
+        }
+      });
+
+      listComments.mockReturnValue({
+        data: [
+          {id: 1, body: "some comment"},
+          {id: 2, body: `### ${title}\n to update`},
+        ]
+      })
+
+      await action.action();
+
+      expect(updateComment.mock.calls[0][0].comment_id).toEqual(2);
+      expect(createComment).toHaveBeenCalledTimes(0);
     });
 
     it("set overall coverage output", async () => {

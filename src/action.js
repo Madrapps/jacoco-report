@@ -17,6 +17,7 @@ async function action() {
       core.getInput("min-coverage-changed-files")
     );
     const title = core.getInput("title");
+    const updateComment = parseBooleans(core.getInput("update-comment"));
     const debugMode = parseBooleans(core.getInput("debug-mode"));
     const event = github.context.eventName;
     core.info(`Event is ${event}`);
@@ -71,6 +72,8 @@ async function action() {
     if (prNumber != null) {
       await addComment(
         prNumber,
+        updateComment,
+        render.getTitle(title),
         render.getPRComment(
           overallCoverage.project,
           filesCoverage,
@@ -118,12 +121,35 @@ async function getChangedFiles(base, head, client) {
   return changedFiles;
 }
 
-async function addComment(prNumber, comment, client) {
-  await client.issues.createComment({
-    issue_number: prNumber,
-    body: comment,
-    ...github.context.repo,
-  });
+async function addComment(prNumber, update, title, body, client) {
+  let commentUpdated = false;
+
+  if (update && title) {
+    const comments = await client.issues.listComments({
+      issue_number: prNumber,
+      ...github.context.repo,
+    });
+    const comment = comments.data.find((comment) =>
+      comment.body.startsWith(title),
+    );
+
+    if (comment) {
+      await client.issues.updateComment({
+        comment_id: comment.id,
+        body: body,
+        ...github.context.repo,
+      });
+      commentUpdated = true;
+    }
+  }
+
+  if (!commentUpdated) {
+    await client.issues.createComment({
+      issue_number: prNumber,
+      body: body,
+      ...github.context.repo,
+    });
+  }
 }
 
 module.exports = {

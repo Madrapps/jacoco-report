@@ -18,6 +18,10 @@ inputs:
   title:
     description: "Optional title for the Pull Request comment"
     required: false
+  update-comment:
+    description: "Update the coverage report comment instead of creating new ones. Requires title to works properly."
+    required: false
+    default: "false"
   debug-mode:
     description: "Run the action in debug mode and get debug logs printed in console"
     required: false
