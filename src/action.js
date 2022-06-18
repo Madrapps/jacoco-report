@@ -26,6 +26,7 @@ async function action() {
     var prNumber;
     switch (event) {
       case "pull_request":
+      case "pull_request_target":
         base = github.context.payload.pull_request.base.sha;
         head = github.context.payload.pull_request.head.sha;
         prNumber = github.context.payload.pull_request.number;
