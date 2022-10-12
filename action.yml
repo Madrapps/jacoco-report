@@ -25,8 +25,18 @@ inputs:
   debug-mode:
     description: "Run the action in debug mode and get debug logs printed in console"
     required: false
-    default: "false"
+    default: "true" # Todo change this to false!
+  show-pages-links:
+    description: "Render links to gh-pages sites showing code coverage"
+    required: false
+    default: "true" # Todo change this to false!
+  #pages-url-template:
+  #  description: "Base URL for code coverage hosting preview, file paths will be appended"
+  #  required: false
+  #  # TODO how to pass this in? Maybe combine with pr-preview as well?
+  #  default: "https://${{ env.PAGES_URL }}/pr-preview/pr-${{ env.PR_NUMBER }}/"
 
+# Outputs are unicode strings, maximum of 1MB each, 50MB total.
 outputs:
   coverage-overall:
     description: "The overall coverage of the project"
