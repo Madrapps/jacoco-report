@@ -93,6 +93,11 @@ function debug(obj) {
   return JSON.stringify(obj, " ", 4);
 }
 
+function getPreviewUrlFor(repoName, prNumber, filename) {
+    // TODO parameterize this with pages URL!
+    return `https://noom.github.io/${repoName}/pr-preview/pr-${prNumber}/${filename}`;
+}
+
 async function getJsonReports(xmlPaths) {
   return Promise.all(
     xmlPaths.map(async (xmlPath) => {
@@ -115,6 +120,7 @@ async function getChangedFiles(base, head, client) {
     var changedFile = {
       filePath: file.filename,
       url: file.blob_url,
+      previewUrl: getPreviewUrlFor("community", prNumber, file.filename),
     };
     changedFiles.push(changedFile);
   });
