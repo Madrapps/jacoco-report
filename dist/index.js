@@ -12383,6 +12383,7 @@ async function action() {
     const debugMode = parseBooleans(core.getInput("debug-mode"));
     const event = github.context.eventName;
     core.info(`Event is ${event}`);
+    const skipOnNoChanges = parseBooleans(core.getInput("skip-on-no-changes"));
 
     var base;
     var head;
@@ -12418,7 +12419,7 @@ async function action() {
     const reports = reportsJson.map((report) => report["report"]);
 
     const overallCoverage = process.getOverallCoverage(reports);
-    if (debugMode) core.info(`overallCoverage: ${overallCoverage}`);
+    if (debugMode) core.info(`overallCoverage: ${debug(overallCoverage)}`);
     core.setOutput(
       "coverage-overall",
       parseFloat(overallCoverage.project.toFixed(2))
@@ -12431,7 +12432,8 @@ async function action() {
       parseFloat(filesCoverage.percentage.toFixed(2))
     );
 
-    if (prNumber != null) {
+    const skip = skipOnNoChanges && filesCoverage.files.length === 0;
+    if (prNumber != null && !skip) {
       await addComment(
         prNumber,
         updateComment,
