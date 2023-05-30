@@ -1,3 +1,8 @@
+# DEPRECATED
+
+Use upstream action : [madrapps/jacoco-report](https://github.com/Madrapps/jacoco-report)
+
+
 # jacoco-report
 
 [![Tests](https://github.com/Madrapps/jacoco-report/actions/workflows/check.yml/badge.svg)](https://github.com/Madrapps/jacoco-report/actions/workflows/check.yml)
