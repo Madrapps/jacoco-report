@@ -18,6 +18,7 @@ Create a workflow `.yml` file in your repositories `.github/workflows` directory
 - `min-coverage-changed-files` - [*optional*] The minimum code coverage that is required to pass for changed files
 - `update-comment` - [*optional*] Updates the coverage report comment instead of creating new ones. Requires `title` to work properly.
 - `title` - [*optional*] Title for the Pull Request comment
+- `aggregate-mode` - [*optional*] Activating it gives you the ability to use jacoco aggregate reports
 
 ### Outputs
 
