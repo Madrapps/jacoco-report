@@ -16588,7 +16588,7 @@ const core = __nccwpck_require__(6024);
 const github = __nccwpck_require__(5016);
 const fs = __nccwpck_require__(7147);
 const parser = __nccwpck_require__(9253);
-const { parseBooleans } = __nccwpck_require__(6434);
+const {parseBooleans} = __nccwpck_require__(6434);
 const process = __nccwpck_require__(650);
 const render = __nccwpck_require__(8183);
 
@@ -16605,9 +16605,10 @@ async function action() {
     const title = core.getInput("title");
     const updateComment = parseBooleans(core.getInput("update-comment"));
     const debugMode = parseBooleans(core.getInput("debug-mode"));
+    const skipIfNoChanges = parseBooleans(core.getInput("skip-if-no-changes"));
+
     const event = github.context.eventName;
     core.info(`Event is ${event}`);
-    const skipOnNoChanges = parseBooleans(core.getInput("skip-on-no-changes"));
 
     var base;
     var head;
@@ -16656,7 +16657,7 @@ async function action() {
       parseFloat(filesCoverage.percentage.toFixed(2))
     );
 
-    const skip = skipOnNoChanges && filesCoverage.files.length === 0;
+    const skip = skipIfNoChanges && filesCoverage.files.length === 0;
     if (prNumber != null && !skip) {
       await addComment(
         prNumber,
