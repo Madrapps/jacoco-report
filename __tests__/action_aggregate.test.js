@@ -19,8 +19,6 @@ describe("Aggregate report", function () {
         return 45;
       case `min-coverage-changed-files`:
         return 60;
-      case `aggregate-mode`:
-        return "true";
     }
   }
 
