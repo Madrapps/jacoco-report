@@ -145,6 +145,70 @@ describe("Single report", function () {
       const out = output.mock.calls[1];
       expect(out).toEqual(["coverage-changed-files", 63.64]);
     });
+
+    describe("Skip if no changes set to true", function () {
+
+      github.context = context;
+
+      function mockInput() {
+        core.getInput = jest.fn((c) => {
+          switch (c) {
+            case "skip-if-no-changes":
+              return "true";
+            default:
+              return getInput(c)
+          }
+        });
+      }
+
+      it("Add comment when coverage present for changes files", async () => {
+        mockInput();
+
+        await action.action();
+
+        expect(createComment.mock.calls[0][0].body)
+          .toEqual(`|File|Coverage [63.64%]|:green_apple:|
+|:-|:-:|:-:|
+|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|
+
+|Total Project Coverage|49.02%|:green_apple:|
+|:-|:-:|:-:|`);
+      })
+
+      it("Don't add comment when coverage absent for changes files", async () => {
+        mockInput();
+        const compareCommitsResponse = {
+          data: {
+            files: [
+              {
+                filename: "src/main/kotlin/com/madrapps/jacoco/asset.yml",
+                blob_url:
+                  "https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/asset.yml",
+              },
+            ],
+          },
+        };
+        github.getOctokit = jest.fn(() => {
+          return {
+            repos: {
+              compareCommits: jest.fn(() => {
+                return compareCommitsResponse;
+              }),
+            },
+            issues: {
+              createComment: createComment,
+              listComments: listComments,
+              updateComment: updateComment,
+            },
+          };
+        });
+
+        await action.action();
+
+        expect(createComment).not.toHaveBeenCalled()
+      })
+    })
   });
 
   describe("Pull Request Target event", function () {

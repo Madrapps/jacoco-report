@@ -12,13 +12,13 @@ Create a workflow `.yml` file in your repositories `.github/workflows` directory
 
 ### Inputs
 
-- `paths` - [**required**] Comma separated paths of the generated jacoco xml files.
+- `paths` - [**required**] Comma separated paths of the generated jacoco xml files
 - `token` - [**required**] Github personal token to add commits to Pull Request
 - `min-coverage-overall` - [*optional*] The minimum code coverage that is required to pass for overall project
 - `min-coverage-changed-files` - [*optional*] The minimum code coverage that is required to pass for changed files
-- `update-comment` - [*optional*] Updates the coverage report comment instead of creating new ones. Requires `title` to work properly.
+- `update-comment` - [*optional*] Updates the coverage report comment instead of creating new ones. Requires `title` to work properly
 - `title` - [*optional*] Title for the Pull Request comment
-- `aggregate-mode` - [*optional*] Activating it gives you the ability to use jacoco aggregate reports
+- `skip-if-no-changes` - [*optional*] Comment won't be added if there is no coverage information present for the files changed
 
 ### Outputs
 
@@ -36,6 +36,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 1.8

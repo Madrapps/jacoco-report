@@ -7,23 +7,22 @@ const process = require("./process");
 const render = require("./render");
 
 async function action() {
-    try {
-        const pathsString = core.getInput("paths");
-        const reportPaths = pathsString.split(",");
-        const minCoverageOverall = parseFloat(
-            core.getInput("min-coverage-overall")
-        );
-        const minCoverageChangedFiles = parseFloat(
-            core.getInput("min-coverage-changed-files")
-        );
-        const title = core.getInput("title");
-        const updateComment = parseBooleans(core.getInput("update-comment"));
-        const debugMode = parseBooleans(core.getInput("debug-mode"));
-        const aggregateMode = parseBooleans(core.getInput("aggregate-mode"));
-        const event = github.context.eventName;
-        core.info(`Event is ${event}`);
-        if (debugMode) core.info(`aggregateMode: ${aggregateMode}`);
+  try {
+    const pathsString = core.getInput("paths");
+    const reportPaths = pathsString.split(",");
+    const minCoverageOverall = parseFloat(
+      core.getInput("min-coverage-overall")
+    );
+    const minCoverageChangedFiles = parseFloat(
+      core.getInput("min-coverage-changed-files")
+    );
+    const title = core.getInput("title");
+    const updateComment = parseBooleans(core.getInput("update-comment"));
+    const debugMode = parseBooleans(core.getInput("debug-mode"));
+    const skipIfNoChanges = parseBooleans(core.getInput("skip-if-no-changes"));
 
+    const event = github.context.eventName;
+    core.info(`Event is ${event}`);
 
         var base;
         var head;
@@ -58,12 +57,12 @@ async function action() {
         if (debugMode) core.info(`report value: ${debug(reportsJson)}`);
         const reports = reportsJson.map((report) => report["report"]);
 
-        const overallCoverage = process.getOverallCoverage(reports);
-        if (debugMode) core.info(`overallCoverage: ${overallCoverage}`);
-        core.setOutput(
-            "coverage-overall",
-            parseFloat(overallCoverage.project.toFixed(2))
-        );
+    const overallCoverage = process.getOverallCoverage(reports);
+    if (debugMode) core.info(`overallCoverage: ${debug(overallCoverage)}`);
+    core.setOutput(
+      "coverage-overall",
+      parseFloat(overallCoverage.project.toFixed(2))
+    );
 
         let filesCoverage
         if (debugMode) core.info(`aggregateMode: ${aggregateMode}`);
@@ -83,24 +82,25 @@ async function action() {
             parseFloat(filesCoverage.percentage.toFixed(2))
         );
 
-        if (prNumber != null) {
-            await addComment(
-                prNumber,
-                updateComment,
-                render.getTitle(title),
-                render.getPRComment(
-                    overallCoverage.project,
-                    filesCoverage,
-                    minCoverageOverall,
-                    minCoverageChangedFiles,
-                    title
-                ),
-                client
-            );
-        }
-    } catch (error) {
-        core.setFailed(error);
+    const skip = skipIfNoChanges && filesCoverage.files.length === 0;
+    if (prNumber != null && !skip) {
+      await addComment(
+        prNumber,
+        updateComment,
+        render.getTitle(title),
+        render.getPRComment(
+          overallCoverage.project,
+          filesCoverage,
+          minCoverageOverall,
+          minCoverageChangedFiles,
+          title
+        ),
+        client
+      );
     }
+  } catch (error) {
+    core.setFailed(error);
+  }
 }
 
 function debug(obj) {
