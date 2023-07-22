@@ -75,6 +75,21 @@ in the project to get an idea on how the report is shown on a pull request comme
 For multi module gradle project,
 refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-playground)
 
+## Example Cases
+
+1. If you want to fail your workflow when the minimum coverage is not met: You can write an additional step that uses
+   the Outputs for the jacoco-report action and fail the workflow.
+   Refer [sample pull request](https://github.com/thsaravana/jacoco-playground/pull/16) and
+   its [workflow](https://github.com/thsaravana/jacoco-playground/actions/runs/3026912615/workflow)
+   ```yaml
+    - name: Fail PR if overall coverage is less than 80%
+      if: ${{ steps.jacoco.outputs.coverage-overall < 80.0 }}
+      uses: actions/github-script@v6
+      with:
+        script: |
+          core.setFailed('Overall coverage is less than 80%!')
+```   
+
 ## Troubleshooting
 
 1. If the PR is created by bots like *dependabot*, then the GITHUB_TOKEN won't have sufficient access to write the
