@@ -22,6 +22,10 @@ inputs:
     description: "Update the coverage report comment instead of creating new ones. Requires title to works properly."
     required: false
     default: "false"
+  skip-if-no-changes:
+    description: "Comment won't be added if there is no coverage information present for the files changed"
+    required: false
+    default: "false"
   debug-mode:
     description: "Run the action in debug mode and get debug logs printed in console"
     required: false
