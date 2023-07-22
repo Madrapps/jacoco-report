@@ -64,7 +64,15 @@ async function action() {
       parseFloat(overallCoverage.project.toFixed(2))
     );
 
-    const filesCoverage = process.getFileCoverage(reports, changedFiles);
+    let filesCoverage
+    let groups = reports.map(report => report["group"]).filter(report => report !== undefined);
+    if (groups.length !== 0) {
+      groups.forEach((group) => {
+        filesCoverage = process.getFileCoverage(group, changedFiles);
+      });
+    } else {
+      filesCoverage = process.getFileCoverage(reports, changedFiles);
+    }
     if (debugMode) core.info(`filesCoverage: ${debug(filesCoverage)}`);
     core.setOutput(
       "coverage-changed-files",
