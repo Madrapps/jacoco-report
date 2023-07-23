@@ -78,42 +78,43 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
 ## Example Cases
 
 1. If you want to fail your workflow when the minimum coverage is not met
-   
+
    > You can write an additional step that uses
-   the Outputs for the jacoco-report action and fail the workflow.
-   Refer [sample pull request](https://github.com/thsaravana/jacoco-playground/pull/16) and
-   its [workflow](https://github.com/thsaravana/jacoco-playground/actions/runs/3026912615/workflow)
+   > the Outputs for the jacoco-report action and fail the workflow.
+   > Refer [sample pull request](https://github.com/thsaravana/jacoco-playground/pull/16) and
+   > its [workflow](https://github.com/thsaravana/jacoco-playground/actions/runs/3026912615/workflow)
+
    ```yaml
-    - name: Fail PR if overall coverage is less than 80%
-      if: ${{ steps.jacoco.outputs.coverage-overall < 80.0 }}
-      uses: actions/github-script@v6
-      with:
-        script: |
-          core.setFailed('Overall coverage is less than 80%!')
+   - name: Fail PR if overall coverage is less than 80%
+     if: ${{ steps.jacoco.outputs.coverage-overall < 80.0 }}
+     uses: actions/github-script@v6
+     with:
+       script: |
+         core.setFailed('Overall coverage is less than 80%!')
    ```
-   
+
 2. If you don't want to add the coverage comment everytime you push a commit to a pull request, but update the existing coverage comment instead
 
    > Set the `update-comment` input to true and also set a `title` input.
-   Refer [sample pull request](https://github.com/thsaravana/jacoco-playground/pull/15) and
-   its [workflow](https://github.com/thsaravana/jacoco-playground/actions/runs/3026888514/workflow)
-   ```yaml
-    - name: Jacoco Report to PR
-      id: jacoco
-      uses: madrapps/jacoco-report@v1.4
-      with:
-        paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
-        token: ${{ secrets.GITHUB_TOKEN }}
-        min-coverage-overall: 40
-        min-coverage-changed-files: 60
-        title: Code Coverage
-        update-comment: true
-   ```
+   > Refer [sample pull request](https://github.com/thsaravana/jacoco-playground/pull/15) and
+   > its [workflow](https://github.com/thsaravana/jacoco-playground/actions/runs/3026888514/workflow)
 
+   ```yaml
+   - name: Jacoco Report to PR
+     id: jacoco
+     uses: madrapps/jacoco-report@v1.4
+     with:
+       paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
+       token: ${{ secrets.GITHUB_TOKEN }}
+       min-coverage-overall: 40
+       min-coverage-changed-files: 60
+       title: Code Coverage
+       update-comment: true
+   ```
 
 ## Troubleshooting
 
-1. If the PR is created by bots like *dependabot*, then the GITHUB_TOKEN won't have sufficient access to write the
+1. If the PR is created by bots like _dependabot_, then the GITHUB_TOKEN won't have sufficient access to write the
    coverage comment. So add the appropriate permission to your job (as shown in the Example workflow). More information
    [here](https://github.com/Madrapps/jacoco-report/issues/24).
 
