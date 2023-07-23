@@ -8,7 +8,7 @@ function getFileCoverageFromPackages(packages, files) {
   const resultFiles = []
   packages.forEach((item) => {
     const packageName = item['$'].name
-    const sourceFiles = item.sourcefile
+    const sourceFiles = item['sourcefile']
     sourceFiles.forEach((sourceFile) => {
       const sourceFileName = sourceFile['$'].name
       const file = files.find(function (f) {
