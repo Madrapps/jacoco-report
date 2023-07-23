@@ -68,26 +68,21 @@ describe('Single report', function () {
   }
 
   describe('Pull Request event', function () {
-    const context = {
-      eventName: 'pull_request',
-      payload: {
-        pull_request: {
-          number: '45',
-          base: {
-            sha: 'guasft7asdtf78asfd87as6df7y2u3',
-          },
-          head: {
-            sha: 'aahsdflais76dfa78wrglghjkaghkj',
-          },
+    const eventName = 'pull_request'
+    const payload = {
+      pull_request: {
+        number: '45',
+        base: {
+          sha: 'guasft7asdtf78asfd87as6df7y2u3',
+        },
+        head: {
+          sha: 'aahsdflais76dfa78wrglghjkaghkj',
         },
       },
-      repo: 'jacoco-playground',
-      owner: 'madrapps',
     }
 
     it('publish proper comment', async () => {
-      github.context = context
-
+      initContext(eventName, payload)
       await action.action()
 
       expect(createComment.mock.calls[0][0].body)
@@ -101,7 +96,7 @@ describe('Single report', function () {
     })
 
     it('updates a previous comment', async () => {
-      github.context = context
+      initContext(eventName, payload)
 
       const title = 'JaCoCo Report'
       core.getInput = jest.fn((c) => {
@@ -129,7 +124,7 @@ describe('Single report', function () {
     })
 
     it('set overall coverage output', async () => {
-      github.context = context
+      initContext(eventName, payload)
       core.setOutput = output
 
       await action.action()
@@ -139,7 +134,7 @@ describe('Single report', function () {
     })
 
     it('set changed files coverage output', async () => {
-      github.context = context
+      initContext(eventName, payload)
       core.setOutput = output
 
       await action.action()
@@ -149,7 +144,7 @@ describe('Single report', function () {
     })
 
     describe('Skip if no changes set to true', function () {
-      github.context = context
+      initContext(eventName, payload)
 
       function mockInput() {
         core.getInput = jest.fn((c) => {
@@ -213,25 +208,20 @@ describe('Single report', function () {
   })
 
   describe('Pull Request Target event', function () {
-    const context = {
-      eventName: 'pull_request_target',
-      payload: {
-        pull_request: {
-          number: '45',
-          base: {
-            sha: 'guasft7asdtf78asfd87as6df7y2u3',
-          },
-          head: {
-            sha: 'aahsdflais76dfa78wrglghjkaghkj',
-          },
+    const payload = {
+      pull_request: {
+        number: '45',
+        base: {
+          sha: 'guasft7asdtf78asfd87as6df7y2u3',
+        },
+        head: {
+          sha: 'aahsdflais76dfa78wrglghjkaghkj',
         },
       },
-      repo: 'jacoco-playground',
-      owner: 'madrapps',
     }
+    initContext('pull_request_target', payload)
 
     it('set overall coverage output', async () => {
-      github.context = context
       core.setOutput = output
 
       await action.action()
@@ -242,18 +232,13 @@ describe('Single report', function () {
   })
 
   describe('Push event', function () {
-    const context = {
-      eventName: 'push',
-      payload: {
-        before: 'guasft7asdtf78asfd87as6df7y2u3',
-        after: 'aahsdflais76dfa78wrglghjkaghkj',
-      },
-      repo: 'jacoco-playground',
-      owner: 'madrapps',
+    const payload = {
+      before: 'guasft7asdtf78asfd87as6df7y2u3',
+      after: 'aahsdflais76dfa78wrglghjkaghkj',
     }
+    initContext('push', payload)
 
     it('set overall coverage output', async () => {
-      github.context = context
       core.setOutput = output
 
       await action.action()
@@ -263,7 +248,6 @@ describe('Single report', function () {
     })
 
     it('set changed files coverage output', async () => {
-      github.context = context
       core.setOutput = output
 
       await action.action()
@@ -274,12 +258,9 @@ describe('Single report', function () {
   })
 
   describe('Other than push or pull_request or pull_request_target event', function () {
-    const context = {
-      eventName: 'pr_review',
-    }
+    initContext('pr_review', {})
 
     it('Fail by throwing appropriate error', async () => {
-      github.context = context
       core.setFailed = jest.fn((c) => {
         expect(c).toEqual(
           'Only pull requests and pushes are supported, pr_review not supported.'
@@ -291,3 +272,11 @@ describe('Single report', function () {
     })
   })
 })
+
+function initContext(eventName, payload) {
+  const context = github.context
+  context.eventName = eventName
+  context.payload = payload
+  context.repo = 'jacoco-playground'
+  context.owner = 'madrapps'
+}
