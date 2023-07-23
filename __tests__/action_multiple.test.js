@@ -34,7 +34,7 @@ describe('Multiple reports', function () {
         return 'SMPLEHDjasdf876a987'
       case 'min-coverage-overall':
         return 45
-      case `min-coverage-changed-files`:
+      case 'min-coverage-changed-files':
         return 60
     }
   })

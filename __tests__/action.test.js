@@ -15,9 +15,9 @@ describe('Input validation', function () {
     }
   }
 
-  let createComment = jest.fn()
-  let listComments = jest.fn()
-  let updateComment = jest.fn()
+  const createComment = jest.fn()
+  const listComments = jest.fn()
+  const updateComment = jest.fn()
 
   core.getInput = jest.fn(getInput)
   github.getOctokit = jest.fn(() => {
