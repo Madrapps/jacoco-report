@@ -16609,7 +16609,17 @@ const render = __nccwpck_require__(8183);
 
 async function action() {
   try {
+    const token = core.getInput("token");
+    if (!token) {
+      core.setFailed("'token' is missing");
+      return;
+    }
     const pathsString = core.getInput("paths");
+    if (!pathsString) {
+      core.setFailed("'paths' is missing");
+      return;
+    }
+
     const reportPaths = pathsString.split(",");
     const minCoverageOverall = parseFloat(
       core.getInput("min-coverage-overall")
@@ -16641,13 +16651,14 @@ async function action() {
         isPR = false;
         break;
       default:
-        throw `Only pull requests and pushes are supported, ${github.context.eventName} not supported.`;
+        core.setFailed(`Only pull requests and pushes are supported, ${github.context.eventName} not supported.`);
+        return;
     }
 
     core.info(`base sha: ${base}`);
     core.info(`head sha: ${head}`);
 
-    const client = github.getOctokit(core.getInput("token"));
+    const client = github.getOctokit(token);
 
     if (debugMode) core.info(`reportPaths: ${reportPaths}`);
     const reportsJsonAsync = getJsonReports(reportPaths);

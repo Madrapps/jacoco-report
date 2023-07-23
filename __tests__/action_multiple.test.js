@@ -30,6 +30,8 @@ describe("Multiple reports", function () {
     switch (c) {
       case "paths":
         return "./__tests__/__fixtures__/multi_module/appCoverage.xml,./__tests__/__fixtures__/multi_module/mathCoverage.xml,./__tests__/__fixtures__/multi_module/textCoverage.xml";
+      case "token":
+        return "SMPLEHDjasdf876a987";
       case "min-coverage-overall":
         return 45;
       case `min-coverage-changed-files`:

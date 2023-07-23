@@ -15,6 +15,8 @@ describe("Aggregate report", function () {
     switch (key) {
       case "paths":
         return "./__tests__/__fixtures__/aggregate-report.xml";
+      case "token":
+        return "SMPLEHDjasdf876a987";
       case "min-coverage-overall":
         return 45;
       case `min-coverage-changed-files`:
