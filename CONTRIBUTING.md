@@ -9,4 +9,6 @@ submitting a change. We're not strict about this and for small changes feel free
 - Aim to keep PR scoped to one feature for ease of review.
 - For new features or changed features, update the `README.md` accordingly.
 - Allow the PR to be edited by maintainers.
+- It is highly recommended to have your
+  commits [verified](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification).
 - Use the default IDE code formatting settings.
