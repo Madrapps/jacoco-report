@@ -19,7 +19,7 @@ function getFileTable(filesCoverage, minCoverage) {
 
   const tableHeader = getHeader(filesCoverage.percentage)
   const tableStructure = `|:-|:-:|:-:|`
-  var table = tableHeader + `\n` + tableStructure
+  let table = tableHeader + `\n` + tableStructure
   files.forEach((file) => {
     renderFileRow(`[${file.name}](${file.url})`, file.percentage)
   })

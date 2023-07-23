@@ -11,7 +11,7 @@ function getFileCoverageFromPackages(packages, files) {
     const sourceFiles = item.sourcefile
     sourceFiles.forEach((sourceFile) => {
       const sourceFileName = sourceFile['$'].name
-      var file = files.find(function (f) {
+      const file = files.find(function (f) {
         return f.filePath.endsWith(`${packageName}/${sourceFileName}`)
       })
       if (file != null) {
@@ -39,8 +39,8 @@ function getFileCoverageFromPackages(packages, files) {
 }
 
 function getTotalPercentage(files) {
-  var missed = 0
-  var covered = 0
+  let missed = 0
+  let covered = 0
   files.forEach((file) => {
     missed += file.missed
     covered += file.covered

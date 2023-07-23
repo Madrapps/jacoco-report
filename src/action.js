@@ -32,9 +32,9 @@ async function action() {
     const event = github.context.eventName
     core.info(`Event is ${event}`)
 
-    var base
-    var head
-    var prNumber
+    let base
+    let head
+    let prNumber
     switch (event) {
       case 'pull_request':
       case 'pull_request_target':
@@ -45,7 +45,6 @@ async function action() {
       case 'push':
         base = github.context.payload.before
         head = github.context.payload.after
-        isPR = false
         break
       default:
         core.setFailed(
@@ -113,10 +112,6 @@ async function action() {
   }
 }
 
-function debug(obj) {
-  return JSON.stringify(obj, ' ', 4)
-}
-
 async function getJsonReports(xmlPaths) {
   return Promise.all(
     xmlPaths.map(async (xmlPath) => {
@@ -134,9 +129,9 @@ async function getChangedFiles(base, head, client) {
     repo: github.context.repo.repo,
   })
 
-  var changedFiles = []
+  const changedFiles = []
   response.data.files.forEach((file) => {
-    var changedFile = {
+    const changedFile = {
       filePath: file.filename,
       url: file.blob_url,
     }
