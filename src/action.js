@@ -5,6 +5,7 @@ const parser = require('xml2js')
 const { parseBooleans } = require('xml2js/lib/processors')
 const process = require('./process')
 const render = require('./render')
+const { debug } = require('./util')
 
 async function action() {
   try {
@@ -75,7 +76,7 @@ async function action() {
     )
 
     let filesCoverage
-    let groups = reports
+    const groups = reports
       .map((report) => report['group'])
       .filter((report) => report !== undefined)
     if (groups.length !== 0) {
@@ -155,7 +156,7 @@ async function addComment(prNumber, update, title, body, client) {
     if (comment) {
       await client.issues.updateComment({
         comment_id: comment.id,
-        body: body,
+        body,
         ...github.context.repo,
       })
       commentUpdated = true
@@ -165,7 +166,7 @@ async function addComment(prNumber, update, title, body, client) {
   if (!commentUpdated) {
     await client.issues.createComment({
       issue_number: prNumber,
-      body: body,
+      body,
       ...github.context.repo,
     })
   }

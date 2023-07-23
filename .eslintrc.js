@@ -3,7 +3,7 @@ module.exports = {
     node: true,
     es2021: true,
   },
-  extends: ['prettier'],
+  extends: ['standard', 'prettier'],
   overrides: [
     {
       files: ['.eslintrc.{js, cjs}'],
@@ -15,6 +15,8 @@ module.exports = {
     project: true,
   },
   rules: {
-    indent: ['error', 2],
+    indent: ['error', 2, { SwitchCase: 1 }],
+    quotes: ['error', 'single', { avoidEscape: true }],
+    'no-var': ['error'],
   },
 }
