@@ -73,13 +73,23 @@ describe('Multiple reports', function () {
       await action.action()
 
       expect(comment.mock.calls[0][0].body)
-        .toEqual(`|File|Coverage [65.91%]|:green_apple:|
+        .toEqual(`|Total Project Coverage|25.32%|:x:|
 |:-|:-:|:-:|
-|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
 
-|Total Project Coverage|25.32%|:x:|
-|:-|:-:|:-:|`)
+|Module|Coverage||
+|:-|:-:|:-:|
+|math|70.37%|:green_apple:|
+|app|8.33%|:x:|
+
+<details>
+<summary>Files</summary>
+
+|Module|File|Coverage [65.91%]||
+|:-|:-|:-:|:-:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
+
+</details>`)
     })
 
     it('set overall coverage output', async () => {

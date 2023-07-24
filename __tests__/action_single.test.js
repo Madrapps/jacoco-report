@@ -86,13 +86,13 @@ describe('Single report', function () {
       await action.action()
 
       expect(createComment.mock.calls[0][0].body)
-        .toEqual(`|File|Coverage [63.64%]|:green_apple:|
+        .toEqual(`|Total Project Coverage|49.02%|:green_apple:|
+|:-|:-:|:-:|
+
+|File|Coverage [63.64%]||
 |:-|:-:|:-:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|
-
-|Total Project Coverage|49.02%|:green_apple:|
-|:-|:-:|:-:|`)
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|`)
     })
 
     it('updates a previous comment', async () => {
@@ -163,13 +163,13 @@ describe('Single report', function () {
         await action.action()
 
         expect(createComment.mock.calls[0][0].body)
-          .toEqual(`|File|Coverage [63.64%]|:green_apple:|
+          .toEqual(`|Total Project Coverage|49.02%|:green_apple:|
+|:-|:-:|:-:|
+
+|File|Coverage [63.64%]||
 |:-|:-:|:-:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|
-
-|Total Project Coverage|49.02%|:green_apple:|
-|:-|:-:|:-:|`)
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|`)
       })
 
       it("Don't add comment when coverage absent for changes files", async () => {
