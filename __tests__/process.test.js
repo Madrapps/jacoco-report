@@ -30,6 +30,7 @@ describe('process', function () {
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [],
+          'coverage-changes-files': 100,
         })
       })
 
@@ -120,7 +121,10 @@ describe('process', function () {
         const reports = await getMultipleReports()
         const changedFiles = []
         const actual = process.getProjectCoverage(reports, changedFiles)
-        expect(actual).toEqual({ modules: [] })
+        expect(actual).toEqual({
+          modules: [],
+          'coverage-changes-files': 100,
+        })
       })
 
       it('one file changed', async () => {
@@ -213,7 +217,10 @@ describe('process', function () {
         const reports = await getAggregateReport()
         const changedFiles = []
         const actual = process.getProjectCoverage(reports, changedFiles)
-        expect(actual).toEqual({ modules: [] })
+        expect(actual).toEqual({
+          modules: [],
+          'coverage-changes-files': 100,
+        })
       })
 
       it('one file changed', async () => {

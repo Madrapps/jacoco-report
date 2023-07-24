@@ -16669,6 +16669,7 @@ async function action() {
     if (debugMode) core.info(`report value: ${debug(reportsJson)}`)
     const reports = reportsJson.map((report) => report['report'])
 
+    // TODO Replace this with the getProjectCoverage itself
     const overallCoverage = process.getOverallCoverage(reports)
     if (debugMode) core.info(`overallCoverage: ${debug(overallCoverage)}`)
     core.setOutput(
@@ -16676,24 +16677,14 @@ async function action() {
       parseFloat(overallCoverage.project.toFixed(2))
     )
 
-    let filesCoverage
-    const groups = reports
-      .map((report) => report['group'])
-      .filter((report) => report !== undefined)
-    if (groups.length !== 0) {
-      groups.forEach((group) => {
-        filesCoverage = process.getFileCoverage(group, changedFiles)
-      })
-    } else {
-      filesCoverage = process.getFileCoverage(reports, changedFiles)
-    }
-    if (debugMode) core.info(`filesCoverage: ${debug(filesCoverage)}`)
+    const project = process.getProjectCoverage(reports, changedFiles)
+    if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-changed-files',
-      parseFloat(filesCoverage.percentage.toFixed(2))
+      parseFloat(project['coverage-changes-files'].toFixed(2))
     )
 
-    const skip = skipIfNoChanges && filesCoverage.files.length === 0
+    const skip = skipIfNoChanges && project.modules.length === 0
     if (prNumber != null && !skip) {
       await addComment(
         prNumber,
@@ -16701,7 +16692,7 @@ async function action() {
         render.getTitle(title),
         render.getPRComment(
           overallCoverage.project,
-          filesCoverage,
+          project,
           minCoverageOverall,
           minCoverageChangedFiles,
           title
@@ -16783,9 +16774,72 @@ module.exports = {
 /***/ 650:
 /***/ ((module) => {
 
-function getFileCoverage(reports, files) {
-  const packages = reports.map((report) => report['package'])
-  return getFileCoverageFromPackages([].concat(...packages), files)
+const TAG_GROUP = 'group'
+const TAG_PACKAGE = 'package'
+
+function getProjectCoverage(reports, files) {
+  const moduleCoverages = []
+  getModulesFromReports(reports).forEach((module) => {
+    const filesCoverage = getFileCoverageFromPackages(
+      [].concat(...module.packages),
+      files
+    )
+    if (filesCoverage.files.length !== 0) {
+      moduleCoverages.push({
+        name: module.name,
+        percentage: getModuleCoverage(module.root),
+        files: filesCoverage.files,
+      })
+    }
+  })
+  moduleCoverages.sort((a, b) => b.percentage - a.percentage)
+  const totalFiles = moduleCoverages.flatMap((module) => {
+    return module.files
+  })
+  const project = {
+    modules: moduleCoverages,
+  }
+  const totalPercentage = getTotalPercentage(totalFiles)
+  if (totalPercentage) {
+    project['coverage-changes-files'] = totalPercentage
+  } else {
+    project['coverage-changes-files'] = 100
+  }
+  return project
+}
+
+function getModulesFromReports(reports) {
+  const modules = []
+  reports.forEach((report) => {
+    const groupTag = report[TAG_GROUP]
+    if (groupTag) {
+      const groups = groupTag.filter((group) => group !== undefined)
+      groups.forEach((group) => {
+        const module = getModuleFromParent(group)
+        modules.push(module)
+      })
+    }
+    const module = getModuleFromParent(report)
+    if (module) {
+      modules.push(module)
+    }
+  })
+  return modules
+}
+
+function getModuleFromParent(parent) {
+  const packageTag = parent[TAG_PACKAGE]
+  if (packageTag) {
+    const packages = packageTag.filter((pacage) => pacage !== undefined)
+    if (packages.length !== 0) {
+      return {
+        name: parent['$'].name,
+        packages: packages,
+        root: parent, // TODO just pass array of 'counters'
+      }
+    }
+  }
+  return null
 }
 
 function getFileCoverageFromPackages(packages, files) {
@@ -16826,11 +16880,15 @@ function getFileCoverageFromPackages(packages, files) {
 function getTotalPercentage(files) {
   let missed = 0
   let covered = 0
-  files.forEach((file) => {
-    missed += file.missed
-    covered += file.covered
-  })
-  return parseFloat(((covered / (covered + missed)) * 100).toFixed(2))
+  if (files.length.size !== 0) {
+    files.forEach((file) => {
+      missed += file.missed
+      covered += file.covered
+    })
+    return parseFloat(((covered / (covered + missed)) * 100).toFixed(2))
+  } else {
+    return null
+  }
 }
 
 function getOverallCoverage(reports) {
@@ -16844,7 +16902,7 @@ function getOverallCoverage(reports) {
       coverage: moduleCoverage,
     })
   })
-  coverage.project = getProjectCoverage(reports)
+  coverage.project = getOverallProjectCoverage(reports)
   coverage.modules = modules
   return coverage
 }
@@ -16855,7 +16913,7 @@ function getModuleCoverage(report) {
   return coverage.percentage
 }
 
-function getProjectCoverage(reports) {
+function getOverallProjectCoverage(reports) {
   const coverages = reports.map((report) =>
     getDetailedCoverage(report['counter'], 'INSTRUCTION')
   )
@@ -16882,7 +16940,7 @@ function getDetailedCoverage(counters, type) {
 }
 
 module.exports = {
-  getFileCoverage,
+  getProjectCoverage,
   getOverallCoverage,
 }
 
@@ -16894,15 +16952,42 @@ module.exports = {
 
 function getPRComment(
   overallCoverage,
-  filesCoverage,
+  project,
   minCoverageOverall,
   minCoverageChangedFiles,
   title
 ) {
-  const fileTable = getFileTable(filesCoverage, minCoverageChangedFiles)
+  const moduleTable = getModuleTable(project.modules, minCoverageChangedFiles)
   const overallTable = getOverallTable(overallCoverage, minCoverageOverall)
   const heading = getTitle(title)
-  return heading + fileTable + '\n\n' + overallTable
+  return heading + moduleTable + '\n\n' + overallTable
+}
+
+function getModuleTable(modules, minCoverage) {
+  if (modules.length.size === 0) {
+    return '> There is no coverage information present for the Files changed'
+  }
+
+  const tableHeader = '|Module|Coverage||'
+  const tableStructure = '|:-|:-:|:-:|'
+  let table = tableHeader + '\n' + tableStructure
+  modules.forEach((module) => {
+    renderFileRow(module.name, module.percentage)
+  })
+  return table
+
+  function renderFileRow(name, coverage) {
+    addRow(getRow(name, coverage))
+  }
+
+  function getRow(name, coverage) {
+    const status = getStatus(coverage, minCoverage)
+    return `|${name}|${formatCoverage(coverage)}|${status}|`
+  }
+
+  function addRow(row) {
+    table = table + '\n' + row
+  }
 }
 
 function getFileTable(filesCoverage, minCoverage) {
@@ -16919,13 +17004,13 @@ function getFileTable(filesCoverage, minCoverage) {
   })
   return table
 
-  function renderFileRow(name, coverage) {
-    addRow(getRow(name, coverage))
-  }
-
   function getHeader(coverage) {
     const status = getStatus(coverage, minCoverage)
     return `|File|Coverage [${formatCoverage(coverage)}]|${status}|`
+  }
+
+  function renderFileRow(name, coverage) {
+    addRow(getRow(name, coverage))
   }
 
   function getRow(name, coverage) {

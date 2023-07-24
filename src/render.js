@@ -1,14 +1,41 @@
 function getPRComment(
   overallCoverage,
-  filesCoverage,
+  project,
   minCoverageOverall,
   minCoverageChangedFiles,
   title
 ) {
-  const fileTable = getFileTable(filesCoverage, minCoverageChangedFiles)
+  const moduleTable = getModuleTable(project.modules, minCoverageChangedFiles)
   const overallTable = getOverallTable(overallCoverage, minCoverageOverall)
   const heading = getTitle(title)
-  return heading + fileTable + '\n\n' + overallTable
+  return heading + moduleTable + '\n\n' + overallTable
+}
+
+function getModuleTable(modules, minCoverage) {
+  if (modules.length.size === 0) {
+    return '> There is no coverage information present for the Files changed'
+  }
+
+  const tableHeader = '|Module|Coverage||'
+  const tableStructure = '|:-|:-:|:-:|'
+  let table = tableHeader + '\n' + tableStructure
+  modules.forEach((module) => {
+    renderFileRow(module.name, module.percentage)
+  })
+  return table
+
+  function renderFileRow(name, coverage) {
+    addRow(getRow(name, coverage))
+  }
+
+  function getRow(name, coverage) {
+    const status = getStatus(coverage, minCoverage)
+    return `|${name}|${formatCoverage(coverage)}|${status}|`
+  }
+
+  function addRow(row) {
+    table = table + '\n' + row
+  }
 }
 
 function getFileTable(filesCoverage, minCoverage) {
@@ -25,13 +52,13 @@ function getFileTable(filesCoverage, minCoverage) {
   })
   return table
 
-  function renderFileRow(name, coverage) {
-    addRow(getRow(name, coverage))
-  }
-
   function getHeader(coverage) {
     const status = getStatus(coverage, minCoverage)
     return `|File|Coverage [${formatCoverage(coverage)}]|${status}|`
+  }
+
+  function renderFileRow(name, coverage) {
+    addRow(getRow(name, coverage))
   }
 
   function getRow(name, coverage) {

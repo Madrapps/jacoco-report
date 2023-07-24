@@ -26,6 +26,8 @@ function getProjectCoverage(reports, files) {
   const totalPercentage = getTotalPercentage(totalFiles)
   if (totalPercentage) {
     project['coverage-changes-files'] = totalPercentage
+  } else {
+    project['coverage-changes-files'] = 100
   }
   return project
 }

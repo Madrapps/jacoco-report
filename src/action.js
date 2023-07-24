@@ -68,6 +68,7 @@ async function action() {
     if (debugMode) core.info(`report value: ${debug(reportsJson)}`)
     const reports = reportsJson.map((report) => report['report'])
 
+    // TODO Replace this with the getProjectCoverage itself
     const overallCoverage = process.getOverallCoverage(reports)
     if (debugMode) core.info(`overallCoverage: ${debug(overallCoverage)}`)
     core.setOutput(
@@ -75,24 +76,14 @@ async function action() {
       parseFloat(overallCoverage.project.toFixed(2))
     )
 
-    let filesCoverage
-    const groups = reports
-      .map((report) => report['group'])
-      .filter((report) => report !== undefined)
-    if (groups.length !== 0) {
-      groups.forEach((group) => {
-        filesCoverage = process.getFileCoverage(group, changedFiles)
-      })
-    } else {
-      filesCoverage = process.getFileCoverage(reports, changedFiles)
-    }
-    if (debugMode) core.info(`filesCoverage: ${debug(filesCoverage)}`)
+    const project = process.getProjectCoverage(reports, changedFiles)
+    if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-changed-files',
-      parseFloat(filesCoverage.percentage.toFixed(2))
+      parseFloat(project['coverage-changes-files'].toFixed(2))
     )
 
-    const skip = skipIfNoChanges && filesCoverage.files.length === 0
+    const skip = skipIfNoChanges && project.modules.length === 0
     if (prNumber != null && !skip) {
       await addComment(
         prNumber,
@@ -100,7 +91,7 @@ async function action() {
         render.getTitle(title),
         render.getPRComment(
           overallCoverage.project,
-          filesCoverage,
+          project,
           minCoverageOverall,
           minCoverageChangedFiles,
           title
