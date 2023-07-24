@@ -6,6 +6,7 @@ const { parseBooleans } = require('xml2js/lib/processors')
 const process = require('./process')
 const render = require('./render')
 const { debug } = require('./util')
+const { glob } = require('glob')
 
 async function action() {
   try {
@@ -60,7 +61,7 @@ async function action() {
     const client = github.getOctokit(token)
 
     if (debugMode) core.info(`reportPaths: ${reportPaths}`)
-    const reportsJsonAsync = getJsonReports(reportPaths)
+    const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
     const changedFiles = await getChangedFiles(base, head, client)
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
@@ -104,11 +105,16 @@ async function action() {
   }
 }
 
-async function getJsonReports(xmlPaths) {
+async function getJsonReports(xmlPaths, debugMode) {
   return Promise.all(
     xmlPaths.map(async (xmlPath) => {
-      const reportXml = await fs.promises.readFile(xmlPath.trim(), 'utf-8')
-      return await parser.parseStringPromise(reportXml)
+      if (debugMode) core.info(`xmlPath: ${xmlPath}`)
+      const paths = await glob(xmlPath)
+      if (debugMode) core.info(`paths: ${paths}`)
+      paths.map(async (path) => {
+        const reportXml = await fs.promises.readFile(path.trim(), 'utf-8')
+        return await parser.parseStringPromise(reportXml)
+      })
     })
   )
 }
