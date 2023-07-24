@@ -30,7 +30,8 @@ describe('process', function () {
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [],
-          'coverage-changes-files': 100,
+          isMultiModule: false,
+          'coverage-changed-files': 100,
         })
       })
 
@@ -62,7 +63,8 @@ describe('process', function () {
               percentage: 49.02,
             },
           ],
-          'coverage-changes-files': 100,
+          isMultiModule: false,
+          'coverage-changed-files': 100,
         })
       })
 
@@ -111,7 +113,8 @@ describe('process', function () {
               percentage: 49.02,
             },
           ],
-          'coverage-changes-files': 63.64,
+          isMultiModule: false,
+          'coverage-changed-files': 63.64,
         })
       })
     })
@@ -123,7 +126,8 @@ describe('process', function () {
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [],
-          'coverage-changes-files': 100,
+          isMultiModule: true,
+          'coverage-changed-files': 100,
         })
       })
 
@@ -137,7 +141,6 @@ describe('process', function () {
         ]
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
-          'coverage-changes-files': 58.82,
           modules: [
             {
               files: [
@@ -155,6 +158,8 @@ describe('process', function () {
               percentage: 8.33,
             },
           ],
+          isMultiModule: true,
+          'coverage-changed-files': 58.82,
         })
       })
 
@@ -176,7 +181,6 @@ describe('process', function () {
         ]
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
-          'coverage-changes-files': 65.91,
           modules: [
             {
               files: [
@@ -193,6 +197,8 @@ describe('process', function () {
               percentage: 70.37,
             },
             {
+              name: 'app',
+              percentage: 8.33,
               files: [
                 {
                   covered: 10,
@@ -204,10 +210,10 @@ describe('process', function () {
                   url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
                 },
               ],
-              name: 'app',
-              percentage: 8.33,
             },
           ],
+          isMultiModule: true,
+          'coverage-changed-files': 65.91,
         })
       })
     })
@@ -219,7 +225,8 @@ describe('process', function () {
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [],
-          'coverage-changes-files': 100,
+          isMultiModule: true,
+          'coverage-changed-files': 100,
         })
       })
 
@@ -233,7 +240,6 @@ describe('process', function () {
         ]
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
-          'coverage-changes-files': 58.82,
           modules: [
             {
               files: [
@@ -251,6 +257,8 @@ describe('process', function () {
               percentage: 8.33,
             },
           ],
+          isMultiModule: true,
+          'coverage-changed-files': 58.82,
         })
       })
 
@@ -272,7 +280,6 @@ describe('process', function () {
         ]
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
-          'coverage-changes-files': 65.91,
           modules: [
             {
               files: [
@@ -304,6 +311,8 @@ describe('process', function () {
               percentage: 8.33,
             },
           ],
+          isMultiModule: true,
+          'coverage-changed-files': 65.91,
         })
       })
     })

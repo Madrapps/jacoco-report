@@ -9,14 +9,18 @@ function getPRComment(
   const overallTable = getOverallTable(overallCoverage, minCoverageOverall)
   const moduleTable = getModuleTable(project.modules, minCoverageChangedFiles)
   const filesTable = getFileTable(project, minCoverageChangedFiles)
-  return heading + overallTable + '\n\n' + moduleTable + '\n\n' + filesTable
+
+  const tables =
+    project.modules.length === 0
+      ? '> There is no coverage information present for the Files changed'
+      : project.isMultiModule
+      ? moduleTable + '\n\n' + filesTable
+      : filesTable
+
+  return heading + overallTable + '\n\n' + tables
 }
 
 function getModuleTable(modules, minCoverage) {
-  if (modules.length.size === 0) {
-    return '> There is no coverage information present for the Files changed'
-  }
-
   const tableHeader = '|Module|Coverage||'
   const tableStructure = '|:-|:-:|:-:|'
   let table = tableHeader + '\n' + tableStructure
@@ -40,9 +44,13 @@ function getModuleTable(modules, minCoverage) {
 }
 
 function getFileTable(project, minCoverage) {
-  const coverage = project['coverage-changes-files']
-  const tableHeader = `|Module|File|Coverage [${formatCoverage(coverage)}]||`
-  const tableStructure = '|:-|:-|:-:|:-:|'
+  const coverage = project['coverage-changed-files']
+  const tableHeader = project.isMultiModule
+    ? `|Module|File|Coverage [${formatCoverage(coverage)}]||`
+    : `|File|Coverage [${formatCoverage(coverage)}]||`
+  const tableStructure = project.isMultiModule
+    ? '|:-|:-|:-:|:-:|'
+    : '|:-|:-:|:-:|'
   let table = tableHeader + '\n' + tableStructure
   project.modules.forEach((module) => {
     module.files.forEach((file, index) => {
@@ -50,23 +58,23 @@ function getFileTable(project, minCoverage) {
       if (index !== 0) {
         moduleName = ''
       }
-      renderFileRow(moduleName, `[${file.name}](${file.url})`, file.percentage)
+      renderFileRow(
+        moduleName,
+        `[${file.name}](${file.url})`,
+        file.percentage,
+        project.isMultiModule
+      )
     })
   })
-  return (
-    '<details>\n' + '<summary>Files</summary>\n\n' + table + '\n\n</details>'
-  )
+  return project.isMultiModule
+    ? '<details>\n' + '<summary>Files</summary>\n\n' + table + '\n\n</details>'
+    : table
 
-  function renderFileRow(moduleName, fileName, coverage) {
-    addRow(getRow(moduleName, fileName, coverage))
-  }
-
-  function getRow(moduleName, fileName, coverage) {
+  function renderFileRow(moduleName, fileName, coverage, isMultiModule) {
     const status = getStatus(coverage, minCoverage)
-    return `|${moduleName}|${fileName}|${formatCoverage(coverage)}|${status}|`
-  }
-
-  function addRow(row) {
+    const row = isMultiModule
+      ? `|${moduleName}|${fileName}|${formatCoverage(coverage)}|${status}|`
+      : `|${fileName}|${formatCoverage(coverage)}|${status}|`
     table = table + '\n' + row
   }
 }

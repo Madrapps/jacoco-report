@@ -80,7 +80,7 @@ async function action() {
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-changed-files',
-      parseFloat(project['coverage-changes-files'].toFixed(2))
+      parseFloat(project['coverage-changed-files'].toFixed(2))
     )
 
     const skip = skipIfNoChanges && project.modules.length === 0

@@ -3,7 +3,8 @@ const TAG_PACKAGE = 'package'
 
 function getProjectCoverage(reports, files) {
   const moduleCoverages = []
-  getModulesFromReports(reports).forEach((module) => {
+  const modules = getModulesFromReports(reports)
+  modules.forEach((module) => {
     const filesCoverage = getFileCoverageFromPackages(
       [].concat(...module.packages),
       files
@@ -22,12 +23,13 @@ function getProjectCoverage(reports, files) {
   })
   const project = {
     modules: moduleCoverages,
+    isMultiModule: reports.length > 1 || modules.length > 1,
   }
   const totalPercentage = getTotalPercentage(totalFiles)
   if (totalPercentage) {
-    project['coverage-changes-files'] = totalPercentage
+    project['coverage-changed-files'] = totalPercentage
   } else {
-    project['coverage-changes-files'] = 100
+    project['coverage-changed-files'] = 100
   }
   return project
 }
@@ -104,7 +106,7 @@ function getFileCoverageFromPackages(packages, files) {
 function getTotalPercentage(files) {
   let missed = 0
   let covered = 0
-  if (files.length.size !== 0) {
+  if (files.length !== 0) {
     files.forEach((file) => {
       missed += file.missed
       covered += file.covered
