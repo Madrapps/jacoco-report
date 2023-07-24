@@ -108,13 +108,16 @@ async function action() {
 async function getJsonReports(xmlPaths, debugMode) {
   if (debugMode) core.info(`xmlPaths: ${xmlPaths}`)
   const paths = xmlPaths.map((xmlPath) => globSync(xmlPath))
-  if (debugMode) core.info(`paths: ${paths}`)
+  if (debugMode) core.info(`paths: ${paths} : ${typeof paths}`)
   return Promise.all(
     paths
-      .filter((path) => path && path.length !== 0)
+      .filter((path) => path && path.fullPath().length !== 0)
       .map(async (path) => {
-        if (debugMode) core.info(`path: ${path}`)
-        const reportXml = await fs.promises.readFile(path.trim(), 'utf-8')
+        if (debugMode) core.info(`path: ${path} : ${typeof path}`)
+        const reportXml = await fs.promises.readFile(
+          path.fullPath().trim(),
+          'utf-8'
+        )
         return await parser.parseStringPromise(reportXml)
       })
   )
