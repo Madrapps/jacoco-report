@@ -106,9 +106,14 @@ async function action() {
 }
 
 async function getJsonReports(xmlPaths, debugMode) {
-  if (debugMode) core.info(`xmlPaths: ${xmlPaths}`)
+  if (debugMode) core.info(`xmlPaths: ${xmlPaths} : ${xmlPaths.length}`)
   const paths = xmlPaths.flatMap((xmlPath) => globSync(xmlPath))
-  if (debugMode) core.info(`paths: ${paths} : ${typeof paths}`)
+  xmlPaths.forEach((p) => {
+    const ph = globSync(p)
+    if (debugMode) core.info(`ph: ${ph} : ${typeof ph} : ${ph.length}`)
+  })
+  if (debugMode)
+    core.info(`paths: ${paths} : ${typeof paths} : ${paths.length}`)
   return Promise.all(
     paths
       .filter((path) => path && path.length !== 0)
