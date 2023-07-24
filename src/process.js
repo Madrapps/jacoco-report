@@ -17,7 +17,17 @@ function getProjectCoverage(reports, files) {
     }
   })
   moduleCoverages.sort((a, b) => b.percentage - a.percentage)
-  return moduleCoverages
+  const totalFiles = moduleCoverages.flatMap((module) => {
+    return module.files
+  })
+  const project = {
+    modules: moduleCoverages,
+  }
+  const totalPercentage = getTotalPercentage(totalFiles)
+  if (totalPercentage) {
+    project['coverage-changes-files'] = totalPercentage
+  }
+  return project
 }
 
 function getModulesFromReports(reports) {
@@ -92,11 +102,15 @@ function getFileCoverageFromPackages(packages, files) {
 function getTotalPercentage(files) {
   let missed = 0
   let covered = 0
-  files.forEach((file) => {
-    missed += file.missed
-    covered += file.covered
-  })
-  return parseFloat(((covered / (covered + missed)) * 100).toFixed(2))
+  if (files.length.size !== 0) {
+    files.forEach((file) => {
+      missed += file.missed
+      covered += file.covered
+    })
+    return parseFloat(((covered / (covered + missed)) * 100).toFixed(2))
+  } else {
+    return null
+  }
 }
 
 function getOverallCoverage(reports) {
