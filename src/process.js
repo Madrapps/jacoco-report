@@ -1,6 +1,57 @@
-function getFileCoverage(reports, files) {
-  const packages = reports.map((report) => report['package'])
-  return getFileCoverageFromPackages([].concat(...packages), files)
+const TAG_GROUP = 'group'
+const TAG_PACKAGE = 'package'
+
+function getProjectCoverage(reports, files) {
+  const moduleCoverages = []
+  getModulesFromReports(reports).forEach((module) => {
+    const filesCoverage = getFileCoverageFromPackages(
+      [].concat(...module.packages),
+      files
+    )
+    if (filesCoverage.files.length !== 0) {
+      moduleCoverages.push({
+        name: module.name,
+        percentage: getModuleCoverage(module.root),
+        files: filesCoverage.files,
+      })
+    }
+  })
+  moduleCoverages.sort((a, b) => b.percentage - a.percentage)
+  return moduleCoverages
+}
+
+function getModulesFromReports(reports) {
+  const modules = []
+  reports.forEach((report) => {
+    const groupTag = report[TAG_GROUP]
+    if (groupTag) {
+      const groups = groupTag.filter((group) => group !== undefined)
+      groups.forEach((group) => {
+        const module = getModuleFromParent(group)
+        modules.push(module)
+      })
+    }
+    const module = getModuleFromParent(report)
+    if (module) {
+      modules.push(module)
+    }
+  })
+  return modules
+}
+
+function getModuleFromParent(parent) {
+  const packageTag = parent[TAG_PACKAGE]
+  if (packageTag) {
+    const packages = packageTag.filter((pacage) => pacage !== undefined)
+    if (packages.length !== 0) {
+      return {
+        name: parent['$'].name,
+        packages: packages,
+        root: parent, // TODO just pass array of 'counters'
+      }
+    }
+  }
+  return null
 }
 
 function getFileCoverageFromPackages(packages, files) {
@@ -59,7 +110,7 @@ function getOverallCoverage(reports) {
       coverage: moduleCoverage,
     })
   })
-  coverage.project = getProjectCoverage(reports)
+  coverage.project = getOverallProjectCoverage(reports)
   coverage.modules = modules
   return coverage
 }
@@ -70,7 +121,7 @@ function getModuleCoverage(report) {
   return coverage.percentage
 }
 
-function getProjectCoverage(reports) {
+function getOverallProjectCoverage(reports) {
   const coverages = reports.map((report) =>
     getDetailedCoverage(report['counter'], 'INSTRUCTION')
   )
@@ -97,6 +148,6 @@ function getDetailedCoverage(counters, type) {
 }
 
 module.exports = {
-  getFileCoverage,
+  getProjectCoverage,
   getOverallCoverage,
 }
