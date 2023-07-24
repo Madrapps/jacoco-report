@@ -16884,7 +16884,7 @@ const { parseBooleans } = __nccwpck_require__(6434)
 const process = __nccwpck_require__(650)
 const render = __nccwpck_require__(8183)
 const { debug } = __nccwpck_require__(4518)
-const { globSync } = __nccwpck_require__(1144)
+const { glob } = __nccwpck_require__(1144)
 
 async function action() {
   try {
@@ -16985,13 +16985,13 @@ async function action() {
 
 async function getJsonReports(xmlPaths, debugMode) {
   if (debugMode) core.info(`xmlPaths: ${xmlPaths} : ${xmlPaths.length}`)
-  const paths = globSync(xmlPaths)
+  const paths = await glob(xmlPaths)
   if (debugMode)
     core.info(`paths: ${paths} : ${typeof paths} : ${paths.length}`)
-  xmlPaths.forEach((p) => {
-    const ph = globSync(p)
+  for (const p of xmlPaths) {
+    const ph = await glob(p)
     if (debugMode) core.info(`ph: ${ph} : ${typeof ph} : ${ph.length}`)
-  })
+  }
   return Promise.all(
     paths
       .filter((path) => path && path.length !== 0)
