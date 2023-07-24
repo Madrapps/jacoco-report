@@ -111,6 +111,7 @@ async function getJsonReports(xmlPaths, debugMode) {
   if (debugMode) core.info(`paths: ${paths}`)
   return Promise.all(
     paths.map(async (path) => {
+      if (debugMode) core.info(`path: ${path}`)
       const reportXml = await fs.promises.readFile(path.trim(), 'utf-8')
       return await parser.parseStringPromise(reportXml)
     })
