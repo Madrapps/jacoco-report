@@ -5,10 +5,11 @@ function getPRComment(
   minCoverageChangedFiles,
   title
 ) {
-  const moduleTable = getModuleTable(project.modules, minCoverageChangedFiles)
-  const overallTable = getOverallTable(overallCoverage, minCoverageOverall)
   const heading = getTitle(title)
-  return heading + moduleTable + '\n\n' + overallTable
+  const overallTable = getOverallTable(overallCoverage, minCoverageOverall)
+  const moduleTable = getModuleTable(project.modules, minCoverageChangedFiles)
+  const filesTable = getFileTable(project)
+  return heading + overallTable + moduleTable + filesTable
 }
 
 function getModuleTable(modules, minCoverage) {
@@ -38,32 +39,29 @@ function getModuleTable(modules, minCoverage) {
   }
 }
 
-function getFileTable(filesCoverage, minCoverage) {
-  const files = filesCoverage.files
-  if (files.length === 0) {
-    return '> There is no coverage information present for the Files changed'
-  }
-
-  const tableHeader = getHeader(filesCoverage.percentage)
-  const tableStructure = '|:-|:-:|:-:|'
+function getFileTable(project, minCoverage) {
+  const coverage = project['coverage-changes-files']
+  const tableHeader = `|Module|File|Coverage [${formatCoverage(coverage)}]||`
+  const tableStructure = '|:-|:-|:-:|:-:|'
   let table = tableHeader + '\n' + tableStructure
-  files.forEach((file) => {
-    renderFileRow(`[${file.name}](${file.url})`, file.percentage)
+  project.modules.forEach((module) => {
+    module.files.forEach((file, index) => {
+      let moduleName = module.name
+      if (index !== 0) {
+        moduleName = ''
+      }
+      renderFileRow(moduleName, `[${file.name}](${file.url})`, file.percentage)
+    })
   })
   return table
 
-  function getHeader(coverage) {
-    const status = getStatus(coverage, minCoverage)
-    return `|File|Coverage [${formatCoverage(coverage)}]|${status}|`
+  function renderFileRow(moduleName, fileName, coverage) {
+    addRow(getRow(moduleName, fileName, coverage))
   }
 
-  function renderFileRow(name, coverage) {
-    addRow(getRow(name, coverage))
-  }
-
-  function getRow(name, coverage) {
+  function getRow(moduleName, fileName, coverage) {
     const status = getStatus(coverage, minCoverage)
-    return `|${name}|${formatCoverage(coverage)}|${status}|`
+    return `|${moduleName}|${fileName}|${formatCoverage(coverage)}|${status}|`
   }
 
   function addRow(row) {
