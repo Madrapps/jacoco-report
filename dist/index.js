@@ -19127,6 +19127,8 @@ async function action() {
     )
 
     const skip = skipIfNoChanges && project.modules.length === 0
+    if (debugMode) core.info(`skip: ${skip}`)
+    if (debugMode) core.info(`prNumber: ${prNumber}`)
     if (prNumber != null && !skip) {
       await addComment(
         prNumber,
@@ -19139,7 +19141,8 @@ async function action() {
           minCoverageChangedFiles,
           title
         ),
-        client
+        client,
+        debugMode
       )
     }
   } catch (error) {
@@ -19179,9 +19182,11 @@ async function getChangedFiles(base, head, client) {
   return changedFiles
 }
 
-async function addComment(prNumber, update, title, body, client) {
+async function addComment(prNumber, update, title, body, client, debugMode) {
   let commentUpdated = false
 
+  if (debugMode) core.info(`update: ${update}`)
+  if (debugMode) core.info(`title: ${title}`)
   if (update && title) {
     const comments = await client.issues.listComments({
       issue_number: prNumber,
@@ -19192,6 +19197,10 @@ async function addComment(prNumber, update, title, body, client) {
     )
 
     if (comment) {
+      if (debugMode)
+        core.info(
+          `Updating existing comment: id=${comment.id} \n body=${comment.body}`
+        )
       await client.issues.updateComment({
         comment_id: comment.id,
         body,
@@ -19202,6 +19211,7 @@ async function addComment(prNumber, update, title, body, client) {
   }
 
   if (!commentUpdated) {
+    if (debugMode) core.info('Creating a new comment')
     await client.issues.createComment({
       issue_number: prNumber,
       body,
