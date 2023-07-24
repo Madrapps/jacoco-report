@@ -16959,7 +16959,7 @@ async function action() {
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-changed-files',
-      parseFloat(project['coverage-changed-files'].toFixed(2))
+      parseFloat(project['coverage-changes-files'].toFixed(2))
     )
 
     const skip = skipIfNoChanges && project.modules.length === 0
@@ -17062,8 +17062,7 @@ const TAG_PACKAGE = 'package'
 
 function getProjectCoverage(reports, files) {
   const moduleCoverages = []
-  const modules = getModulesFromReports(reports)
-  modules.forEach((module) => {
+  getModulesFromReports(reports).forEach((module) => {
     const filesCoverage = getFileCoverageFromPackages(
       [].concat(...module.packages),
       files
@@ -17082,13 +17081,12 @@ function getProjectCoverage(reports, files) {
   })
   const project = {
     modules: moduleCoverages,
-    isMultiModule: reports.length > 1 || modules.length > 1,
   }
   const totalPercentage = getTotalPercentage(totalFiles)
   if (totalPercentage) {
-    project['coverage-changed-files'] = totalPercentage
+    project['coverage-changes-files'] = totalPercentage
   } else {
-    project['coverage-changed-files'] = 100
+    project['coverage-changes-files'] = 100
   }
   return project
 }
@@ -17165,7 +17163,7 @@ function getFileCoverageFromPackages(packages, files) {
 function getTotalPercentage(files) {
   let missed = 0
   let covered = 0
-  if (files.length !== 0) {
+  if (files.length.size !== 0) {
     files.forEach((file) => {
       missed += file.missed
       covered += file.covered
@@ -17245,19 +17243,15 @@ function getPRComment(
   const heading = getTitle(title)
   const overallTable = getOverallTable(overallCoverage, minCoverageOverall)
   const moduleTable = getModuleTable(project.modules, minCoverageChangedFiles)
-  const filesTable = getFileTable(project, minCoverageChangedFiles)
-
-  const tables =
-    project.modules.length === 0
-      ? '> There is no coverage information present for the Files changed'
-      : project.isMultiModule
-      ? moduleTable + '\n\n' + filesTable
-      : filesTable
-
-  return heading + overallTable + '\n\n' + tables
+  const filesTable = getFileTable(project)
+  return heading + overallTable + '\n\n' + moduleTable + '\n\n' + filesTable
 }
 
 function getModuleTable(modules, minCoverage) {
+  if (modules.length.size === 0) {
+    return '> There is no coverage information present for the Files changed'
+  }
+
   const tableHeader = '|Module|Coverage||'
   const tableStructure = '|:-|:-:|:-:|'
   let table = tableHeader + '\n' + tableStructure
@@ -17281,13 +17275,9 @@ function getModuleTable(modules, minCoverage) {
 }
 
 function getFileTable(project, minCoverage) {
-  const coverage = project['coverage-changed-files']
-  const tableHeader = project.isMultiModule
-    ? `|Module|File|Coverage [${formatCoverage(coverage)}]||`
-    : `|File|Coverage [${formatCoverage(coverage)}]||`
-  const tableStructure = project.isMultiModule
-    ? '|:-|:-|:-:|:-:|'
-    : '|:-|:-:|:-:|'
+  const coverage = project['coverage-changes-files']
+  const tableHeader = `|Module|File|Coverage [${formatCoverage(coverage)}]||`
+  const tableStructure = '|:-|:-|:-:|:-:|'
   let table = tableHeader + '\n' + tableStructure
   project.modules.forEach((module) => {
     module.files.forEach((file, index) => {
@@ -17295,23 +17285,23 @@ function getFileTable(project, minCoverage) {
       if (index !== 0) {
         moduleName = ''
       }
-      renderFileRow(
-        moduleName,
-        `[${file.name}](${file.url})`,
-        file.percentage,
-        project.isMultiModule
-      )
+      renderFileRow(moduleName, `[${file.name}](${file.url})`, file.percentage)
     })
   })
-  return project.isMultiModule
-    ? '<details>\n' + '<summary>Files</summary>\n\n' + table + '\n\n</details>'
-    : table
+  return (
+    '<details>\n' + '<summary>Files</summary>\n\n' + table + '\n\n</details>'
+  )
 
-  function renderFileRow(moduleName, fileName, coverage, isMultiModule) {
+  function renderFileRow(moduleName, fileName, coverage) {
+    addRow(getRow(moduleName, fileName, coverage))
+  }
+
+  function getRow(moduleName, fileName, coverage) {
     const status = getStatus(coverage, minCoverage)
-    const row = isMultiModule
-      ? `|${moduleName}|${fileName}|${formatCoverage(coverage)}|${status}|`
-      : `|${fileName}|${formatCoverage(coverage)}|${status}|`
+    return `|${moduleName}|${fileName}|${formatCoverage(coverage)}|${status}|`
+  }
+
+  function addRow(row) {
     table = table + '\n' + row
   }
 }
