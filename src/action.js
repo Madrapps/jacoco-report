@@ -6,7 +6,7 @@ const { parseBooleans } = require('xml2js/lib/processors')
 const process = require('./process')
 const render = require('./render')
 const { debug } = require('./util')
-const { globSync } = require('glob')
+const { glob } = require('glob')
 
 async function action() {
   try {
@@ -106,13 +106,15 @@ async function action() {
 }
 
 async function getJsonReports(xmlPaths, debugMode) {
-  if (debugMode) core.info(`xmlPaths: ${xmlPaths}`)
-  const paths = xmlPaths.map((xmlPath) => globSync(xmlPath))
-  if (debugMode) core.info(`paths: ${paths}`)
   return Promise.all(
-    paths.map(async (path) => {
-      const reportXml = await fs.promises.readFile(path.trim(), 'utf-8')
-      return await parser.parseStringPromise(reportXml)
+    xmlPaths.map(async (xmlPath) => {
+      if (debugMode) core.info(`xmlPath: ${xmlPath}`)
+      const paths = await glob(xmlPath)
+      if (debugMode) core.info(`paths: ${paths}`)
+      paths.map(async (path) => {
+        const reportXml = await fs.promises.readFile(path.trim(), 'utf-8')
+        return await parser.parseStringPromise(reportXml)
+      })
     })
   )
 }
