@@ -8,7 +8,7 @@ function getPRComment(
   const heading = getTitle(title)
   const overallTable = getOverallTable(overallCoverage, minCoverageOverall)
   const moduleTable = getModuleTable(project.modules, minCoverageChangedFiles)
-  const filesTable = getFileTable(project)
+  const filesTable = getFileTable(project, minCoverageChangedFiles)
   return heading + overallTable + '\n\n' + moduleTable + '\n\n' + filesTable
 }
 
