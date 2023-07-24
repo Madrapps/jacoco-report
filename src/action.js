@@ -7,6 +7,7 @@ const process = require('./process')
 const render = require('./render')
 const { debug } = require('./util')
 const { glob } = require('glob')
+const globs = require('@actions/glob')
 
 async function action() {
   try {
@@ -106,6 +107,10 @@ async function action() {
 }
 
 async function getJsonReports(xmlPaths, debugMode) {
+  const globber = await globs.create(xmlPaths.join('\n'))
+  const files = await globber.glob()
+  if (debugMode) core.info(`files: ${files} : ${files.length}`)
+
   if (debugMode) core.info(`xmlPaths: ${xmlPaths} : ${xmlPaths.length}`)
   const paths = await glob(xmlPaths)
   if (debugMode)
