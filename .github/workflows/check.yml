@@ -37,3 +37,4 @@ jobs:
         run: |
           npm i -g @vercel/ncc
           npm run build
+          git diff --exit-code
