@@ -43,6 +43,10 @@ async function action() {
 
     const event = github.context.eventName
     core.info(`Event is ${event}`)
+    if (debugMode) {
+      core.info(`passEmoji: ${passEmoji}`)
+      core.info(`failEmoji: ${failEmoji}`)
+    }
 
     let base
     let head
@@ -160,6 +164,7 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
 
   if (debugMode) core.info(`update: ${update}`)
   if (debugMode) core.info(`title: ${title}`)
+  if (debugMode) core.info(`JaCoCo Comment: ${body}`)
   if (update && title) {
     const comments = await client.issues.listComments({
       issue_number: prNumber,
