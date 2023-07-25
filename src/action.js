@@ -80,7 +80,6 @@ async function action() {
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
     const reportsJson = await reportsJsonAsync
-    if (debugMode) core.info(`report value: ${debug(reportsJson)}`)
     const reports = reportsJson.map((report) => report['report'])
 
     // TODO Replace this with the getProjectCoverage itself
@@ -166,6 +165,7 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
   if (debugMode) core.info(`title: ${title}`)
   if (debugMode) core.info(`JaCoCo Comment: ${body}`)
   if (update && title) {
+    if (debugMode) core.info('Listing all comments')
     const comments = await client.issues.listComments({
       issue_number: prNumber,
       ...github.context.repo,
