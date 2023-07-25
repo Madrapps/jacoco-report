@@ -3,7 +3,7 @@
 [![Tests](https://github.com/Madrapps/jacoco-report/actions/workflows/check.yml/badge.svg)](https://github.com/Madrapps/jacoco-report/actions/workflows/check.yml)
 
 A Github action that publishes the JaCoCo report as a comment in the Pull Request with customizable pass percentage for
-modified files and for the entire project.
+modified modules, files and for the entire project.
 
 ## Usage
 
