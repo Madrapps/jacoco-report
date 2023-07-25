@@ -19195,7 +19195,11 @@ async function getChangedFiles(base, head, client, debugMode) {
     if (debugMode && file.patch) {
       core.info(`File PATCH = ${file.patch}`)
       const changedLines = getChangedLines(file.patch)
-      core.info(`Changed Lines = ${file.filename} = ${debug(changedLines)}`)
+      core.info(
+        `Changed Lines = ${file.filename} = ${changedLines.length} = ${debug(
+          changedLines
+        )}`
+      )
     }
     const changedFile = {
       filePath: file.filename,
@@ -19566,7 +19570,7 @@ const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/
 
 function getChangedLines(patch) {
   const lines = patch.split('\n')
-
+  console.log(`LINES = ${lines} = ${lines.length}`)
   const lineNumbers = new Set()
   const firstLine = lines.shift()
   if (firstLine) {
@@ -19589,7 +19593,7 @@ function getChangedLines(patch) {
       })
     }
   }
-  return lineNumbers
+  return [...lineNumbers]
 }
 
 module.exports = {

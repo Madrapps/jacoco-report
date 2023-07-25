@@ -6,7 +6,7 @@ const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/
 
 function getChangedLines(patch) {
   const lines = patch.split('\n')
-
+  console.log(`LINES = ${lines} = ${lines.length}`)
   const lineNumbers = new Set()
   const firstLine = lines.shift()
   if (firstLine) {
@@ -29,7 +29,7 @@ function getChangedLines(patch) {
       })
     }
   }
-  return lineNumbers
+  return [...lineNumbers]
 }
 
 module.exports = {
