@@ -19195,7 +19195,7 @@ async function getChangedFiles(base, head, client, debugMode) {
     if (debugMode && file.patch) {
       core.info(`File PATCH = ${file.patch}`)
       const changedLines = getChangedLines(file.patch)
-      core.info(`Changed Lines = ${file.filename} = ${changedLines}`)
+      core.info(`Changed Lines = ${file.filename} = ${debug(changedLines)}`)
     }
     const changedFile = {
       filePath: file.filename,
