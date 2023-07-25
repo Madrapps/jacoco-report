@@ -28,6 +28,13 @@ async function action() {
     )
     const title = core.getInput('title')
     const updateComment = parseBooleans(core.getInput('update-comment'))
+    if (updateComment) {
+      if (!title) {
+        core.warning(
+          "'title' is not set. 'update-comment' does not work without 'title'"
+        )
+      }
+    }
     const debugMode = parseBooleans(core.getInput('debug-mode'))
     const skipIfNoChanges = parseBooleans(core.getInput('skip-if-no-changes'))
 

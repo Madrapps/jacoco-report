@@ -37,7 +37,7 @@ describe('Multiple reports', function () {
       case 'min-coverage-changed-files':
         return 60
       case 'debug-mode':
-        return 'true'
+        return 'false'
     }
   })
   github.getOctokit = jest.fn(() => {

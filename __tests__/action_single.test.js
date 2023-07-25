@@ -97,32 +97,79 @@ describe('Single report', function () {
 |[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|`)
     })
 
-    it('updates a previous comment', async () => {
-      initContext(eventName, payload)
-
+    describe('With update-comment ON', function () {
       const title = 'JaCoCo Report'
-      core.getInput = jest.fn((c) => {
-        switch (c) {
+      function mockInput(key) {
+        switch (key) {
           case 'title':
             return title
           case 'update-comment':
             return 'true'
           default:
-            return getInput(c)
+            return getInput(key)
         }
+      }
+
+      it('if comment exists, update it', async () => {
+        initContext(eventName, payload)
+        core.getInput = jest.fn((key) => {
+          return mockInput(key)
+        })
+
+        listComments.mockReturnValue({
+          data: [
+            { id: 1, body: 'some comment' },
+            { id: 2, body: `### ${title}\n to update` },
+          ],
+        })
+
+        await action.action()
+
+        expect(updateComment.mock.calls[0][0].comment_id).toEqual(2)
+        expect(createComment).toHaveBeenCalledTimes(0)
       })
 
-      listComments.mockReturnValue({
-        data: [
-          { id: 1, body: 'some comment' },
-          { id: 2, body: `### ${title}\n to update` },
-        ],
+      it('if comment does not exist, create new comment', async () => {
+        initContext(eventName, payload)
+        core.getInput = jest.fn((key) => {
+          return mockInput(key)
+        })
+        listComments.mockReturnValue({
+          data: [{ id: 1, body: 'some comment' }],
+        })
+
+        await action.action()
+
+        expect(createComment.mock.calls[0][0].body).not.toBeNull()
+        expect(updateComment).toHaveBeenCalledTimes(0)
       })
 
-      await action.action()
+      it('if title not set, warn user and create new comment', async () => {
+        initContext(eventName, payload)
+        core.getInput = jest.fn((c) => {
+          switch (c) {
+            case 'title':
+              return ''
+            default:
+              return mockInput(c)
+          }
+        })
 
-      expect(updateComment.mock.calls[0][0].comment_id).toEqual(2)
-      expect(createComment).toHaveBeenCalledTimes(0)
+        listComments.mockReturnValue({
+          data: [
+            { id: 1, body: 'some comment' },
+            { id: 2, body: `### ${title}\n to update` },
+          ],
+        })
+
+        await action.action()
+
+        expect(core.warning).toBeCalledWith(
+          "'title' is not set. 'update-comment' does not work without 'title'"
+        )
+        expect(createComment.mock.calls[0][0].body).not.toBeNull()
+        expect(updateComment).toHaveBeenCalledTimes(0)
+      })
     })
 
     it('set overall coverage output', async () => {
