@@ -6,30 +6,43 @@ const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/
 
 function getChangedLines(patch) {
   const lines = patch.split('\n')
-  console.log(`LINES = ${lines} = ${lines.length}`)
+  const groups = getDiffGroups(lines)
   const lineNumbers = new Set()
-  const firstLine = lines.shift()
-  if (firstLine) {
-    const diffGroup = firstLine.match(pattern)
-    if (diffGroup) {
-      let aX = parseInt(diffGroup[1])
-      let bX = parseInt(diffGroup[2])
+  groups.forEach((group) => {
+    const firstLine = group.shift()
+    if (firstLine) {
+      const diffGroup = firstLine.match(pattern)
+      if (diffGroup) {
+        let bX = parseInt(diffGroup[2])
 
-      lines.forEach((line) => {
-        aX++
-        bX++
+        group.forEach((line) => {
+          bX++
 
-        if (line.startsWith('+')) {
-          aX--
-          lineNumbers.add(bX)
-        } else if (line.startsWith('-')) {
-          bX--
-          lineNumbers.add(aX)
-        }
-      })
+          if (line.startsWith('+')) {
+            lineNumbers.add(bX - 1)
+          } else if (line.startsWith('-')) {
+            bX--
+          }
+        })
+      }
     }
-  }
+  })
   return [...lineNumbers]
+}
+
+function getDiffGroups(lines) {
+  const groups = []
+
+  let group = []
+  lines.forEach((line) => {
+    if (line.startsWith('@@')) {
+      group = []
+      groups.push(group)
+    }
+    group.push(line)
+  })
+
+  return groups
 }
 
 module.exports = {
