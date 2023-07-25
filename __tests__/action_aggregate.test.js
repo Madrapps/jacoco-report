@@ -1,6 +1,12 @@
+/* eslint-disable no-template-curly-in-string */
 const action = require('../src/action')
 const core = require('@actions/core')
 const github = require('@actions/github')
+
+const PATCH_MAIN_VIEW_MODEL =
+  '@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {\n         val userId = \\"admin\\"\n         val model: MainViewModel by viewModels()\n         Log.d(\\"App\\", \\"Validate = ${model.validate(userId)}\\")\n-        Log.d(\\"App\\", \\"Verify Access = ${model.verifyAccess(userId)}\\")\n+        Log.d(\\"App\\", \\"Verify Access = ${model.verifyAccess1(userId)}\\")\n \n         // Math module\n         val arithmetic = Arithmetic()'
+const PATCH_MATH =
+  '@@ -18,6 +18,10 @@ class Arithmetic : MathOperation {\n         return a / b\n     }\n \n+    override fun difference(a: Int, b: Int): Int {\n+        return subtract(a, b)\n+    }\n+\n     fun modulo(a: Int, b: Int): Int {\n         return a % b\n     }'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -63,11 +69,13 @@ describe('Aggregate report', function () {
           filename: 'src/main/java/com/madrapps/playground/MainViewModel.kt',
           blob_url:
             'https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
+          patch: PATCH_MAIN_VIEW_MODEL,
         },
         {
           filename: 'src/main/java/com/madrapps/math/Math.kt',
           blob_url:
             'https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt',
+          patch: PATCH_MATH,
         },
       ],
     },

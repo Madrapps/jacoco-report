@@ -1,9 +1,17 @@
+/* eslint-disable no-template-curly-in-string */
 const action = require('../src/action')
 const core = require('@actions/core')
 const github = require('@actions/github')
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
+
+const PATCH_MAIN_VIEW_MODEL =
+  '@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {\n         val userId = \\"admin\\"\n         val model: MainViewModel by viewModels()\n         Log.d(\\"App\\", \\"Validate = ${model.validate(userId)}\\")\n-        Log.d(\\"App\\", \\"Verify Access = ${model.verifyAccess(userId)}\\")\n+        Log.d(\\"App\\", \\"Verify Access = ${model.verifyAccess1(userId)}\\")\n \n         // Math module\n         val arithmetic = Arithmetic()'
+const PATCH_STRING_OP =
+  "'@@ -3,7 +3,7 @@\n /**\n  * String related operation\n  */\n-public class StringOp implements StringOperation {\n+public class StringOp implements IStringOperation {\n \n     @Override\n     public boolean endsWith(String source, String chars) {\n@@ -14,4 +14,9 @@ public boolean endsWith(String source, String chars) {\n     public boolean startsWith(String source, String chars) {\n         return source.startsWith(chars);\n     }\n+\n+    @Override\n+    public boolean replace(String from, String to) {\n+        return false;\n+    }\n }'"
+const PATCH_COVERAGE =
+  "\"@@ -23,17 +23,19 @@ jobs:\n \n     - name: Jacoco Report to PR\n       id: jacoco\n-      uses: madrapps/jacoco-report@v1.2\n+      uses: madrapps/jacoco-report@coverage-diff\n       with:\n         paths: |\n-          ${{ github.workspace }}/app/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,\n-          ${{ github.workspace }}/math/build/reports/jacoco/debugCoverage/debugCoverage.xml,\n-          ${{ github.workspace }}/text/build/reports/jacoco/debugCoverage/debugCoverage.xml\n+          ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,\n+          ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml\n         token: ${{ secrets.GITHUB_TOKEN }}\n         min-coverage-overall: 40\n         min-coverage-changed-files: 60\n-        title: Code Coverage\n-        debug-mode: false\n+        title: ':lobster: Coverage Report'\n+        update-comment: true\n+        pass-emoji: ':green_circle:'\n+        fail-emoji: ':red_circle:'\n+        debug-mode: true\n \n     - name: Get the Coverage info\n       run: |\""
 
 describe('Single report', function () {
   let createComment
@@ -63,11 +71,13 @@ describe('Single report', function () {
           filename: 'src/main/kotlin/com/madrapps/jacoco/Math.kt',
           blob_url:
             'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt',
+          patch: PATCH_MAIN_VIEW_MODEL,
         },
         {
           filename: 'src/main/java/com/madrapps/jacoco/operation/StringOp.java',
           blob_url:
             'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
+          patch: PATCH_STRING_OP,
         },
       ],
     },
@@ -231,9 +241,10 @@ describe('Single report', function () {
           data: {
             files: [
               {
-                filename: 'src/main/kotlin/com/madrapps/jacoco/asset.yml',
+                filename: 'src/main/kotlin/com/madrapps/jacoco/coverage.yml',
                 blob_url:
-                  'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/asset.yml',
+                  'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/coverage.yml',
+                patch: PATCH_COVERAGE,
               },
             ],
           },
