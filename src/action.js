@@ -5,7 +5,7 @@ const parser = require('xml2js')
 const { parseBooleans } = require('xml2js/lib/processors')
 const process = require('./process')
 const render = require('./render')
-const { debug } = require('./util')
+const { debug, getChangedLines } = require('./util')
 const glob = require('@actions/glob')
 
 async function action() {
@@ -152,6 +152,8 @@ async function getChangedFiles(base, head, client, debugMode) {
     if (debugMode) core.info(`Changed Files - file: ${debug(file)}`)
     if (debugMode && file.patch) {
       core.info(`File PATCH = ${file.patch}`)
+      const changedLines = getChangedLines(file.patch)
+      core.info(`Changed Lines = ${file.filename} = ${changedLines}`)
     }
     const changedFile = {
       filePath: file.filename,

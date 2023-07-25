@@ -19047,7 +19047,7 @@ const parser = __nccwpck_require__(9253)
 const { parseBooleans } = __nccwpck_require__(6434)
 const process = __nccwpck_require__(650)
 const render = __nccwpck_require__(8183)
-const { debug } = __nccwpck_require__(4518)
+const { debug, getChangedLines } = __nccwpck_require__(4518)
 const glob = __nccwpck_require__(2723)
 
 async function action() {
@@ -19194,6 +19194,8 @@ async function getChangedFiles(base, head, client, debugMode) {
     if (debugMode) core.info(`Changed Files - file: ${debug(file)}`)
     if (debugMode && file.patch) {
       core.info(`File PATCH = ${file.patch}`)
+      const changedLines = getChangedLines(file.patch)
+      core.info(`Changed Lines = ${file.filename} = ${changedLines}`)
     }
     const changedFile = {
       filePath: file.filename,
@@ -19560,8 +19562,39 @@ function debug(obj) {
   return JSON.stringify(obj, ' ', 4)
 }
 
+const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/
+
+function getChangedLines(patch) {
+  const lines = patch.split('\n')
+
+  const lineNumbers = new Set()
+  const firstLine = lines.shift()
+  if (firstLine) {
+    const diffGroup = firstLine.match(pattern)
+    if (diffGroup) {
+      let aX = parseInt(diffGroup[1])
+      let bX = parseInt(diffGroup[2])
+
+      lines.forEach((line) => {
+        aX++
+        bX++
+
+        if (line.startsWith('+')) {
+          aX--
+          lineNumbers.add(bX)
+        } else if (line.startsWith('-')) {
+          bX--
+          lineNumbers.add(aX)
+        }
+      })
+    }
+  }
+  return lineNumbers
+}
+
 module.exports = {
   debug,
+  getChangedLines,
 }
 
 
