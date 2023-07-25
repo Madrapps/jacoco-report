@@ -21,6 +21,8 @@ describe('Single report', function () {
         return 45
       case 'min-coverage-changed-files':
         return 60
+      case 'debug-mode':
+        return 'true'
     }
   }
 
@@ -144,8 +146,6 @@ describe('Single report', function () {
     })
 
     describe('Skip if no changes set to true', function () {
-      initContext(eventName, payload)
-
       function mockInput() {
         core.getInput = jest.fn((c) => {
           switch (c) {
@@ -158,6 +158,7 @@ describe('Single report', function () {
       }
 
       it('Add comment when coverage present for changes files', async () => {
+        initContext(eventName, payload)
         mockInput()
 
         await action.action()
@@ -173,6 +174,7 @@ describe('Single report', function () {
       })
 
       it("Don't add comment when coverage absent for changes files", async () => {
+        initContext(eventName, payload)
         mockInput()
         const compareCommitsResponse = {
           data: {
@@ -219,9 +221,9 @@ describe('Single report', function () {
         },
       },
     }
-    initContext('pull_request_target', payload)
 
     it('set overall coverage output', async () => {
+      initContext('pull_request_target', payload)
       core.setOutput = output
 
       await action.action()
@@ -236,9 +238,9 @@ describe('Single report', function () {
       before: 'guasft7asdtf78asfd87as6df7y2u3',
       after: 'aahsdflais76dfa78wrglghjkaghkj',
     }
-    initContext('push', payload)
 
     it('set overall coverage output', async () => {
+      initContext('push', payload)
       core.setOutput = output
 
       await action.action()
@@ -248,6 +250,7 @@ describe('Single report', function () {
     })
 
     it('set changed files coverage output', async () => {
+      initContext('push', payload)
       core.setOutput = output
 
       await action.action()
@@ -258,9 +261,8 @@ describe('Single report', function () {
   })
 
   describe('Other than push or pull_request or pull_request_target event', function () {
-    initContext('pr_review', {})
-
     it('Fail by throwing appropriate error', async () => {
+      initContext('pr_review', {})
       core.setFailed = jest.fn((c) => {
         expect(c).toEqual(
           'Only pull requests and pushes are supported, pr_review not supported.'

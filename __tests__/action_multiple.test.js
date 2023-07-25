@@ -36,6 +36,8 @@ describe('Multiple reports', function () {
         return 45
       case 'min-coverage-changed-files':
         return 60
+      case 'debug-mode':
+        return 'true'
     }
   })
   github.getOctokit = jest.fn(() => {
@@ -118,9 +120,9 @@ describe('Multiple reports', function () {
       before: 'guasft7asdtf78asfd87as6df7y2u3',
       after: 'aahsdflais76dfa78wrglghjkaghkj',
     }
-    initContext('push', payload)
 
     it('set overall coverage output', async () => {
+      initContext('push', payload)
       core.setOutput = output
 
       await action.action()
@@ -130,27 +132,13 @@ describe('Multiple reports', function () {
     })
 
     it('set changed files coverage output', async () => {
+      initContext('push', payload)
       core.setOutput = output
 
       await action.action()
 
       const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-files', 65.91])
-    })
-  })
-
-  describe('Other than push or pull_request or pull_request_target event', function () {
-    initContext('pr_review', {})
-
-    it('Fail by throwing appropriate error', async () => {
-      core.setFailed = jest.fn((c) => {
-        expect(c).toEqual(
-          'Only pull requests and pushes are supported, pr_review not supported.'
-        )
-      })
-      core.setOutput = output
-
-      await action.action()
     })
   })
 })
