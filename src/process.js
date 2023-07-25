@@ -60,7 +60,7 @@ function getModuleFromParent(parent) {
     if (packages.length !== 0) {
       return {
         name: parent['$'].name,
-        packages: packages,
+        packages,
         root: parent, // TODO just pass array of 'counters'
       }
     }

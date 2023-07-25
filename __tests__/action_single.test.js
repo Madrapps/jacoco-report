@@ -39,9 +39,9 @@ describe('Single report', function () {
           }),
         },
         issues: {
-          createComment: createComment,
-          listComments: listComments,
-          updateComment: updateComment,
+          createComment,
+          listComments,
+          updateComment,
         },
       }
     })
@@ -193,9 +193,9 @@ describe('Single report', function () {
               }),
             },
             issues: {
-              createComment: createComment,
-              listComments: listComments,
-              updateComment: updateComment,
+              createComment,
+              listComments,
+              updateComment,
             },
           }
         })

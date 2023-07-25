@@ -21,7 +21,14 @@ jobs:
         with:
           node-version: '12.x'
 
-      - name: Run unit tests
+      - name: Install
         run: |
           npm install
+
+      - name: Lint
+        run: |
+          npm run lint
+
+      - name: Run unit tests
+        run: |
           npm test

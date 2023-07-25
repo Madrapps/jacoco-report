@@ -44,9 +44,9 @@ describe('Input validation', function () {
         }),
       },
       issues: {
-        createComment: createComment,
-        listComments: listComments,
-        updateComment: updateComment,
+        createComment,
+        listComments,
+        updateComment,
       },
     }
   })

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest --coverage",
     "build": "ncc build src/index.js --license licenses.txt",
-    "lint:eslint": "eslint --ext .js --max-warnings=0",
+    "lint:eslint": "eslint '**/*.{js,ts}' --max-warnings=0",
     "lint:prettier": "prettier --check '**/*.{js,md,json,yml}'",
     "lint": "npm run lint:prettier && npm run lint:eslint",
     "lint:fix": "npm run lint:prettier -- --write && npm run lint:eslint -- --fix"
