@@ -160,7 +160,7 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
        pass-emoji: ':green_circle:'
        fail-emoji: ':red_circle:'
    ```
-   
+
 ## Troubleshooting
 
 1. If the PR is created by bots like _dependabot_, then the GITHUB_TOKEN won't have sufficient access to write the
