@@ -20,12 +20,14 @@ for [Creating a workflow file](https://help.github.com/en/articles/configuring-a
 - `token` - [**required**] Github personal token to add commits to Pull Request
 - `min-coverage-overall` - [*optional*] The minimum code coverage that is required to pass for overall project
 - `min-coverage-changed-files` - [*optional*] The minimum code coverage that is required to pass for changed files
-- `update-comment` - [*optional*] If true, updates the previous coverage report comment instead of creating new one.
+- `update-comment` - [*optional* {default: false}] If true, updates the previous coverage report comment instead of creating new one.
   Requires `title` to work properly
 - `title` - [*optional*] Title for the Pull Request comment
-- `skip-if-no-changes` - [*optional*] If true, comment won't be added if there is no coverage information present for
+- `skip-if-no-changes` - [*optional* {default: false}] If true, comment won't be added if there is no coverage information present for
   the files changed
-- `debug-mode` - [*optional*] If true, run the action in debug mode and get debug logs printed in console
+- `pass-emoji` - [*optional* {default: :green_apple:}] Emoji to use for pass status shown when 'coverage >= min coverage' (should be a Github supported emoji).
+- `fail-emoji` - [*optional* {default: :x:}] Emoji to use for fail status shown when 'coverage < min coverage' (should be a Github supported emoji).
+- `debug-mode` - [*optional* {default: false}] If true, run the action in debug mode and get debug logs printed in console
 
 ### Outputs
 
@@ -137,6 +139,26 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
        token: ${{ secrets.GITHUB_TOKEN }}
        min-coverage-overall: 40
        min-coverage-changed-files: 60
+   ```
+
+4. When you need to customize the pass/fail emojis in the comment
+
+   > Set the `pass-emoji` and `fail-emoji` to a valid emoji supported in Github.
+   > Refer [sample pull request](https://github.com/thsaravana/jacoco-android-playground/pull/10) and
+   > its [workflow](https://github.com/thsaravana/jacoco-android-playground/blob/testing-custom-emoji-support/.github/workflows/coverage.yml)
+
+   ```yaml
+   - name: Jacoco Report to PR
+     id: jacoco
+     uses: madrapps/jacoco-report@v1.6
+     with:
+       paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
+       token: ${{ secrets.GITHUB_TOKEN }}
+       min-coverage-overall: 40
+       min-coverage-changed-files: 60
+       title: ':lobster: Coverage Report'
+       pass-emoji: ':green_circle:'
+       fail-emoji: ':red_circle:'
    ```
 
 ## Troubleshooting

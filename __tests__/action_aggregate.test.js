@@ -21,6 +21,10 @@ describe('Aggregate report', function () {
         return 45
       case 'min-coverage-changed-files':
         return 60
+      case 'pass-emoji':
+        return ':green_apple:'
+      case 'fail-emoji':
+        return ':x:'
       case 'debug-mode':
         return 'true'
     }

@@ -35,11 +35,18 @@ async function action() {
         )
       }
     }
-    const debugMode = parseBooleans(core.getInput('debug-mode'))
     const skipIfNoChanges = parseBooleans(core.getInput('skip-if-no-changes'))
+    const passEmoji = core.getInput('pass-emoji')
+    const failEmoji = core.getInput('fail-emoji')
+
+    const debugMode = parseBooleans(core.getInput('debug-mode'))
 
     const event = github.context.eventName
     core.info(`Event is ${event}`)
+    if (debugMode) {
+      core.info(`passEmoji: ${passEmoji}`)
+      core.info(`failEmoji: ${failEmoji}`)
+    }
 
     let base
     let head
@@ -73,7 +80,6 @@ async function action() {
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
     const reportsJson = await reportsJsonAsync
-    if (debugMode) core.info(`report value: ${debug(reportsJson)}`)
     const reports = reportsJson.map((report) => report['report'])
 
     // TODO Replace this with the getProjectCoverage itself
@@ -95,6 +101,10 @@ async function action() {
     if (debugMode) core.info(`skip: ${skip}`)
     if (debugMode) core.info(`prNumber: ${prNumber}`)
     if (prNumber != null && !skip) {
+      const emoji = {
+        pass: passEmoji,
+        fail: failEmoji,
+      }
       await addComment(
         prNumber,
         updateComment,
@@ -104,7 +114,8 @@ async function action() {
           project,
           minCoverageOverall,
           minCoverageChangedFiles,
-          title
+          title,
+          emoji
         ),
         client,
         debugMode
@@ -152,7 +163,9 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
 
   if (debugMode) core.info(`update: ${update}`)
   if (debugMode) core.info(`title: ${title}`)
+  if (debugMode) core.info(`JaCoCo Comment: ${body}`)
   if (update && title) {
+    if (debugMode) core.info('Listing all comments')
     const comments = await client.issues.listComments({
       issue_number: prNumber,
       ...github.context.repo,

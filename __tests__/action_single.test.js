@@ -21,6 +21,10 @@ describe('Single report', function () {
         return 45
       case 'min-coverage-changed-files':
         return 60
+      case 'pass-emoji':
+        return ':green_apple:'
+      case 'fail-emoji':
+        return ':x:'
       case 'debug-mode':
         return 'true'
     }
@@ -95,6 +99,26 @@ describe('Single report', function () {
 |:-|:-:|:-:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
 |[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|`)
+    })
+
+    it('set overall coverage output', async () => {
+      initContext(eventName, payload)
+      core.setOutput = output
+
+      await action.action()
+
+      const out = output.mock.calls[0]
+      expect(out).toEqual(['coverage-overall', 49.02])
+    })
+
+    it('set changed files coverage output', async () => {
+      initContext(eventName, payload)
+      core.setOutput = output
+
+      await action.action()
+
+      const out = output.mock.calls[1]
+      expect(out).toEqual(['coverage-changed-files', 63.64])
     })
 
     describe('With update-comment ON', function () {
@@ -172,26 +196,6 @@ describe('Single report', function () {
       })
     })
 
-    it('set overall coverage output', async () => {
-      initContext(eventName, payload)
-      core.setOutput = output
-
-      await action.action()
-
-      const out = output.mock.calls[0]
-      expect(out).toEqual(['coverage-overall', 49.02])
-    })
-
-    it('set changed files coverage output', async () => {
-      initContext(eventName, payload)
-      core.setOutput = output
-
-      await action.action()
-
-      const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 63.64])
-    })
-
     describe('Skip if no changes set to true', function () {
       function mockInput() {
         core.getInput = jest.fn((c) => {
@@ -252,6 +256,33 @@ describe('Single report', function () {
         await action.action()
 
         expect(createComment).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('With custom emoji', function () {
+      it('publish proper comment', async () => {
+        initContext(eventName, payload)
+        core.getInput = jest.fn((key) => {
+          switch (key) {
+            case 'pass-emoji':
+              return ':green_circle:'
+            case 'fail-emoji':
+              return 'red_circle'
+            default:
+              return getInput(key)
+          }
+        })
+
+        await action.action()
+
+        expect(createComment.mock.calls[0][0].body)
+          .toEqual(`|Total Project Coverage|49.02%|:green_circle:|
+|:-|:-:|:-:|
+
+|File|Coverage [63.64%]||
+|:-|:-:|:-:|
+|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_circle:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|red_circle|`)
       })
     })
   })
