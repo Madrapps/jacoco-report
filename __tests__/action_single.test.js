@@ -164,7 +164,7 @@ describe('Single report', function () {
 
         await action.action()
 
-        expect(core.warning).toBeCalledWith(
+        expect(core.info).toBeCalledWith(
           "'title' is not set. 'update-comment' does not work without 'title'"
         )
         expect(createComment.mock.calls[0][0].body).not.toBeNull()

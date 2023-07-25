@@ -2,7 +2,7 @@ name: 'JaCoCo Report'
 description: 'Publishes the JaCoCo report as a comment in the Pull Request'
 inputs:
   paths:
-    description: 'Comma separated paths of the generated jacoco xml files'
+    description: 'Comma separated paths of the generated jacoco xml files (supports wildcard glob pattern)'
     required: true
   token:
     description: 'Github personal token to add commits to Pull Request'

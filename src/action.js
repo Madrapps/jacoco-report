@@ -30,7 +30,7 @@ async function action() {
     const updateComment = parseBooleans(core.getInput('update-comment'))
     if (updateComment) {
       if (!title) {
-        core.warning(
+        core.info(
           "'title' is not set. 'update-comment' does not work without 'title'"
         )
       }

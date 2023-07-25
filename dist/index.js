@@ -19070,6 +19070,13 @@ async function action() {
     )
     const title = core.getInput('title')
     const updateComment = parseBooleans(core.getInput('update-comment'))
+    if (updateComment) {
+      if (!title) {
+        core.info(
+          "'title' is not set. 'update-comment' does not work without 'title'"
+        )
+      }
+    }
     const debugMode = parseBooleans(core.getInput('debug-mode'))
     const skipIfNoChanges = parseBooleans(core.getInput('skip-if-no-changes'))
 
@@ -19292,7 +19299,7 @@ function getModuleFromParent(parent) {
     if (packages.length !== 0) {
       return {
         name: parent['$'].name,
-        packages: packages,
+        packages,
         root: parent, // TODO just pass array of 'counters'
       }
     }
