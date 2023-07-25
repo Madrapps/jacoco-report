@@ -25,6 +25,8 @@ for [Creating a workflow file](https://help.github.com/en/articles/configuring-a
 - `title` - [*optional*] Title for the Pull Request comment
 - `skip-if-no-changes` - [*optional*] If true, comment won't be added if there is no coverage information present for
   the files changed
+- `pass-emoji` - [*optional*] Emoji to use for pass status shown when 'coverage >= min coverage' (should be a Github supported emoji).
+- `fail-emoji` - [*optional*] Emoji to use for fail status shown when 'coverage < min coverage' (should be a Github supported emoji).
 - `debug-mode` - [*optional*] If true, run the action in debug mode and get debug logs printed in console
 
 ### Outputs

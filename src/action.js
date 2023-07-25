@@ -35,8 +35,11 @@ async function action() {
         )
       }
     }
-    const debugMode = parseBooleans(core.getInput('debug-mode'))
     const skipIfNoChanges = parseBooleans(core.getInput('skip-if-no-changes'))
+    const passEmoji = core.getInput('pass-emoji')
+    const failEmoji = core.getInput('fail-emoji')
+
+    const debugMode = parseBooleans(core.getInput('debug-mode'))
 
     const event = github.context.eventName
     core.info(`Event is ${event}`)
@@ -95,6 +98,10 @@ async function action() {
     if (debugMode) core.info(`skip: ${skip}`)
     if (debugMode) core.info(`prNumber: ${prNumber}`)
     if (prNumber != null && !skip) {
+      const emoji = {
+        pass: passEmoji,
+        fail: failEmoji,
+      }
       await addComment(
         prNumber,
         updateComment,
@@ -104,7 +111,8 @@ async function action() {
           project,
           minCoverageOverall,
           minCoverageChangedFiles,
-          title
+          title,
+          emoji
         ),
         client,
         debugMode

@@ -3,12 +3,21 @@ function getPRComment(
   project,
   minCoverageOverall,
   minCoverageChangedFiles,
-  title
+  title,
+  emoji
 ) {
   const heading = getTitle(title)
-  const overallTable = getOverallTable(overallCoverage, minCoverageOverall)
-  const moduleTable = getModuleTable(project.modules, minCoverageChangedFiles)
-  const filesTable = getFileTable(project, minCoverageChangedFiles)
+  const overallTable = getOverallTable(
+    overallCoverage,
+    minCoverageOverall,
+    emoji
+  )
+  const moduleTable = getModuleTable(
+    project.modules,
+    minCoverageChangedFiles,
+    emoji
+  )
+  const filesTable = getFileTable(project, minCoverageChangedFiles, emoji)
 
   const tables =
     project.modules.length === 0
@@ -20,30 +29,23 @@ function getPRComment(
   return heading + overallTable + '\n\n' + tables
 }
 
-function getModuleTable(modules, minCoverage) {
+function getModuleTable(modules, minCoverage, emoji) {
   const tableHeader = '|Module|Coverage||'
   const tableStructure = '|:-|:-:|:-:|'
   let table = tableHeader + '\n' + tableStructure
   modules.forEach((module) => {
-    renderFileRow(module.name, module.percentage)
+    renderFileRow(module.name, module.percentage, emoji)
   })
   return table
 
-  function renderFileRow(name, coverage) {
-    addRow(getRow(name, coverage))
-  }
-
-  function getRow(name, coverage) {
-    const status = getStatus(coverage, minCoverage)
-    return `|${name}|${formatCoverage(coverage)}|${status}|`
-  }
-
-  function addRow(row) {
+  function renderFileRow(name, coverage, emoji) {
+    const status = getStatus(coverage, minCoverage, emoji)
+    const row = `|${name}|${formatCoverage(coverage)}|${status}|`
     table = table + '\n' + row
   }
 }
 
-function getFileTable(project, minCoverage) {
+function getFileTable(project, minCoverage, emoji) {
   const coverage = project['coverage-changed-files']
   const tableHeader = project.isMultiModule
     ? `|Module|File|Coverage [${formatCoverage(coverage)}]||`
@@ -62,7 +64,8 @@ function getFileTable(project, minCoverage) {
         moduleName,
         `[${file.name}](${file.url})`,
         file.percentage,
-        project.isMultiModule
+        project.isMultiModule,
+        emoji
       )
     })
   })
@@ -70,8 +73,8 @@ function getFileTable(project, minCoverage) {
     ? '<details>\n' + '<summary>Files</summary>\n\n' + table + '\n\n</details>'
     : table
 
-  function renderFileRow(moduleName, fileName, coverage, isMultiModule) {
-    const status = getStatus(coverage, minCoverage)
+  function renderFileRow(moduleName, fileName, coverage, isMultiModule, emoji) {
+    const status = getStatus(coverage, minCoverage, emoji)
     const row = isMultiModule
       ? `|${moduleName}|${fileName}|${formatCoverage(coverage)}|${status}|`
       : `|${fileName}|${formatCoverage(coverage)}|${status}|`
@@ -79,8 +82,8 @@ function getFileTable(project, minCoverage) {
   }
 }
 
-function getOverallTable(coverage, minCoverage) {
-  const status = getStatus(coverage, minCoverage)
+function getOverallTable(coverage, minCoverage, emoji) {
+  const status = getStatus(coverage, minCoverage, emoji)
   const tableHeader = `|Total Project Coverage|${formatCoverage(
     coverage
   )}|${status}|`
@@ -96,10 +99,10 @@ function getTitle(title) {
   }
 }
 
-function getStatus(coverage, minCoverage) {
-  let status = ':green_apple:'
+function getStatus(coverage, minCoverage, emoji) {
+  let status = emoji.pass
   if (coverage < minCoverage) {
-    status = ':x:'
+    status = emoji.fail
   }
   return status
 }

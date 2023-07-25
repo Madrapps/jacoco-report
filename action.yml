@@ -26,6 +26,14 @@ inputs:
     description: "Comment won't be added if there is no coverage information present for the files changed"
     required: false
     default: 'false'
+  pass-emoji:
+    description: 'Github emoji to use for pass status shown when coverage greater than min coverage (should be a Github supported emoji)'
+    required: false
+    default: ':green_apple:'
+  fail-emoji:
+    description: 'Github emoji to use for fail status shown when coverage lesser than min coverage (should be a Github supported emoji)'
+    required: false
+    default: ':x:'
   debug-mode:
     description: 'Run the action in debug mode and get debug logs printed in console'
     required: false
