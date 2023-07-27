@@ -84,7 +84,10 @@ function getFileCoverageFromPackages(packages, files) {
       githubFile.lines.forEach((lineNumber) => {
         const jacocoLine = jacocoFile.lines[lineNumber]
         if (jacocoLine) {
-          lines.push(jacocoLine)
+          lines.push({
+            number: lineNumber,
+            ...jacocoLine,
+          })
         }
       })
       resultFiles.push({

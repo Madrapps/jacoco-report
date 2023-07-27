@@ -53,6 +53,7 @@ describe('process', function () {
                   percentage: 100,
                   lines: [
                     {
+                      number: 10,
                       branch: { covered: '0', missed: '0' },
                       instruction: { covered: '4', missed: '0' },
                     },
@@ -88,6 +89,7 @@ describe('process', function () {
                   percentage: 100,
                   lines: [
                     {
+                      number: 10,
                       branch: { covered: '0', missed: '0' },
                       instruction: { covered: '4', missed: '0' },
                     },
@@ -101,10 +103,12 @@ describe('process', function () {
                   url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt',
                   lines: [
                     {
+                      number: 18,
                       branch: { covered: '0', missed: '0' },
                       instruction: { covered: '4', missed: '0' },
                     },
                     {
+                      number: 22,
                       branch: { covered: '0', missed: '0' },
                       instruction: { covered: '0', missed: '5' },
                     },
@@ -178,10 +182,12 @@ describe('process', function () {
                   url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt',
                   lines: [
                     {
+                      number: 18,
                       branch: { covered: '0', missed: '0' },
                       instruction: { covered: '4', missed: '0' },
                     },
                     {
+                      number: 22,
                       branch: { covered: '0', missed: '0' },
                       instruction: { covered: '0', missed: '5' },
                     },
@@ -270,10 +276,12 @@ describe('process', function () {
                   url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt',
                   lines: [
                     {
+                      number: 18,
                       branch: { covered: '0', missed: '0' },
                       instruction: { covered: '4', missed: '0' },
                     },
                     {
+                      number: 22,
                       branch: { covered: '0', missed: '0' },
                       instruction: { covered: '0', missed: '5' },
                     },
