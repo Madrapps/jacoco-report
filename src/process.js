@@ -1,4 +1,4 @@
-const { TAG } = require('./util')
+const { TAG, getFilesWithCoverage } = require('./util')
 
 function getProjectCoverage(reports, files) {
   const moduleCoverages = []
@@ -70,29 +70,29 @@ function getModuleFromParent(parent) {
 function getFileCoverageFromPackages(packages, files) {
   const result = {}
   const resultFiles = []
-  packages.forEach((item) => {
-    const packageName = item['$'].name
-    const sourceFiles = item[TAG.SOURCE_FILE]
-    sourceFiles.forEach((sourceFile) => {
-      const sourceFileName = sourceFile['$'].name
-      const file = files.find(function (f) {
-        return f.filePath.endsWith(`${packageName}/${sourceFileName}`)
-      })
-      if (file != null) {
-        const fileName = sourceFile['$'].name
-        const counters = sourceFile['counter']
-        if (counters != null && counters.length !== 0) {
-          const coverage = getDetailedCoverage(counters, 'INSTRUCTION')
-          file['name'] = fileName
-          file['missed'] = coverage.missed
-          file['covered'] = coverage.covered
-          file['percentage'] = coverage.percentage
-          resultFiles.push(file)
-        }
-      }
+  const jacocoFiles = getFilesWithCoverage(packages)
+  jacocoFiles.forEach((jacocoFile) => {
+    const name = jacocoFile.name
+    const packageName = jacocoFile.packageName
+    const githubFile = files.find(function (f) {
+      return f.filePath.endsWith(`${packageName}/${name}`)
     })
-    resultFiles.sort((a, b) => b.percentage - a.percentage)
+    if (githubFile) {
+      const missed = parseFloat(jacocoFile.instruction.missed)
+      const covered = parseFloat(jacocoFile.instruction.covered)
+      resultFiles.push({
+        name,
+        url: githubFile.url,
+        missed,
+        covered,
+        percentage: parseFloat(
+          ((covered / (covered + missed)) * 100).toFixed(2)
+        ),
+      })
+    }
   })
+  resultFiles.sort((a, b) => b.percentage - a.percentage)
+
   result.files = resultFiles
   if (resultFiles.length !== 0) {
     result.percentage = getTotalPercentage(resultFiles)

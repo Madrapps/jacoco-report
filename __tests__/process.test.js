@@ -51,8 +51,6 @@ describe('process', function () {
               name: 'jacoco-playground',
               files: [
                 {
-                  filePath:
-                    'src/main/java/com/madrapps/jacoco/operation/StringOp.java',
                   url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
                   name: 'StringOp.java',
                   covered: 7,
@@ -75,15 +73,18 @@ describe('process', function () {
             filePath:
               'src/main/java/com/madrapps/jacoco/operation/StringOp.java',
             url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
+            lines: [17, 18, 19, 20, 21],
           },
           {
             filePath: 'src/main/kotlin/com/madrapps/jacoco/Math.kt',
             url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt',
+            lines: [20],
           },
           {
             filePath:
               'src/test/java/com/madrapps/jacoco/operation/StringOpTest.java',
             url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/test/java/com/madrapps/jacoco/operation/StringOpTest.java',
+            lines: [8, 9, 10],
           },
         ]
         const actual = process.getProjectCoverage(reports, changedFiles)
@@ -93,8 +94,6 @@ describe('process', function () {
               name: 'jacoco-playground',
               files: [
                 {
-                  filePath:
-                    'src/main/java/com/madrapps/jacoco/operation/StringOp.java',
                   url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
                   name: 'StringOp.java',
                   covered: 7,
@@ -105,7 +104,6 @@ describe('process', function () {
                   covered: 7,
                   missed: 8,
                   percentage: 46.67,
-                  filePath: 'src/main/kotlin/com/madrapps/jacoco/Math.kt',
                   name: 'Math.kt',
                   url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt',
                 },
@@ -146,8 +144,6 @@ describe('process', function () {
               files: [
                 {
                   covered: 10,
-                  filePath:
-                    'src/main/java/com/madrapps/playground/MainViewModel.kt',
                   missed: 7,
                   name: 'MainViewModel.kt',
                   percentage: 58.82,
@@ -186,7 +182,6 @@ describe('process', function () {
               files: [
                 {
                   covered: 19,
-                  filePath: 'src/main/java/com/madrapps/math/Math.kt',
                   missed: 8,
                   name: 'Math.kt',
                   percentage: 70.37,
@@ -202,8 +197,6 @@ describe('process', function () {
               files: [
                 {
                   covered: 10,
-                  filePath:
-                    'src/main/java/com/madrapps/playground/MainViewModel.kt',
                   missed: 7,
                   name: 'MainViewModel.kt',
                   percentage: 58.82,
@@ -245,8 +238,6 @@ describe('process', function () {
               files: [
                 {
                   covered: 10,
-                  filePath:
-                    'src/main/java/com/madrapps/playground/MainViewModel.kt',
                   missed: 7,
                   name: 'MainViewModel.kt',
                   percentage: 58.82,
@@ -285,7 +276,6 @@ describe('process', function () {
               files: [
                 {
                   covered: 19,
-                  filePath: 'src/main/java/com/madrapps/math/Math.kt',
                   missed: 8,
                   name: 'Math.kt',
                   percentage: 70.37,
@@ -299,8 +289,6 @@ describe('process', function () {
               files: [
                 {
                   covered: 10,
-                  filePath:
-                    'src/main/java/com/madrapps/playground/MainViewModel.kt',
                   missed: 7,
                   name: 'MainViewModel.kt',
                   percentage: 58.82,
