@@ -78,28 +78,31 @@ function getFileCoverageFromPackages(packages, files) {
       return f.filePath.endsWith(`${packageName}/${name}`)
     })
     if (githubFile) {
-      const missed = parseFloat(jacocoFile.instruction.missed)
-      const covered = parseFloat(jacocoFile.instruction.covered)
-      const lines = []
-      githubFile.lines.forEach((lineNumber) => {
-        const jacocoLine = jacocoFile.lines[lineNumber]
-        if (jacocoLine) {
-          lines.push({
-            number: lineNumber,
-            ...jacocoLine,
-          })
-        }
-      })
-      resultFiles.push({
-        name,
-        url: githubFile.url,
-        missed,
-        covered,
-        percentage: parseFloat(
-          ((covered / (covered + missed)) * 100).toFixed(2)
-        ),
-        lines,
-      })
+      const instruction = jacocoFile.instruction
+      if (instruction) {
+        const missed = parseFloat(instruction.missed)
+        const covered = parseFloat(instruction.covered)
+        const lines = []
+        githubFile.lines.forEach((lineNumber) => {
+          const jacocoLine = jacocoFile.lines[lineNumber]
+          if (jacocoLine) {
+            lines.push({
+              number: lineNumber,
+              ...jacocoLine,
+            })
+          }
+        })
+        resultFiles.push({
+          name,
+          url: githubFile.url,
+          missed,
+          covered,
+          percentage: parseFloat(
+            ((covered / (covered + missed)) * 100).toFixed(2)
+          ),
+          lines,
+        })
+      }
     }
   })
   resultFiles.sort((a, b) => b.percentage - a.percentage)
