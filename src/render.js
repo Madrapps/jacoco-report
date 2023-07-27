@@ -48,7 +48,7 @@ function getModuleTable(modules, minCoverage, emoji) {
 function getFileTable(project, minCoverage, emoji) {
   const coverage = project['coverage-changed-files']
   const tableHeader = project.isMultiModule
-    ? `|Module|File|Coverage [${formatCoverage(coverage)}]||`
+    ? '|Module|File|Coverage||'
     : `|File|Coverage [${formatCoverage(coverage)}]||`
   const tableStructure = project.isMultiModule
     ? '|:-|:-|:-|:-:|'
