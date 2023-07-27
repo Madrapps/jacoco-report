@@ -86,9 +86,7 @@ function getFileTable(project, minCoverage, emoji) {
     const status = getStatus(coverage, minCoverage, emoji)
     let coveragePercentage = `${formatCoverage(coverage)}`
     if (coverageDiff !== 0) {
-      coveragePercentage += ` <sup>**\`(${formatCoverage(
-        coverageDiff
-      )})\`**<sup>`
+      coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
     }
     const row = isMultiModule
       ? `|${moduleName}|${fileName}|${coveragePercentage}|${status}|`
