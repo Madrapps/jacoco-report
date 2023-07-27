@@ -54,8 +54,8 @@ describe('process', function () {
                   lines: [
                     {
                       number: 10,
-                      branch: { covered: '0', missed: '0' },
-                      instruction: { covered: '4', missed: '0' },
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 4, missed: 0 },
                     },
                   ],
                 },
@@ -90,8 +90,8 @@ describe('process', function () {
                   lines: [
                     {
                       number: 10,
-                      branch: { covered: '0', missed: '0' },
-                      instruction: { covered: '4', missed: '0' },
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 4, missed: 0 },
                     },
                   ],
                 },
@@ -104,13 +104,13 @@ describe('process', function () {
                   lines: [
                     {
                       number: 18,
-                      branch: { covered: '0', missed: '0' },
-                      instruction: { covered: '4', missed: '0' },
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 4, missed: 0 },
                     },
                     {
                       number: 22,
-                      branch: { covered: '0', missed: '0' },
-                      instruction: { covered: '0', missed: '5' },
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 0, missed: 5 },
                     },
                   ],
                 },
@@ -183,13 +183,13 @@ describe('process', function () {
                   lines: [
                     {
                       number: 18,
-                      branch: { covered: '0', missed: '0' },
-                      instruction: { covered: '4', missed: '0' },
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 4, missed: 0 },
                     },
                     {
                       number: 22,
-                      branch: { covered: '0', missed: '0' },
-                      instruction: { covered: '0', missed: '5' },
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 0, missed: 5 },
                     },
                   ],
                 },
@@ -277,13 +277,13 @@ describe('process', function () {
                   lines: [
                     {
                       number: 18,
-                      branch: { covered: '0', missed: '0' },
-                      instruction: { covered: '4', missed: '0' },
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 4, missed: 0 },
                     },
                     {
                       number: 22,
-                      branch: { covered: '0', missed: '0' },
-                      instruction: { covered: '0', missed: '5' },
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 0, missed: 5 },
                     },
                   ],
                 },

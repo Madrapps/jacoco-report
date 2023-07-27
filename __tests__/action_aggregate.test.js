@@ -109,7 +109,7 @@ describe('Aggregate report', function () {
 
 |Module|File|Coverage [65.91%]||
 |:-|:-|:-:|:-:|
-|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
+|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt)|70.37% (-0.19%)|:green_apple:|
 |module-3|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
 
 </details>`)

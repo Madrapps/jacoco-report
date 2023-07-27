@@ -60,10 +60,12 @@ function getFileTable(project, minCoverage, emoji) {
       if (index !== 0) {
         moduleName = ''
       }
+      const coverageDifference = getCoverageDifference(file)
       renderFileRow(
         moduleName,
         `[${file.name}](${file.url})`,
         file.percentage,
+        coverageDifference,
         project.isMultiModule,
         emoji
       )
@@ -73,13 +75,38 @@ function getFileTable(project, minCoverage, emoji) {
     ? '<details>\n' + '<summary>Files</summary>\n\n' + table + '\n\n</details>'
     : table
 
-  function renderFileRow(moduleName, fileName, coverage, isMultiModule, emoji) {
+  function renderFileRow(
+    moduleName,
+    fileName,
+    coverage,
+    coverageDiff,
+    isMultiModule,
+    emoji
+  ) {
     const status = getStatus(coverage, minCoverage, emoji)
+    let coveragePercentage = `${formatCoverage(coverage)}`
+    if (coverageDiff !== 0) {
+      coveragePercentage += ` (${formatCoverage(coverageDiff)})`
+    }
     const row = isMultiModule
-      ? `|${moduleName}|${fileName}|${formatCoverage(coverage)}|${status}|`
-      : `|${fileName}|${formatCoverage(coverage)}|${status}|`
+      ? `|${moduleName}|${fileName}|${coveragePercentage}|${status}|`
+      : `|${fileName}|${coveragePercentage}|${status}|`
     table = table + '\n' + row
   }
+}
+
+const sumReducer = (total, value) => {
+  return total + value
+}
+
+function getCoverageDifference(file) {
+  const totalInstructions = file.covered + file.missed
+  const missed = file.lines
+    .map((line) => {
+      return toFloat(line.instruction.missed)
+    })
+    .reduce(sumReducer, 0.0)
+  return -(missed / totalInstructions)
 }
 
 function getOverallTable(coverage, minCoverage, emoji) {
@@ -108,7 +135,11 @@ function getStatus(coverage, minCoverage, emoji) {
 }
 
 function formatCoverage(coverage) {
-  return `${parseFloat(coverage.toFixed(2))}%`
+  return `${toFloat(coverage)}%`
+}
+
+function toFloat(value) {
+  return parseFloat(value.toFixed(2))
 }
 
 module.exports = {

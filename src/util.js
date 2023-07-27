@@ -70,8 +70,8 @@ function getFilesWithCoverage(packages) {
         const counterSelf = counter[TAG.SELF]
         const type = counterSelf.type
         file[type.toLowerCase()] = {
-          missed: counterSelf.missed ?? 0,
-          covered: counterSelf.covered ?? 0,
+          missed: parseInt(counterSelf.missed) ?? 0,
+          covered: parseInt(counterSelf.covered) ?? 0,
         }
       })
 
@@ -81,12 +81,12 @@ function getFilesWithCoverage(packages) {
         const lineSelf = line[TAG.SELF]
         file.lines[lineSelf.nr] = {
           instruction: {
-            missed: lineSelf.mi ?? 0,
-            covered: lineSelf.ci ?? 0,
+            missed: parseInt(lineSelf.mi) ?? 0,
+            covered: parseInt(lineSelf.ci) ?? 0,
           },
           branch: {
-            missed: lineSelf.mb ?? 0,
-            covered: lineSelf.cb ?? 0,
+            missed: parseInt(lineSelf.mb) ?? 0,
+            covered: parseInt(lineSelf.cb) ?? 0,
           },
         }
       })

@@ -57,21 +57,42 @@ describe('get PR Comment', function () {
           percentage: 49.23,
           files: [
             {
-              filePath:
-                'src/main/java/com/madrapps/jacoco/operation/StringOp.java',
               url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
               name: 'StringOp.java',
               covered: 7,
               missed: 0,
               percentage: 100,
+              lines: [
+                {
+                  number: 10,
+                  branch: { covered: 0, missed: 0 },
+                  instruction: { covered: 1, missed: 0 },
+                },
+                {
+                  number: 12,
+                  branch: { covered: 2, missed: 0 },
+                  instruction: { covered: 2, missed: 0 },
+                },
+              ],
             },
             {
               covered: 7,
               missed: 8,
               percentage: 46.67,
-              filePath: 'src/main/kotlin/com/madrapps/jacoco/Math.kt',
               name: 'Math.kt',
               url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt',
+              lines: [
+                {
+                  number: 8,
+                  branch: { covered: 2, missed: 2 },
+                  instruction: { covered: 1, missed: 3 },
+                },
+                {
+                  number: 9,
+                  branch: { covered: 1, missed: 4 },
+                  instruction: { covered: 3, missed: 2 },
+                },
+              ],
             },
           ],
         },
@@ -89,7 +110,7 @@ describe('get PR Comment', function () {
 |File|Coverage [63.64%]||
 |:-|:-:|:-:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|`
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67% (-0.33%)|:x:|`
       )
     })
 
@@ -102,7 +123,7 @@ describe('get PR Comment', function () {
 |File|Coverage [63.64%]||
 |:-|:-:|:-:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|`
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67% (-0.33%)|:x:|`
       )
     })
 
@@ -115,7 +136,7 @@ describe('get PR Comment', function () {
 |File|Coverage [63.64%]||
 |:-|:-:|:-:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|`
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67% (-0.33%)|:x:|`
       )
     })
 
@@ -128,7 +149,7 @@ describe('get PR Comment', function () {
 |File|Coverage [63.64%]||
 |:-|:-:|:-:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|`
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67% (-0.33%)|:green_apple:|`
       )
     })
 
@@ -149,7 +170,7 @@ describe('get PR Comment', function () {
 |File|Coverage [63.64%]||
 |:-|:-:|:-:|
 |[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|`
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67% (-0.33%)|:green_apple:|`
       )
     })
   })
@@ -163,11 +184,17 @@ describe('get PR Comment', function () {
           files: [
             {
               covered: 19,
-              filePath: 'src/main/java/com/madrapps/math/Math.kt',
               missed: 8,
               name: 'Math.kt',
               percentage: 70.37,
               url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt',
+              lines: [
+                {
+                  number: 10,
+                  branch: { covered: 0, missed: 0 },
+                  instruction: { covered: 4, missed: 8 },
+                },
+              ],
             },
           ],
         },
@@ -177,20 +204,61 @@ describe('get PR Comment', function () {
           files: [
             {
               covered: 10,
-              filePath:
-                'src/main/java/com/madrapps/playground/MainViewModel.kt',
               missed: 7,
               name: 'MainViewModel.kt',
               percentage: 58.82,
               url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
+              lines: [
+                {
+                  number: 16,
+                  branch: { covered: 0, missed: 0 },
+                  instruction: { covered: 2, missed: 0 },
+                },
+                {
+                  number: 17,
+                  branch: { covered: 1, missed: 2 },
+                  instruction: { covered: 1, missed: 0 },
+                },
+                {
+                  number: 18,
+                  branch: { covered: 0, missed: 3 },
+                  instruction: { covered: 3, missed: 3 },
+                },
+              ],
             },
             {
               covered: 10,
-              filePath: 'src/main/java/com/madrapps/playground/StringOp.kt',
               missed: 21,
               name: 'StringOp.kt',
               percentage: 32.25,
               url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt',
+              lines: [
+                {
+                  number: 16,
+                  branch: { covered: 0, missed: 0 },
+                  instruction: { covered: 2, missed: 2 },
+                },
+                {
+                  number: 17,
+                  branch: { covered: 1, missed: 0 },
+                  instruction: { covered: 1, missed: 1 },
+                },
+                {
+                  number: 25,
+                  branch: { covered: 1, missed: 3 },
+                  instruction: { covered: 1, missed: 1 },
+                },
+                {
+                  number: 26,
+                  branch: { covered: 2, missed: 0 },
+                  instruction: { covered: 1, missed: 2 },
+                },
+                {
+                  number: 27,
+                  branch: { covered: 0, missed: 3 },
+                  instruction: { covered: 1, missed: 3 },
+                },
+              ],
             },
           ],
         },
@@ -215,9 +283,9 @@ describe('get PR Comment', function () {
 
 |Module|File|Coverage [63.64%]||
 |:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
-||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25%|:x:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37% (-0.3%)|:green_apple:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82% (-0.18%)|:x:|
+||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25% (-0.29%)|:x:|
 
 </details>`
       )
@@ -239,9 +307,9 @@ describe('get PR Comment', function () {
 
 |Module|File|Coverage [63.64%]||
 |:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
-||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25%|:x:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37% (-0.3%)|:green_apple:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82% (-0.18%)|:x:|
+||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25% (-0.29%)|:x:|
 
 </details>`
       )
@@ -263,9 +331,9 @@ describe('get PR Comment', function () {
 
 |Module|File|Coverage [63.64%]||
 |:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37%|:x:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
-||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25%|:x:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37% (-0.3%)|:x:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82% (-0.18%)|:x:|
+||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25% (-0.29%)|:x:|
 
 </details>`
       )
@@ -287,9 +355,9 @@ describe('get PR Comment', function () {
 
 |Module|File|Coverage [63.64%]||
 |:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:green_apple:|
-||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25%|:green_apple:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37% (-0.3%)|:green_apple:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82% (-0.18%)|:green_apple:|
+||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25% (-0.29%)|:green_apple:|
 
 </details>`
       )
@@ -319,9 +387,9 @@ describe('get PR Comment', function () {
 
 |Module|File|Coverage [63.64%]||
 |:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:green_apple:|
-||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25%|:green_apple:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37% (-0.3%)|:green_apple:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82% (-0.18%)|:green_apple:|
+||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25% (-0.29%)|:green_apple:|
 
 </details>`
       )

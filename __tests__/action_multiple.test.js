@@ -96,7 +96,7 @@ describe('Multiple reports', function () {
 
 |Module|File|Coverage [65.91%]||
 |:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt)|70.37% (-0.19%)|:green_apple:|
 |app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
 
 </details>`)
