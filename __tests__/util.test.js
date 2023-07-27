@@ -103,16 +103,32 @@ describe('Util', function () {
               instruction: { covered: '3', missed: '0' },
             },
             6: {
-              branch: { covered: '0', missed: '4' },
+              branch: { covered: '0', missed: '0' },
               instruction: { covered: '4', missed: '0' },
             },
             10: {
               branch: { covered: '0', missed: '0' },
-              instruction: { covered: '0', missed: '4' },
+              instruction: { covered: '4', missed: '0' },
             },
             14: {
-              branch: { covered: '4', missed: '0' },
-              instruction: { covered: '2', missed: '4' },
+              branch: { covered: '0', missed: '0' },
+              instruction: { covered: '4', missed: '0' },
+            },
+            18: {
+              branch: { covered: '0', missed: '0' },
+              instruction: { covered: '4', missed: '0' },
+            },
+            22: {
+              branch: { covered: '0', missed: '0' },
+              instruction: { covered: '0', missed: '5' },
+            },
+            26: {
+              branch: { covered: '0', missed: '0' },
+              instruction: { covered: '0', missed: '4' },
+            },
+            30: {
+              branch: { covered: '0', missed: '0' },
+              instruction: { covered: '0', missed: '4' },
             },
           },
           method: { covered: '2', missed: '2' },
@@ -125,16 +141,23 @@ describe('Util', function () {
           instruction: { covered: '7', missed: '0' },
           line: { covered: '2', missed: '0' },
           lines: {
-            3: {
-              branch: { covered: '3', missed: '0' },
+            6: {
+              branch: { covered: '0', missed: '0' },
               instruction: { covered: '3', missed: '0' },
             },
-            6: {
-              branch: { covered: '0', missed: '2' },
+            10: {
+              branch: { covered: '0', missed: '0' },
+              instruction: { covered: '4', missed: '0' },
+            },
+            15: {
+              branch: { covered: '0', missed: '0' },
               instruction: { covered: '4', missed: '0' },
             },
           },
-          method: { covered: '2', missed: '0' },
+          method: {
+            covered: '2',
+            missed: '0',
+          },
           name: 'StringOp.java',
           packageName: 'com/madrapps/jacoco/operation',
         },

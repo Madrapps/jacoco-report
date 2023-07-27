@@ -1,6 +1,7 @@
 const fs = require('fs')
 const parser = require('xml2js')
 const process = require('../src/process')
+const { CHANGED_FILE } = require('./mocks.test')
 
 describe('process', function () {
   describe('get overall coverage', function () {
@@ -37,13 +38,7 @@ describe('process', function () {
 
       it('one file changed', async () => {
         const reports = await getSingleReport()
-        const changedFiles = [
-          {
-            filePath:
-              'src/main/java/com/madrapps/jacoco/operation/StringOp.java',
-            url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
-          },
-        ]
+        const changedFiles = [CHANGED_FILE.STRING_OP]
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [
@@ -56,6 +51,12 @@ describe('process', function () {
                   covered: 7,
                   missed: 0,
                   percentage: 100,
+                  lines: [
+                    {
+                      branch: { covered: '0', missed: '0' },
+                      instruction: { covered: '4', missed: '0' },
+                    },
+                  ],
                 },
               ],
               percentage: 49.02,
@@ -69,23 +70,9 @@ describe('process', function () {
       it('multiple files changed', async () => {
         const reports = await getSingleReport()
         const changedFiles = [
-          {
-            filePath:
-              'src/main/java/com/madrapps/jacoco/operation/StringOp.java',
-            url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
-            lines: [17, 18, 19, 20, 21],
-          },
-          {
-            filePath: 'src/main/kotlin/com/madrapps/jacoco/Math.kt',
-            url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt',
-            lines: [20],
-          },
-          {
-            filePath:
-              'src/test/java/com/madrapps/jacoco/operation/StringOpTest.java',
-            url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/test/java/com/madrapps/jacoco/operation/StringOpTest.java',
-            lines: [8, 9, 10],
-          },
+          CHANGED_FILE.STRING_OP,
+          CHANGED_FILE.MATH,
+          CHANGED_FILE.STRING_OP_TEST,
         ]
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
@@ -99,6 +86,12 @@ describe('process', function () {
                   covered: 7,
                   missed: 0,
                   percentage: 100,
+                  lines: [
+                    {
+                      branch: { covered: '0', missed: '0' },
+                      instruction: { covered: '4', missed: '0' },
+                    },
+                  ],
                 },
                 {
                   covered: 7,
@@ -106,6 +99,16 @@ describe('process', function () {
                   percentage: 46.67,
                   name: 'Math.kt',
                   url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt',
+                  lines: [
+                    {
+                      branch: { covered: '0', missed: '0' },
+                      instruction: { covered: '4', missed: '0' },
+                    },
+                    {
+                      branch: { covered: '0', missed: '0' },
+                      instruction: { covered: '0', missed: '5' },
+                    },
+                  ],
                 },
               ],
               percentage: 49.02,
@@ -131,12 +134,7 @@ describe('process', function () {
 
       it('one file changed', async () => {
         const reports = await getMultipleReports()
-        const changedFiles = [
-          {
-            filePath: 'src/main/java/com/madrapps/playground/MainViewModel.kt',
-            url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
-          },
-        ]
+        const changedFiles = [CHANGED_FILE.MAIN_VIEW_MODEL]
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [
@@ -148,6 +146,7 @@ describe('process', function () {
                   name: 'MainViewModel.kt',
                   percentage: 58.82,
                   url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
+                  lines: [],
                 },
               ],
               name: 'app',
@@ -162,18 +161,9 @@ describe('process', function () {
       it('multiple files changed', async () => {
         const reports = await getMultipleReports()
         const changedFiles = [
-          {
-            filePath: 'src/main/java/com/madrapps/playground/MainViewModel.kt',
-            url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
-          },
-          {
-            filePath: 'src/main/java/com/madrapps/math/Math.kt',
-            url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt',
-          },
-          {
-            filePath: 'src/test/java/com/madrapps/math/MathTest.kt',
-            url: 'https://github.com/thsaravana/jacoco-android-playground/src/test/java/com/madrapps/math/MathTest.kt',
-          },
+          CHANGED_FILE.MAIN_VIEW_MODEL,
+          CHANGED_FILE.MATH_ANDROID,
+          CHANGED_FILE.MATH_TEST,
         ]
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
@@ -186,6 +176,16 @@ describe('process', function () {
                   name: 'Math.kt',
                   percentage: 70.37,
                   url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt',
+                  lines: [
+                    {
+                      branch: { covered: '0', missed: '0' },
+                      instruction: { covered: '4', missed: '0' },
+                    },
+                    {
+                      branch: { covered: '0', missed: '0' },
+                      instruction: { covered: '0', missed: '5' },
+                    },
+                  ],
                 },
               ],
               name: 'math',
@@ -201,6 +201,7 @@ describe('process', function () {
                   name: 'MainViewModel.kt',
                   percentage: 58.82,
                   url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
+                  lines: [],
                 },
               ],
             },
@@ -225,12 +226,7 @@ describe('process', function () {
 
       it('one file changed', async () => {
         const reports = await getAggregateReport()
-        const changedFiles = [
-          {
-            filePath: 'src/main/java/com/madrapps/playground/MainViewModel.kt',
-            url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
-          },
-        ]
+        const changedFiles = [CHANGED_FILE.MAIN_VIEW_MODEL]
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [
@@ -242,6 +238,7 @@ describe('process', function () {
                   name: 'MainViewModel.kt',
                   percentage: 58.82,
                   url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
+                  lines: [],
                 },
               ],
               name: 'module-3',
@@ -256,18 +253,9 @@ describe('process', function () {
       it('multiple files changed', async () => {
         const reports = await getAggregateReport()
         const changedFiles = [
-          {
-            filePath: 'src/main/java/com/madrapps/playground/MainViewModel.kt',
-            url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
-          },
-          {
-            filePath: 'src/main/java/com/madrapps/math/Math.kt',
-            url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt',
-          },
-          {
-            filePath: 'src/test/java/com/madrapps/math/MathTest.kt',
-            url: 'https://github.com/thsaravana/jacoco-android-playground/src/test/java/com/madrapps/math/MathTest.kt',
-          },
+          CHANGED_FILE.MAIN_VIEW_MODEL,
+          CHANGED_FILE.MATH_ANDROID,
+          CHANGED_FILE.MATH_TEST,
         ]
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
@@ -280,6 +268,16 @@ describe('process', function () {
                   name: 'Math.kt',
                   percentage: 70.37,
                   url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt',
+                  lines: [
+                    {
+                      branch: { covered: '0', missed: '0' },
+                      instruction: { covered: '4', missed: '0' },
+                    },
+                    {
+                      branch: { covered: '0', missed: '0' },
+                      instruction: { covered: '0', missed: '5' },
+                    },
+                  ],
                 },
               ],
               name: 'module-2',
@@ -293,6 +291,7 @@ describe('process', function () {
                   name: 'MainViewModel.kt',
                   percentage: 58.82,
                   url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
+                  lines: [],
                 },
               ],
               name: 'module-3',

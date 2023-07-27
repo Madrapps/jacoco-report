@@ -60,7 +60,7 @@
             <line cb="0" ci="4" mb="0" mi="0" nr="10" />
             <line cb="0" ci="4" mb="0" mi="0" nr="14" />
             <line cb="0" ci="4" mb="0" mi="0" nr="18" />
-            <line cb="0" ci="0" mb="0" mi="4" nr="22" />
+            <line cb="0" ci="0" mb="0" mi="5" nr="22" />
             <line cb="0" ci="0" mb="0" mi="4" nr="26" />
             <counter covered="19" missed="8" type="INSTRUCTION" />
             <counter covered="5" missed="2" type="LINE" />

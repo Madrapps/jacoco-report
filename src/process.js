@@ -80,6 +80,13 @@ function getFileCoverageFromPackages(packages, files) {
     if (githubFile) {
       const missed = parseFloat(jacocoFile.instruction.missed)
       const covered = parseFloat(jacocoFile.instruction.covered)
+      const lines = []
+      githubFile.lines.forEach((lineNumber) => {
+        const jacocoLine = jacocoFile.lines[lineNumber]
+        if (jacocoLine) {
+          lines.push(jacocoLine)
+        }
+      })
       resultFiles.push({
         name,
         url: githubFile.url,
@@ -88,6 +95,7 @@ function getFileCoverageFromPackages(packages, files) {
         percentage: parseFloat(
           ((covered / (covered + missed)) * 100).toFixed(2)
         ),
+        lines,
       })
     }
   })
