@@ -51,8 +51,8 @@ function getFileTable(project, minCoverage, emoji) {
     ? `|Module|File|Coverage [${formatCoverage(coverage)}]||`
     : `|File|Coverage [${formatCoverage(coverage)}]||`
   const tableStructure = project.isMultiModule
-    ? '|:-|:-|:-:|:-:|'
-    : '|:-|:-:|:-:|'
+    ? '|:-|:-|:-|:-:|'
+    : '|:-|:-|:-:|'
   let table = tableHeader + '\n' + tableStructure
   project.modules.forEach((module) => {
     module.files.forEach((file, index) => {
