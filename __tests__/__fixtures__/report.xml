@@ -85,11 +85,11 @@
         </class>
         <sourcefile name="Utils.java">
             <line nr="3" mi="0" ci="3" mb="0" cb="0"/>
-            <line nr="6" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="6" mi="4" ci="0" mb="1" cb="3"/>
             <line nr="10" mi="0" ci="4" mb="0" cb="0"/>
-            <line nr="14" mi="4" ci="0" mb="0" cb="0"/>
-            <line nr="18" mi="0" ci="4" mb="0" cb="0"/>
-            <line nr="22" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="14" mi="4" ci="0" mb="2" cb="2"/>
+            <line nr="18" mi="0" ci="4" mb="0" cb="3"/>
+            <line nr="22" mi="4" ci="0" mb="4" cb="0"/>
             <line nr="26" mi="6" ci="0" mb="0" cb="0"/>
             <counter type="INSTRUCTION" missed="18" covered="11"/>
             <counter type="LINE" missed="4" covered="3"/>
@@ -99,9 +99,9 @@
         </sourcefile>
         <sourcefile name="Math.kt">
             <line nr="3" mi="0" ci="3" mb="0" cb="0"/>
-            <line nr="6" mi="0" ci="4" mb="0" cb="0"/>
+            <line nr="6" mi="0" ci="4" mb="4" cb="0"/>
             <line nr="10" mi="4" ci="0" mb="0" cb="0"/>
-            <line nr="14" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="14" mi="4" ci="2" mb="0" cb="4"/>
             <counter type="INSTRUCTION" missed="8" covered="7"/>
             <counter type="LINE" missed="2" covered="2"/>
             <counter type="COMPLEXITY" missed="2" covered="2"/>
@@ -135,8 +135,8 @@
             <counter type="CLASS" missed="0" covered="1"/>
         </class>
         <sourcefile name="StringOp.java">
-            <line nr="3" mi="0" ci="3" mb="0" cb="0"/>
-            <line nr="6" mi="0" ci="4" mb="0" cb="0"/>
+            <line nr="3" mi="0" ci="3" mb="0" cb="3"/>
+            <line nr="6" mi="0" ci="4" mb="2" cb="0"/>
             <counter type="INSTRUCTION" missed="0" covered="7"/>
             <counter type="LINE" missed="0" covered="2"/>
             <counter type="COMPLEXITY" missed="0" covered="2"/>

@@ -1,5 +1,4 @@
-const TAG_GROUP = 'group'
-const TAG_PACKAGE = 'package'
+const { TAG } = require('./util')
 
 function getProjectCoverage(reports, files) {
   const moduleCoverages = []
@@ -37,7 +36,7 @@ function getProjectCoverage(reports, files) {
 function getModulesFromReports(reports) {
   const modules = []
   reports.forEach((report) => {
-    const groupTag = report[TAG_GROUP]
+    const groupTag = report[TAG.GROUP]
     if (groupTag) {
       const groups = groupTag.filter((group) => group !== undefined)
       groups.forEach((group) => {
@@ -54,7 +53,7 @@ function getModulesFromReports(reports) {
 }
 
 function getModuleFromParent(parent) {
-  const packageTag = parent[TAG_PACKAGE]
+  const packageTag = parent[TAG.PACKAGE]
   if (packageTag) {
     const packages = packageTag.filter((pacage) => pacage !== undefined)
     if (packages.length !== 0) {
@@ -73,7 +72,7 @@ function getFileCoverageFromPackages(packages, files) {
   const resultFiles = []
   packages.forEach((item) => {
     const packageName = item['$'].name
-    const sourceFiles = item['sourcefile']
+    const sourceFiles = item[TAG.SOURCE_FILE]
     sourceFiles.forEach((sourceFile) => {
       const sourceFileName = sourceFile['$'].name
       const file = files.find(function (f) {
