@@ -19249,10 +19249,9 @@ module.exports = {
 /***/ }),
 
 /***/ 4053:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const TAG_GROUP = 'group'
-const TAG_PACKAGE = 'package'
+const { TAG, getFilesWithCoverage } = __nccwpck_require__(683)
 
 function getProjectCoverage(reports, files) {
   const moduleCoverages = []
@@ -19290,7 +19289,7 @@ function getProjectCoverage(reports, files) {
 function getModulesFromReports(reports) {
   const modules = []
   reports.forEach((report) => {
-    const groupTag = report[TAG_GROUP]
+    const groupTag = report[TAG.GROUP]
     if (groupTag) {
       const groups = groupTag.filter((group) => group !== undefined)
       groups.forEach((group) => {
@@ -19307,7 +19306,7 @@ function getModulesFromReports(reports) {
 }
 
 function getModuleFromParent(parent) {
-  const packageTag = parent[TAG_PACKAGE]
+  const packageTag = parent[TAG.PACKAGE]
   if (packageTag) {
     const packages = packageTag.filter((pacage) => pacage !== undefined)
     if (packages.length !== 0) {
@@ -19324,29 +19323,40 @@ function getModuleFromParent(parent) {
 function getFileCoverageFromPackages(packages, files) {
   const result = {}
   const resultFiles = []
-  packages.forEach((item) => {
-    const packageName = item['$'].name
-    const sourceFiles = item['sourcefile']
-    sourceFiles.forEach((sourceFile) => {
-      const sourceFileName = sourceFile['$'].name
-      const file = files.find(function (f) {
-        return f.filePath.endsWith(`${packageName}/${sourceFileName}`)
-      })
-      if (file != null) {
-        const fileName = sourceFile['$'].name
-        const counters = sourceFile['counter']
-        if (counters != null && counters.length !== 0) {
-          const coverage = getDetailedCoverage(counters, 'INSTRUCTION')
-          file['name'] = fileName
-          file['missed'] = coverage.missed
-          file['covered'] = coverage.covered
-          file['percentage'] = coverage.percentage
-          resultFiles.push(file)
-        }
-      }
+  const jacocoFiles = getFilesWithCoverage(packages)
+  jacocoFiles.forEach((jacocoFile) => {
+    const name = jacocoFile.name
+    const packageName = jacocoFile.packageName
+    const githubFile = files.find(function (f) {
+      return f.filePath.endsWith(`${packageName}/${name}`)
     })
-    resultFiles.sort((a, b) => b.percentage - a.percentage)
+    if (githubFile) {
+      const missed = parseFloat(jacocoFile.instruction.missed)
+      const covered = parseFloat(jacocoFile.instruction.covered)
+      const lines = []
+      githubFile.lines.forEach((lineNumber) => {
+        const jacocoLine = jacocoFile.lines[lineNumber]
+        if (jacocoLine) {
+          lines.push({
+            number: lineNumber,
+            ...jacocoLine,
+          })
+        }
+      })
+      resultFiles.push({
+        name,
+        url: githubFile.url,
+        missed,
+        covered,
+        percentage: parseFloat(
+          ((covered / (covered + missed)) * 100).toFixed(2)
+        ),
+        lines,
+      })
+    }
   })
+  resultFiles.sort((a, b) => b.percentage - a.percentage)
+
   result.files = resultFiles
   if (resultFiles.length !== 0) {
     result.percentage = getTotalPercentage(resultFiles)
@@ -19491,10 +19501,12 @@ function getFileTable(project, minCoverage, emoji) {
       if (index !== 0) {
         moduleName = ''
       }
+      const coverageDifference = getCoverageDifference(file)
       renderFileRow(
         moduleName,
         `[${file.name}](${file.url})`,
         file.percentage,
+        coverageDifference,
         project.isMultiModule,
         emoji
       )
@@ -19504,13 +19516,38 @@ function getFileTable(project, minCoverage, emoji) {
     ? '<details>\n' + '<summary>Files</summary>\n\n' + table + '\n\n</details>'
     : table
 
-  function renderFileRow(moduleName, fileName, coverage, isMultiModule, emoji) {
+  function renderFileRow(
+    moduleName,
+    fileName,
+    coverage,
+    coverageDiff,
+    isMultiModule,
+    emoji
+  ) {
     const status = getStatus(coverage, minCoverage, emoji)
+    let coveragePercentage = `${formatCoverage(coverage)}`
+    if (coverageDiff !== 0) {
+      coveragePercentage += ` (${formatCoverage(coverageDiff)})`
+    }
     const row = isMultiModule
-      ? `|${moduleName}|${fileName}|${formatCoverage(coverage)}|${status}|`
-      : `|${fileName}|${formatCoverage(coverage)}|${status}|`
+      ? `|${moduleName}|${fileName}|${coveragePercentage}|${status}|`
+      : `|${fileName}|${coveragePercentage}|${status}|`
     table = table + '\n' + row
   }
+}
+
+const sumReducer = (total, value) => {
+  return total + value
+}
+
+function getCoverageDifference(file) {
+  const totalInstructions = file.covered + file.missed
+  const missed = file.lines
+    .map((line) => {
+      return toFloat(line.instruction.missed)
+    })
+    .reduce(sumReducer, 0.0)
+  return -(missed / totalInstructions)
 }
 
 function getOverallTable(coverage, minCoverage, emoji) {
@@ -19539,7 +19576,11 @@ function getStatus(coverage, minCoverage, emoji) {
 }
 
 function formatCoverage(coverage) {
-  return `${parseFloat(coverage.toFixed(2))}%`
+  return `${toFloat(coverage)}%`
+}
+
+function toFloat(value) {
+  return parseFloat(value.toFixed(2))
 }
 
 module.exports = {
@@ -19552,6 +19593,15 @@ module.exports = {
 
 /***/ 683:
 /***/ ((module) => {
+
+const TAG = {
+  SELF: '$',
+  SOURCE_FILE: 'sourcefile',
+  LINE: 'line',
+  COUNTER: 'counter',
+  PACKAGE: 'package',
+  GROUP: 'group',
+}
 
 function debug(obj) {
   return JSON.stringify(obj, ' ', 4)
@@ -19600,9 +19650,53 @@ function getDiffGroups(lines) {
   return groups
 }
 
+function getFilesWithCoverage(packages) {
+  const files = []
+  packages.forEach((item) => {
+    const packageName = item[TAG.SELF].name
+    const sourceFiles = item[TAG.SOURCE_FILE] ?? []
+    sourceFiles.forEach((sourceFile) => {
+      const sourceFileName = sourceFile[TAG.SELF].name
+      const file = {
+        name: sourceFileName,
+        packageName,
+      }
+      const counters = sourceFile[TAG.COUNTER] ?? []
+      counters.forEach((counter) => {
+        const counterSelf = counter[TAG.SELF]
+        const type = counterSelf.type
+        file[type.toLowerCase()] = {
+          missed: parseInt(counterSelf.missed) ?? 0,
+          covered: parseInt(counterSelf.covered) ?? 0,
+        }
+      })
+
+      file.lines = {}
+      const lines = sourceFile[TAG.LINE] ?? []
+      lines.forEach((line) => {
+        const lineSelf = line[TAG.SELF]
+        file.lines[lineSelf.nr] = {
+          instruction: {
+            missed: parseInt(lineSelf.mi) ?? 0,
+            covered: parseInt(lineSelf.ci) ?? 0,
+          },
+          branch: {
+            missed: parseInt(lineSelf.mb) ?? 0,
+            covered: parseInt(lineSelf.cb) ?? 0,
+          },
+        }
+      })
+      files.push(file)
+    })
+  })
+  return files
+}
+
 module.exports = {
   debug,
   getChangedLines,
+  getFilesWithCoverage,
+  TAG,
 }
 
 
