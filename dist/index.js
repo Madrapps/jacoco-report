@@ -19191,7 +19191,6 @@ async function getChangedFiles(base, head, client) {
 
   const changedFiles = []
   response.data.files.forEach((file) => {
-    core.info(`PATCH = ${file.filename} \n\n ${file.patch} \n\n`)
     const changedFile = {
       filePath: file.filename,
       url: file.blob_url,
@@ -19491,7 +19490,6 @@ function getModuleTable(modules, minCoverage, emoji) {
 }
 
 function getFileTable(project, minCoverage, emoji) {
-  const coverage = project['coverage-changed-files']
   const tableHeader = project.isMultiModule
     ? '|Module|File|Coverage||'
     : '|File|Coverage||'

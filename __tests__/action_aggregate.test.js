@@ -62,16 +62,17 @@ describe('Aggregate report', function () {
     data: {
       files: [
         {
-          filename: 'src/main/java/com/madrapps/playground/MainViewModel.kt',
+          filename:
+            'app/src/main/java/com/madrapps/playground/MainViewModel.kt',
           blob_url:
-            'https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
-          patch: PATCH.MAIN_VIEW_MODEL,
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
+          patch: PATCH.MULTI_MODULE.MAIN_VIEW_MODEL,
         },
         {
-          filename: 'src/main/java/com/madrapps/math/Math.kt',
+          filename: 'math/src/main/java/com/madrapps/math/Math.kt',
           blob_url:
-            'https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt',
-          patch: PATCH.MATH,
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt',
+          patch: PATCH.MULTI_MODULE.MATH,
         },
       ],
     },
@@ -107,10 +108,10 @@ describe('Aggregate report', function () {
 <details>
 <summary>Files</summary>
 
-|Module|File|Coverage [65.91%]||
-|:-|:-|:-:|:-:|
-|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt)|70.37% (-0.19%)|:green_apple:|
-|module-3|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
+|Module|File|Coverage||
+|:-|:-|:-|:-:|
+|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|70.37% **\`-0.19%\`**|:green_apple:|
+|module-3|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
 
 </details>`)
     })

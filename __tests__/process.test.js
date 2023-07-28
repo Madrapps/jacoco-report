@@ -186,60 +186,61 @@ describe('process', function () {
 
       it('one file changed', async () => {
         const reports = await getAggregateReport()
-        const changedFiles = [CHANGED_FILE.MAIN_VIEW_MODEL]
+        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter((file) => {
+          return file.filePath.endsWith('MainViewModel.kt')
+        })
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
+          'coverage-changed-files': 58.82,
+          isMultiModule: true,
           modules: [
             {
               files: [
                 {
                   covered: 10,
+                  lines: [],
                   missed: 7,
                   name: 'MainViewModel.kt',
                   percentage: 58.82,
-                  url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
-                  lines: [],
+                  url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
                 },
               ],
               name: 'module-3',
               percentage: 8.33,
             },
           ],
-          isMultiModule: true,
-          'coverage-changed-files': 58.82,
         })
       })
 
       it('multiple files changed', async () => {
         const reports = await getAggregateReport()
-        const changedFiles = [
-          CHANGED_FILE.MAIN_VIEW_MODEL,
-          CHANGED_FILE.MATH_ANDROID,
-          CHANGED_FILE.MATH_TEST,
-        ]
+        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter((file) => {
+          return (
+            file.filePath.endsWith('MainViewModel.kt') ||
+            file.filePath.endsWith('Math.kt') ||
+            file.filePath.endsWith('OnClickEvent.kt')
+          )
+        })
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
+          'coverage-changed-files': 65.91,
+          isMultiModule: true,
           modules: [
             {
               files: [
                 {
                   covered: 19,
+                  lines: [
+                    {
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 0, missed: 5 },
+                      number: 22,
+                    },
+                  ],
                   missed: 8,
                   name: 'Math.kt',
                   percentage: 70.37,
-                  url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt',
-                  lines: [
-                    {
-                      number: 18,
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 4, missed: 0 },
-                    },
-                    {
-                      number: 22,
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 0, missed: 5 },
-                    },
-                  ],
+                  url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt',
                 },
               ],
               name: 'module-2',
@@ -249,19 +250,17 @@ describe('process', function () {
               files: [
                 {
                   covered: 10,
+                  lines: [],
                   missed: 7,
                   name: 'MainViewModel.kt',
                   percentage: 58.82,
-                  url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
-                  lines: [],
+                  url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
                 },
               ],
               name: 'module-3',
               percentage: 8.33,
             },
           ],
-          isMultiModule: true,
-          'coverage-changed-files': 65.91,
         })
       })
     })

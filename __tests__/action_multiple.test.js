@@ -15,16 +15,23 @@ describe('Multiple reports', function () {
     data: {
       files: [
         {
-          filename: 'src/main/java/com/madrapps/playground/MainViewModel.kt',
+          filename:
+            'app/src/main/java/com/madrapps/playground/MainViewModel.kt',
           blob_url:
-            'https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
-          patch: PATCH.MAIN_VIEW_MODEL,
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
+          patch: PATCH.MULTI_MODULE.MAIN_VIEW_MODEL,
         },
         {
-          filename: 'src/main/java/com/madrapps/math/Math.kt',
+          filename: 'math/src/main/java/com/madrapps/math/Math.kt',
           blob_url:
-            'https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt',
-          patch: PATCH.MATH,
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt',
+          patch: PATCH.MULTI_MODULE.MATH,
+        },
+        {
+          filename: 'text/src/main/java/com/madrapps/text/StringOp.java',
+          blob_url:
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java',
+          patch: PATCH.MULTI_MODULE.STRING_OP,
         },
       ],
     },
@@ -83,21 +90,23 @@ describe('Multiple reports', function () {
       await action.action()
 
       expect(comment.mock.calls[0][0].body)
-        .toEqual(`|Total Project Coverage|25.32%|:x:|
+        .toEqual(`|Total Project Coverage|20.41%|:x:|
 |:-|:-:|:-:|
 
 |Module|Coverage||
 |:-|:-:|:-:|
-|math|70.37%|:green_apple:|
-|app|8.33%|:x:|
+|text|84.62%|:green_apple:|
+|math|51.35%|:x:|
+|app|6.85%|:x:|
 
 <details>
 <summary>Files</summary>
 
-|Module|File|Coverage [65.91%]||
-|:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt)|70.37% (-0.19%)|:green_apple:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
+|Module|File|Coverage||
+|:-|:-|:-|:-:|
+|text|[StringOp.java](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java)|84.62% **\`-0.15%\`**|:green_apple:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|59.38% **\`-0.16%\`**|:x:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|35.71% **\`-0.29%\`**|:x:|
 
 </details>`)
     })
@@ -109,7 +118,7 @@ describe('Multiple reports', function () {
       await action.action()
 
       const out = output.mock.calls[0]
-      expect(out).toEqual(['coverage-overall', 25.32])
+      expect(out).toEqual(['coverage-overall', 20.41])
     })
 
     it('set changed files coverage output', async () => {
@@ -119,7 +128,7 @@ describe('Multiple reports', function () {
       await action.action()
 
       const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 65.91])
+      expect(out).toEqual(['coverage-changed-files', 54.79])
     })
   })
 
@@ -136,7 +145,7 @@ describe('Multiple reports', function () {
       await action.action()
 
       const out = output.mock.calls[0]
-      expect(out).toEqual(['coverage-overall', 25.32])
+      expect(out).toEqual(['coverage-overall', 20.41])
     })
 
     it('set changed files coverage output', async () => {
@@ -146,7 +155,7 @@ describe('Multiple reports', function () {
       await action.action()
 
       const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 65.91])
+      expect(out).toEqual(['coverage-changed-files', 54.79])
     })
   })
 })
