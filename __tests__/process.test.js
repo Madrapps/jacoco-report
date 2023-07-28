@@ -164,11 +164,7 @@ describe('process', function () {
 
       it('multiple files changed', async () => {
         const reports = await getMultipleReports()
-        const changedFiles = [
-          CHANGED_FILE.MAIN_VIEW_MODEL,
-          CHANGED_FILE.MATH_ANDROID,
-          CHANGED_FILE.MATH_TEST,
-        ]
+        const changedFiles = CHANGED_FILE.MULTI_MODULE
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [

@@ -1,141 +1,181 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC
-    "-//JACOCO//DTD Report 1.1//EN" "report.dtd">
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN"
+        "report.dtd">
 <report name="app">
-    <sessioninfo dump="1630475844131" id="FWS-CHE-LT-2648-93125f81" start="1630475843423" />
+    <sessioninfo id="Admins-MacBook-Pro-102.local-e0751f82" start="1690465527566" dump="1690465527899"/>
     <package name="com/madrapps/playground">
         <class name="com/madrapps/playground/MainViewModel" sourcefilename="MainViewModel.kt">
             <method name="&lt;init&gt;" desc="()V" line="5">
-                <counter covered="3" missed="0" type="INSTRUCTION" />
-                <counter covered="1" missed="0" type="LINE" />
-                <counter covered="1" missed="0" type="COMPLEXITY" />
-                <counter covered="1" missed="0" type="METHOD" />
+                <counter type="INSTRUCTION" missed="0" covered="3"/>
+                <counter type="LINE" missed="0" covered="1"/>
+                <counter type="COMPLEXITY" missed="0" covered="1"/>
+                <counter type="METHOD" missed="0" covered="1"/>
             </method>
             <method name="validate" desc="(Ljava/lang/String;)Z" line="8">
-                <counter covered="7" missed="0" type="INSTRUCTION" />
-                <counter covered="1" missed="0" type="LINE" />
-                <counter covered="1" missed="0" type="COMPLEXITY" />
-                <counter covered="1" missed="0" type="METHOD" />
+                <counter type="INSTRUCTION" missed="0" covered="7"/>
+                <counter type="LINE" missed="0" covered="1"/>
+                <counter type="COMPLEXITY" missed="0" covered="1"/>
+                <counter type="METHOD" missed="0" covered="1"/>
             </method>
-            <method name="verifyAccess" desc="(Ljava/lang/String;)Z" line="12">
-                <counter covered="0" missed="7" type="INSTRUCTION" />
-                <counter covered="0" missed="1" type="LINE" />
-                <counter covered="0" missed="1" type="COMPLEXITY" />
-                <counter covered="0" missed="1" type="METHOD" />
+            <method name="verifyAccess1" desc="(Ljava/lang/String;)Z" line="12">
+                <counter type="INSTRUCTION" missed="7" covered="0"/>
+                <counter type="LINE" missed="1" covered="0"/>
+                <counter type="COMPLEXITY" missed="1" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
             </method>
-            <counter covered="10" missed="7" type="INSTRUCTION" />
-            <counter covered="2" missed="1" type="LINE" />
-            <counter covered="2" missed="1" type="COMPLEXITY" />
-            <counter covered="2" missed="1" type="METHOD" />
-            <counter covered="1" missed="0" type="CLASS" />
+            <method name="verifyPassword" desc="(Ljava/lang/String;)Z" line="16">
+                <counter type="INSTRUCTION" missed="11" covered="0"/>
+                <counter type="BRANCH" missed="2" covered="0"/>
+                <counter type="LINE" missed="1" covered="0"/>
+                <counter type="COMPLEXITY" missed="2" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
+            </method>
+            <counter type="INSTRUCTION" missed="18" covered="10"/>
+            <counter type="BRANCH" missed="2" covered="0"/>
+            <counter type="LINE" missed="2" covered="2"/>
+            <counter type="COMPLEXITY" missed="3" covered="2"/>
+            <counter type="METHOD" missed="2" covered="2"/>
+            <counter type="CLASS" missed="0" covered="1"/>
         </class>
         <class name="com/madrapps/playground/MainActivity$onCreate$$inlined$viewModels$default$2"
-            sourcefilename="ActivityViewModelLazy.kt">
+               sourcefilename="ActivityViewModelLazy.kt">
             <method name="invoke" desc="()Landroidx/lifecycle/ViewModelStore;" line="47">
-                <counter covered="0" missed="9" type="INSTRUCTION" />
-                <counter covered="0" missed="1" type="LINE" />
-                <counter covered="0" missed="1" type="COMPLEXITY" />
-                <counter covered="0" missed="1" type="METHOD" />
+                <counter type="INSTRUCTION" missed="7" covered="0"/>
+                <counter type="LINE" missed="1" covered="0"/>
+                <counter type="COMPLEXITY" missed="1" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
             </method>
-            <counter covered="0" missed="9" type="INSTRUCTION" />
-            <counter covered="0" missed="1" type="LINE" />
-            <counter covered="0" missed="1" type="COMPLEXITY" />
-            <counter covered="0" missed="1" type="METHOD" />
-            <counter covered="0" missed="1" type="CLASS" />
+            <counter type="INSTRUCTION" missed="7" covered="0"/>
+            <counter type="LINE" missed="1" covered="0"/>
+            <counter type="COMPLEXITY" missed="1" covered="0"/>
+            <counter type="METHOD" missed="1" covered="0"/>
+            <counter type="CLASS" missed="1" covered="0"/>
         </class>
         <class name="com/madrapps/playground/MainActivity$onCreate$$inlined$viewModels$default$1"
-            sourcefilename="ActivityViewModelLazy.kt">
+               sourcefilename="ActivityViewModelLazy.kt">
             <method name="invoke" desc="()Landroidx/lifecycle/ViewModelProvider$Factory;" line="44">
-                <counter covered="0" missed="9" type="INSTRUCTION" />
-                <counter covered="0" missed="1" type="LINE" />
-                <counter covered="0" missed="1" type="COMPLEXITY" />
-                <counter covered="0" missed="1" type="METHOD" />
+                <counter type="INSTRUCTION" missed="7" covered="0"/>
+                <counter type="LINE" missed="1" covered="0"/>
+                <counter type="COMPLEXITY" missed="1" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
             </method>
-            <counter covered="0" missed="9" type="INSTRUCTION" />
-            <counter covered="0" missed="1" type="LINE" />
-            <counter covered="0" missed="1" type="COMPLEXITY" />
-            <counter covered="0" missed="1" type="METHOD" />
-            <counter covered="0" missed="1" type="CLASS" />
+            <counter type="INSTRUCTION" missed="7" covered="0"/>
+            <counter type="LINE" missed="1" covered="0"/>
+            <counter type="COMPLEXITY" missed="1" covered="0"/>
+            <counter type="METHOD" missed="1" covered="0"/>
+            <counter type="CLASS" missed="1" covered="0"/>
         </class>
         <class name="com/madrapps/playground/MainActivity" sourcefilename="MainActivity.kt">
             <method name="&lt;init&gt;" desc="()V" line="10">
-                <counter covered="0" missed="3" type="INSTRUCTION" />
-                <counter covered="0" missed="1" type="LINE" />
-                <counter covered="0" missed="1" type="COMPLEXITY" />
-                <counter covered="0" missed="1" type="METHOD" />
+                <counter type="INSTRUCTION" missed="3" covered="0"/>
+                <counter type="LINE" missed="1" covered="0"/>
+                <counter type="COMPLEXITY" missed="1" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
             </method>
             <method name="onCreate" desc="(Landroid/os/Bundle;)V" line="13">
-                <counter covered="0" missed="71" type="INSTRUCTION" />
-                <counter covered="0" missed="12" type="LINE" />
-                <counter covered="0" missed="1" type="COMPLEXITY" />
-                <counter covered="0" missed="1" type="METHOD" />
+                <counter type="INSTRUCTION" missed="91" covered="0"/>
+                <counter type="LINE" missed="12" covered="0"/>
+                <counter type="COMPLEXITY" missed="1" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
             </method>
-            <method name="onCreate$lambda-0"
-                desc="(Lkotlin/Lazy;)Lcom/madrapps/playground/MainViewModel;" line="18">
-                <counter covered="0" missed="10" type="INSTRUCTION" />
-                <counter covered="0" missed="1" type="LINE" />
-                <counter covered="0" missed="1" type="COMPLEXITY" />
-                <counter covered="0" missed="1" type="METHOD" />
+            <method name="onCreate$lambda$0" desc="(Lkotlin/Lazy;)Lcom/madrapps/playground/MainViewModel;" line="18">
+                <counter type="INSTRUCTION" missed="6" covered="0"/>
+                <counter type="LINE" missed="1" covered="0"/>
+                <counter type="COMPLEXITY" missed="1" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
             </method>
-            <method name="&lt;clinit&gt;" desc="()V" line="18">
-                <counter covered="0" missed="1" type="INSTRUCTION" />
-                <counter covered="0" missed="1" type="LINE" />
-                <counter covered="0" missed="1" type="COMPLEXITY" />
-                <counter covered="0" missed="1" type="METHOD" />
-            </method>
-            <counter covered="0" missed="85" type="INSTRUCTION" />
-            <counter covered="0" missed="13" type="LINE" />
-            <counter covered="0" missed="4" type="COMPLEXITY" />
-            <counter covered="0" missed="4" type="METHOD" />
-            <counter covered="0" missed="1" type="CLASS" />
+            <counter type="INSTRUCTION" missed="100" covered="0"/>
+            <counter type="LINE" missed="13" covered="0"/>
+            <counter type="COMPLEXITY" missed="3" covered="0"/>
+            <counter type="METHOD" missed="3" covered="0"/>
+            <counter type="CLASS" missed="1" covered="0"/>
         </class>
         <sourcefile name="ActivityViewModelLazy.kt">
-            <line cb="0" ci="0" mb="0" mi="9" nr="44" />
-            <line cb="0" ci="0" mb="0" mi="9" nr="47" />
-            <counter covered="0" missed="18" type="INSTRUCTION" />
-            <counter covered="0" missed="2" type="LINE" />
-            <counter covered="0" missed="2" type="COMPLEXITY" />
-            <counter covered="0" missed="2" type="METHOD" />
-            <counter covered="0" missed="2" type="CLASS" />
+            <line nr="44" mi="7" ci="0" mb="0" cb="0"/>
+            <line nr="47" mi="7" ci="0" mb="0" cb="0"/>
+            <counter type="INSTRUCTION" missed="14" covered="0"/>
+            <counter type="LINE" missed="2" covered="0"/>
+            <counter type="COMPLEXITY" missed="2" covered="0"/>
+            <counter type="METHOD" missed="2" covered="0"/>
+            <counter type="CLASS" missed="2" covered="0"/>
         </sourcefile>
         <sourcefile name="MainActivity.kt">
-            <line cb="0" ci="0" mb="0" mi="3" nr="10" />
-            <line cb="0" ci="0" mb="0" mi="3" nr="13" />
-            <line cb="0" ci="0" mb="0" mi="3" nr="14" />
-            <line cb="0" ci="0" mb="0" mi="2" nr="17" />
-            <line cb="0" ci="0" mb="0" mi="15" nr="18" />
-            <line cb="0" ci="0" mb="0" mi="10" nr="19" />
-            <line cb="0" ci="0" mb="0" mi="10" nr="20" />
-            <line cb="0" ci="0" mb="0" mi="4" nr="23" />
-            <line cb="0" ci="0" mb="0" mi="10" nr="24" />
-            <line cb="0" ci="0" mb="0" mi="10" nr="25" />
-            <line cb="0" ci="0" mb="0" mi="4" nr="28" />
-            <line cb="0" ci="0" mb="0" mi="10" nr="29" />
-            <line cb="0" ci="0" mb="0" mi="1" nr="30" />
-            <counter covered="0" missed="85" type="INSTRUCTION" />
-            <counter covered="0" missed="13" type="LINE" />
-            <counter covered="0" missed="4" type="COMPLEXITY" />
-            <counter covered="0" missed="4" type="METHOD" />
-            <counter covered="0" missed="1" type="CLASS" />
+            <line nr="10" mi="3" ci="0" mb="0" cb="0"/>
+            <line nr="13" mi="3" ci="0" mb="0" cb="0"/>
+            <line nr="14" mi="3" ci="0" mb="0" cb="0"/>
+            <line nr="17" mi="2" ci="0" mb="0" cb="0"/>
+            <line nr="18" mi="10" ci="0" mb="0" cb="0"/>
+            <line nr="19" mi="14" ci="0" mb="0" cb="0"/>
+            <line nr="20" mi="14" ci="0" mb="0" cb="0"/>
+            <line nr="23" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="24" mi="14" ci="0" mb="0" cb="0"/>
+            <line nr="25" mi="14" ci="0" mb="0" cb="0"/>
+            <line nr="28" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="29" mi="14" ci="0" mb="0" cb="0"/>
+            <line nr="30" mi="1" ci="0" mb="0" cb="0"/>
+            <counter type="INSTRUCTION" missed="100" covered="0"/>
+            <counter type="LINE" missed="13" covered="0"/>
+            <counter type="COMPLEXITY" missed="3" covered="0"/>
+            <counter type="METHOD" missed="3" covered="0"/>
+            <counter type="CLASS" missed="1" covered="0"/>
         </sourcefile>
         <sourcefile name="MainViewModel.kt">
-            <line cb="0" ci="3" mb="0" mi="0" nr="5" />
-            <line cb="0" ci="4" mb="0" mi="0" nr="8" />
-            <line cb="0" ci="0" mb="0" mi="4" nr="12" />
-            <counter covered="10" missed="7" type="INSTRUCTION" />
-            <counter covered="2" missed="1" type="LINE" />
-            <counter covered="2" missed="1" type="COMPLEXITY" />
-            <counter covered="2" missed="1" type="METHOD" />
-            <counter covered="1" missed="0" type="CLASS" />
+            <line nr="5" mi="0" ci="3" mb="0" cb="0"/>
+            <line nr="8" mi="0" ci="4" mb="0" cb="0"/>
+            <line nr="12" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="16" mi="8" ci="0" mb="2" cb="0"/>
+            <counter type="INSTRUCTION" missed="18" covered="10"/>
+            <counter type="BRANCH" missed="2" covered="0"/>
+            <counter type="LINE" missed="2" covered="2"/>
+            <counter type="COMPLEXITY" missed="3" covered="2"/>
+            <counter type="METHOD" missed="2" covered="2"/>
+            <counter type="CLASS" missed="0" covered="1"/>
         </sourcefile>
-        <counter covered="10" missed="110" type="INSTRUCTION" />
-        <counter covered="2" missed="16" type="LINE" />
-        <counter covered="2" missed="7" type="COMPLEXITY" />
-        <counter covered="2" missed="7" type="METHOD" />
-        <counter covered="1" missed="3" type="CLASS" />
+        <counter type="INSTRUCTION" missed="132" covered="10"/>
+        <counter type="BRANCH" missed="2" covered="0"/>
+        <counter type="LINE" missed="17" covered="2"/>
+        <counter type="COMPLEXITY" missed="8" covered="2"/>
+        <counter type="METHOD" missed="7" covered="2"/>
+        <counter type="CLASS" missed="3" covered="1"/>
     </package>
-    <counter covered="10" missed="110" type="INSTRUCTION" />
-    <counter covered="2" missed="16" type="LINE" />
-    <counter covered="2" missed="7" type="COMPLEXITY" />
-    <counter covered="2" missed="7" type="METHOD" />
-    <counter covered="1" missed="3" type="CLASS" />
+    <package name="com/madrapps/playground/events">
+        <class name="com/madrapps/playground/events/OnClickEvent" sourcefilename="OnClickEvent.kt">
+            <method name="&lt;init&gt;" desc="()V" line="3">
+                <counter type="INSTRUCTION" missed="3" covered="0"/>
+                <counter type="LINE" missed="1" covered="0"/>
+                <counter type="COMPLEXITY" missed="1" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
+            </method>
+            <method name="onClick" desc="()V" line="7">
+                <counter type="INSTRUCTION" missed="1" covered="0"/>
+                <counter type="LINE" missed="1" covered="0"/>
+                <counter type="COMPLEXITY" missed="1" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
+            </method>
+            <counter type="INSTRUCTION" missed="4" covered="0"/>
+            <counter type="LINE" missed="2" covered="0"/>
+            <counter type="COMPLEXITY" missed="2" covered="0"/>
+            <counter type="METHOD" missed="2" covered="0"/>
+            <counter type="CLASS" missed="1" covered="0"/>
+        </class>
+        <sourcefile name="OnClickEvent.kt">
+            <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
+            <line nr="7" mi="1" ci="0" mb="0" cb="0"/>
+            <counter type="INSTRUCTION" missed="4" covered="0"/>
+            <counter type="LINE" missed="2" covered="0"/>
+            <counter type="COMPLEXITY" missed="2" covered="0"/>
+            <counter type="METHOD" missed="2" covered="0"/>
+            <counter type="CLASS" missed="1" covered="0"/>
+        </sourcefile>
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="2" covered="0"/>
+        <counter type="METHOD" missed="2" covered="0"/>
+        <counter type="CLASS" missed="1" covered="0"/>
+    </package>
+    <counter type="INSTRUCTION" missed="136" covered="10"/>
+    <counter type="BRANCH" missed="2" covered="0"/>
+    <counter type="LINE" missed="19" covered="2"/>
+    <counter type="COMPLEXITY" missed="10" covered="2"/>
+    <counter type="METHOD" missed="9" covered="2"/>
+    <counter type="CLASS" missed="4" covered="1"/>
 </report>
