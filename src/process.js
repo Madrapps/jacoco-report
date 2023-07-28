@@ -164,8 +164,8 @@ function getOverallProjectCoverage(reports) {
 function getDetailedCoverage(counters, type) {
   const coverage = {}
   counters.forEach((counter) => {
-    const attr = counter['$']
-    if (attr['type'] === type) {
+    const attr = counter[TAG.SELF]
+    if (attr.type === type) {
       const missed = parseFloat(attr['missed'])
       const covered = parseFloat(attr['covered'])
       coverage.missed = missed

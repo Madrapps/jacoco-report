@@ -143,9 +143,9 @@ describe('get PR Comment', function () {
 
 |Module|Coverage||
 |:-|:-:|:-:|
-|text|84.62%|:green_apple:|
-|math|51.35%|:x:|
-|app|6.85%|:x:|
+|text|84.62% **\`-0.15%\`**|:green_apple:|
+|math|51.35% **\`-0.27%\`**|:x:|
+|app|6.85% **\`-0.2%\`**|:x:|
 
 <details>
 <summary>Files</summary>
@@ -171,9 +171,9 @@ describe('get PR Comment', function () {
 
 |Module|Coverage||
 |:-|:-:|:-:|
-|text|84.62%|:green_apple:|
-|math|51.35%|:x:|
-|app|6.85%|:x:|
+|text|84.62% **\`-0.15%\`**|:green_apple:|
+|math|51.35% **\`-0.27%\`**|:x:|
+|app|6.85% **\`-0.2%\`**|:x:|
 
 <details>
 <summary>Files</summary>
@@ -199,9 +199,9 @@ describe('get PR Comment', function () {
 
 |Module|Coverage||
 |:-|:-:|:-:|
-|text|84.62%|:green_apple:|
-|math|51.35%|:x:|
-|app|6.85%|:x:|
+|text|84.62% **\`-0.15%\`**|:green_apple:|
+|math|51.35% **\`-0.27%\`**|:x:|
+|app|6.85% **\`-0.2%\`**|:x:|
 
 <details>
 <summary>Files</summary>
@@ -227,9 +227,9 @@ describe('get PR Comment', function () {
 
 |Module|Coverage||
 |:-|:-:|:-:|
-|text|84.62%|:green_apple:|
-|math|51.35%|:green_apple:|
-|app|6.85%|:x:|
+|text|84.62% **\`-0.15%\`**|:green_apple:|
+|math|51.35% **\`-0.27%\`**|:green_apple:|
+|app|6.85% **\`-0.2%\`**|:x:|
 
 <details>
 <summary>Files</summary>
@@ -263,9 +263,9 @@ describe('get PR Comment', function () {
 
 |Module|Coverage||
 |:-|:-:|:-:|
-|text|84.62%|:green_apple:|
-|math|51.35%|:green_apple:|
-|app|6.85%|:x:|
+|text|84.62% **\`-0.15%\`**|:green_apple:|
+|math|51.35% **\`-0.27%\`**|:green_apple:|
+|app|6.85% **\`-0.2%\`**|:x:|
 
 <details>
 <summary>Files</summary>
