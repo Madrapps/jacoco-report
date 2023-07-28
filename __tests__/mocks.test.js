@@ -335,4 +335,6 @@ module.exports = {
   PROJECT,
 }
 
-test.skip('Suppress - Your test suite must contain at least one test.', () => 1)
+it('Empty test', function () {
+  // To Suppress - Your test suite must contain at least one test.
+})

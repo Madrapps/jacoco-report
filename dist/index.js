@@ -19478,13 +19478,18 @@ function getModuleTable(modules, minCoverage, emoji) {
   const tableStructure = '|:-|:-:|:-:|'
   let table = tableHeader + '\n' + tableStructure
   modules.forEach((module) => {
-    renderFileRow(module.name, module.percentage, emoji)
+    const coverageDifference = getCoverageDifferenceForModule(module)
+    renderFileRow(module.name, module.percentage, coverageDifference, emoji)
   })
   return table
 
-  function renderFileRow(name, coverage, emoji) {
+  function renderFileRow(name, coverage, coverageDiff, emoji) {
     const status = getStatus(coverage, minCoverage, emoji)
-    const row = `|${name}|${formatCoverage(coverage)}|${status}|`
+    let coveragePercentage = `${formatCoverage(coverage)}`
+    if (coverageDiff !== 0) {
+      coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
+    }
+    const row = `|${name}|${coveragePercentage}|${status}|`
     table = table + '\n' + row
   }
 }
@@ -19503,7 +19508,7 @@ function getFileTable(project, minCoverage, emoji) {
       if (index !== 0) {
         moduleName = ''
       }
-      const coverageDifference = getCoverageDifference(file)
+      const coverageDifference = getCoverageDifferenceForFile(file)
       renderFileRow(
         moduleName,
         `[${file.name}](${file.url})`,
@@ -19542,12 +19547,27 @@ const sumReducer = (total, value) => {
   return total + value
 }
 
-function getCoverageDifference(file) {
+function getCoverageDifferenceForFile(file) {
   const totalInstructions = file.covered + file.missed
   const missed = file.lines
     .map((line) => {
       return toFloat(line.instruction.missed)
     })
+    .reduce(sumReducer, 0.0)
+  return -(missed / totalInstructions)
+}
+
+function getCoverageDifferenceForModule(module) {
+  const totalMissed = module.files
+    .map((file) => file.missed)
+    .reduce(sumReducer, 0.0)
+  const totalCovered = module.files
+    .map((file) => file.covered)
+    .reduce(sumReducer, 0.0)
+  const totalInstructions = totalCovered + totalMissed
+  const missed = module.files
+    .flatMap((file) => file.lines)
+    .map((line) => toFloat(line.instruction.missed))
     .reduce(sumReducer, 0.0)
   return -(missed / totalInstructions)
 }
