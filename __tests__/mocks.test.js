@@ -91,32 +91,35 @@ const CHANGED_FILE = {
   SINGLE_MODULE: [
     {
       filePath: '.github/workflows/coverage.yml',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/2ec1d3051c8fcdf13931fffe517596c4bd7f71fb/.github%2Fworkflows%2Fcoverage.yml',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/.github%2Fworkflows%2Fcoverage.yml',
       lines: [13, 16, 32, 34, 38, 39, 40],
     },
     {
       filePath: 'src/main/java/com/madrapps/jacoco/Utility.java',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/2ec1d3051c8fcdf13931fffe517596c4bd7f71fb/src%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fjacoco%2FUtility.java',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fjacoco%2FUtility.java',
       lines: [3],
     },
     {
       filePath: 'src/main/java/com/madrapps/jacoco/operation/StringOp.java',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/2ec1d3051c8fcdf13931fffe517596c4bd7f71fb/src%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fjacoco%2Foperation%2FStringOp.java',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fjacoco%2Foperation%2FStringOp.java',
       lines: [5, 6, 7, 8, 9, 10, 16],
     },
     {
       filePath: 'src/main/kotlin/com/madrapps/jacoco/Math.kt',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/2ec1d3051c8fcdf13931fffe517596c4bd7f71fb/src%2Fmain%2Fkotlin%2Fcom%2Fmadrapps%2Fjacoco%2FMath.kt',
-      lines: [29],
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src%2Fmain%2Fkotlin%2Fcom%2Fmadrapps%2Fjacoco%2FMath.kt',
+      lines: [
+        6, 7, 8, 13, 14, 15, 16, 17, 21, 26, 27, 28, 29, 30, 34, 42, 43, 44, 45,
+        46,
+      ],
     },
     {
       filePath: 'src/test/java/com/madrapps/jacoco/UtilityTest.java',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/2ec1d3051c8fcdf13931fffe517596c4bd7f71fb/src%2Ftest%2Fjava%2Fcom%2Fmadrapps%2Fjacoco%2FUtilityTest.java',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src%2Ftest%2Fjava%2Fcom%2Fmadrapps%2Fjacoco%2FUtilityTest.java',
       lines: [6, 10, 17],
     },
     {
       filePath: 'src/test/kotlin/com/madrapps/jacoco/MathTest.kt',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/2ec1d3051c8fcdf13931fffe517596c4bd7f71fb/src%2Ftest%2Fkotlin%2Fcom%2Fmadrapps%2Fjacoco%2FMathTest.kt',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src%2Ftest%2Fkotlin%2Fcom%2Fmadrapps%2Fjacoco%2FMathTest.kt',
       lines: [],
     },
   ],

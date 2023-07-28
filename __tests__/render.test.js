@@ -54,43 +54,35 @@ describe('get PR Comment', function () {
       modules: [
         {
           name: 'jacoco-playground',
-          percentage: 49.23,
+          percentage: 37.37,
           files: [
             {
-              url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
               name: 'StringOp.java',
-              covered: 7,
+              url: 'https://github.com/thsaravana/jacoco-playground/blob/2ec1d3051c8fcdf13931fffe517596c4bd7f71fb/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
               missed: 0,
+              covered: 11,
               percentage: 100,
-              lines: [
-                {
-                  number: 10,
-                  branch: { covered: 0, missed: 0 },
-                  instruction: { covered: 1, missed: 0 },
-                },
-                {
-                  number: 12,
-                  branch: { covered: 2, missed: 0 },
-                  instruction: { covered: 2, missed: 0 },
-                },
-              ],
+              lines: [],
             },
             {
-              covered: 7,
-              missed: 8,
-              percentage: 46.67,
               name: 'Math.kt',
-              url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt',
+              url: 'https://github.com/thsaravana/jacoco-playground/blob/2ec1d3051c8fcdf13931fffe517596c4bd7f71fb/src/main/kotlin/com/madrapps/jacoco/Math.kt',
+              missed: 12,
+              covered: 15,
+              percentage: 55.56,
+              lines: [],
+            },
+            {
+              name: 'Utility.java',
+              url: 'https://github.com/thsaravana/jacoco-playground/blob/2ec1d3051c8fcdf13931fffe517596c4bd7f71fb/src/main/java/com/madrapps/jacoco/Utility.java',
+              missed: 50,
+              covered: 11,
+              percentage: 18.03,
               lines: [
                 {
-                  number: 8,
-                  branch: { covered: 2, missed: 2 },
-                  instruction: { covered: 1, missed: 3 },
-                },
-                {
-                  number: 9,
-                  branch: { covered: 1, missed: 4 },
-                  instruction: { covered: 3, missed: 2 },
+                  number: 3,
+                  instruction: { missed: 0, covered: 3 },
+                  branch: { missed: 0, covered: 0 },
                 },
               ],
             },
@@ -98,7 +90,7 @@ describe('get PR Comment', function () {
         },
       ],
       isMultiModule: false,
-      'coverage-changed-files': 63.64,
+      'coverage-changed-files': 37.37,
     }
 
     it('coverage greater than min coverage for overall project', function () {

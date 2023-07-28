@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN"
         "report.dtd">
 <report name="jacoco-playground">
-    <sessioninfo id="Admins-MBP-102-6fc474c3" start="1690535448559" dump="1690535449030"/>
+    <sessioninfo id="Admins-MBP-102-50209034" start="1690536441032" dump="1690536441535"/>
     <package name="com/madrapps/jacoco">
         <class name="com/madrapps/jacoco/Utility" sourcefilename="Utility.java">
             <method name="&lt;init&gt;" desc="()V" line="3">
@@ -84,45 +84,55 @@
                 <counter type="METHOD" missed="0" covered="1"/>
             </method>
             <method name="add" desc="(II)I" line="6">
+                <counter type="INSTRUCTION" missed="0" covered="7"/>
+                <counter type="BRANCH" missed="1" covered="1"/>
+                <counter type="LINE" missed="0" covered="2"/>
+                <counter type="COMPLEXITY" missed="1" covered="1"/>
+                <counter type="METHOD" missed="0" covered="1"/>
+            </method>
+            <method name="subtract" desc="(II)I" line="13">
+                <counter type="INSTRUCTION" missed="11" covered="0"/>
+                <counter type="BRANCH" missed="2" covered="0"/>
+                <counter type="LINE" missed="3" covered="0"/>
+                <counter type="COMPLEXITY" missed="2" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
+            </method>
+            <method name="multiply" desc="(II)I" line="22">
                 <counter type="INSTRUCTION" missed="0" covered="4"/>
                 <counter type="LINE" missed="0" covered="1"/>
                 <counter type="COMPLEXITY" missed="0" covered="1"/>
                 <counter type="METHOD" missed="0" covered="1"/>
             </method>
-            <method name="subtract" desc="(II)I" line="10">
-                <counter type="INSTRUCTION" missed="4" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <method name="multiply" desc="(II)I" line="14">
-                <counter type="INSTRUCTION" missed="0" covered="4"/>
-                <counter type="LINE" missed="0" covered="1"/>
-                <counter type="COMPLEXITY" missed="0" covered="1"/>
+            <method name="divide" desc="(II)I" line="26">
+                <counter type="INSTRUCTION" missed="4" covered="7"/>
+                <counter type="BRANCH" missed="1" covered="1"/>
+                <counter type="LINE" missed="1" covered="2"/>
+                <counter type="COMPLEXITY" missed="1" covered="1"/>
                 <counter type="METHOD" missed="0" covered="1"/>
             </method>
-            <method name="divide" desc="(II)I" line="18">
-                <counter type="INSTRUCTION" missed="0" covered="4"/>
-                <counter type="LINE" missed="0" covered="1"/>
-                <counter type="COMPLEXITY" missed="0" covered="1"/>
-                <counter type="METHOD" missed="0" covered="1"/>
-            </method>
-            <method name="modulo" desc="(II)I" line="22">
+            <method name="modulo" desc="(II)I" line="35">
                 <counter type="INSTRUCTION" missed="4" covered="0"/>
                 <counter type="LINE" missed="1" covered="0"/>
                 <counter type="COMPLEXITY" missed="1" covered="0"/>
                 <counter type="METHOD" missed="1" covered="0"/>
             </method>
-            <method name="area" desc="(II)I" line="26">
+            <method name="area" desc="(II)I" line="39">
                 <counter type="INSTRUCTION" missed="4" covered="0"/>
                 <counter type="LINE" missed="1" covered="0"/>
                 <counter type="COMPLEXITY" missed="1" covered="0"/>
                 <counter type="METHOD" missed="1" covered="0"/>
             </method>
-            <counter type="INSTRUCTION" missed="12" covered="15"/>
-            <counter type="LINE" missed="3" covered="4"/>
-            <counter type="COMPLEXITY" missed="3" covered="4"/>
-            <counter type="METHOD" missed="3" covered="4"/>
+            <method name="volume" desc="(III)I" line="43">
+                <counter type="INSTRUCTION" missed="6" covered="0"/>
+                <counter type="LINE" missed="1" covered="0"/>
+                <counter type="COMPLEXITY" missed="1" covered="0"/>
+                <counter type="METHOD" missed="1" covered="0"/>
+            </method>
+            <counter type="INSTRUCTION" missed="29" covered="21"/>
+            <counter type="BRANCH" missed="4" covered="2"/>
+            <counter type="LINE" missed="7" covered="6"/>
+            <counter type="COMPLEXITY" missed="7" covered="4"/>
+            <counter type="METHOD" missed="4" covered="4"/>
             <counter type="CLASS" missed="0" covered="1"/>
         </class>
         <sourcefile name="Utility.java">
@@ -145,22 +155,30 @@
         </sourcefile>
         <sourcefile name="Math.kt">
             <line nr="3" mi="0" ci="3" mb="0" cb="0"/>
-            <line nr="6" mi="0" ci="4" mb="0" cb="0"/>
-            <line nr="10" mi="4" ci="0" mb="0" cb="0"/>
-            <line nr="14" mi="0" ci="4" mb="0" cb="0"/>
-            <line nr="18" mi="0" ci="4" mb="0" cb="0"/>
-            <line nr="22" mi="4" ci="0" mb="0" cb="0"/>
-            <line nr="26" mi="4" ci="0" mb="0" cb="0"/>
-            <counter type="INSTRUCTION" missed="12" covered="15"/>
-            <counter type="LINE" missed="3" covered="4"/>
-            <counter type="COMPLEXITY" missed="3" covered="4"/>
-            <counter type="METHOD" missed="3" covered="4"/>
+            <line nr="6" mi="0" ci="3" mb="1" cb="1"/>
+            <line nr="9" mi="0" ci="4" mb="0" cb="0"/>
+            <line nr="13" mi="3" ci="0" mb="2" cb="0"/>
+            <line nr="14" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="16" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="22" mi="0" ci="4" mb="0" cb="0"/>
+            <line nr="26" mi="0" ci="3" mb="1" cb="1"/>
+            <line nr="27" mi="0" ci="4" mb="0" cb="0"/>
+            <line nr="29" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="35" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="39" mi="4" ci="0" mb="0" cb="0"/>
+            <line nr="43" mi="6" ci="0" mb="0" cb="0"/>
+            <counter type="INSTRUCTION" missed="29" covered="21"/>
+            <counter type="BRANCH" missed="4" covered="2"/>
+            <counter type="LINE" missed="7" covered="6"/>
+            <counter type="COMPLEXITY" missed="7" covered="4"/>
+            <counter type="METHOD" missed="4" covered="4"/>
             <counter type="CLASS" missed="0" covered="1"/>
         </sourcefile>
-        <counter type="INSTRUCTION" missed="62" covered="26"/>
-        <counter type="LINE" missed="11" covered="7"/>
-        <counter type="COMPLEXITY" missed="11" covered="7"/>
-        <counter type="METHOD" missed="11" covered="7"/>
+        <counter type="INSTRUCTION" missed="79" covered="32"/>
+        <counter type="BRANCH" missed="4" covered="2"/>
+        <counter type="LINE" missed="15" covered="9"/>
+        <counter type="COMPLEXITY" missed="15" covered="7"/>
+        <counter type="METHOD" missed="12" covered="7"/>
         <counter type="CLASS" missed="0" covered="2"/>
     </package>
     <package name="com/madrapps/jacoco/operation">
@@ -205,9 +223,10 @@
         <counter type="METHOD" missed="0" covered="3"/>
         <counter type="CLASS" missed="0" covered="1"/>
     </package>
-    <counter type="INSTRUCTION" missed="62" covered="37"/>
-    <counter type="LINE" missed="11" covered="10"/>
-    <counter type="COMPLEXITY" missed="11" covered="10"/>
-    <counter type="METHOD" missed="11" covered="10"/>
+    <counter type="INSTRUCTION" missed="79" covered="43"/>
+    <counter type="BRANCH" missed="4" covered="2"/>
+    <counter type="LINE" missed="15" covered="12"/>
+    <counter type="COMPLEXITY" missed="15" covered="10"/>
+    <counter type="METHOD" missed="12" covered="10"/>
     <counter type="CLASS" missed="0" covered="3"/>
 </report>
