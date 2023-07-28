@@ -19387,7 +19387,7 @@ function getOverallCoverage(reports) {
   const coverage = {}
   const modules = []
   reports.forEach((report) => {
-    const moduleName = report['$'].name
+    const moduleName = report[TAG.SELF].name
     const moduleCoverage = getModuleCoverage(report)
     modules.push({
       module: moduleName,
@@ -19406,29 +19406,28 @@ function getModuleCoverage(report) {
 }
 
 function getOverallProjectCoverage(reports) {
-  const coverages = reports.map((report) =>
-    getDetailedCoverage(report['counter'], 'INSTRUCTION')
-  )
+  const coverages = reports
+    .map((report) => getDetailedCoverage(report['counter'], 'INSTRUCTION'))
+    .filter((coverage) => coverage)
   const covered = coverages.reduce((acc, coverage) => acc + coverage.covered, 0)
   const missed = coverages.reduce((acc, coverage) => acc + coverage.missed, 0)
   return parseFloat(((covered / (covered + missed)) * 100).toFixed(2))
 }
 
 function getDetailedCoverage(counters, type) {
-  const coverage = {}
-  counters.forEach((counter) => {
+  const counter = counters.find((counter) => counter[TAG.SELF].type === type)
+  if (counter) {
     const attr = counter[TAG.SELF]
-    if (attr.type === type) {
-      const missed = parseFloat(attr['missed'])
-      const covered = parseFloat(attr['covered'])
-      coverage.missed = missed
-      coverage.covered = covered
-      coverage.percentage = parseFloat(
-        ((covered / (covered + missed)) * 100).toFixed(2)
-      )
+    const missed = parseFloat(attr.missed)
+    const covered = parseFloat(attr.covered)
+    return {
+      missed,
+      covered,
+      percentage: parseFloat(((covered / (covered + missed)) * 100).toFixed(2)),
     }
-  })
-  return coverage
+  } else {
+    return null
+  }
 }
 
 module.exports = {
