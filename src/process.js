@@ -9,9 +9,12 @@ function getProjectCoverage(reports, files) {
       files
     )
     if (filesCoverage.files.length !== 0) {
+      const moduleCoverage = getModuleCoverage(module.root)
       moduleCoverages.push({
         name: module.name,
-        percentage: getModuleCoverage(module.root),
+        percentage: moduleCoverage.percentage,
+        covered: moduleCoverage.covered,
+        missed: moduleCoverage.missed,
         files: filesCoverage.files,
       })
     }
@@ -130,6 +133,11 @@ function getTotalPercentage(files) {
   }
 }
 
+function getModuleCoverage(report) {
+  const counters = report['counter']
+  return getDetailedCoverage(counters, 'INSTRUCTION')
+}
+
 function getOverallCoverage(reports) {
   const coverage = {}
   const modules = []
@@ -144,12 +152,6 @@ function getOverallCoverage(reports) {
   coverage.project = getOverallProjectCoverage(reports)
   coverage.modules = modules
   return coverage
-}
-
-function getModuleCoverage(report) {
-  const counters = report['counter']
-  const coverage = getDetailedCoverage(counters, 'INSTRUCTION')
-  return coverage.percentage
 }
 
 function getOverallProjectCoverage(reports) {
@@ -172,9 +174,8 @@ function getDetailedCoverage(counters, type) {
       covered,
       percentage: parseFloat(((covered / (covered + missed)) * 100).toFixed(2)),
     }
-  } else {
-    return null
   }
+  return { missed: 0, covered: 0, percentage: 100 }
 }
 
 module.exports = {

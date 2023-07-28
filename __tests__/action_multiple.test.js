@@ -96,8 +96,8 @@ describe('Multiple reports', function () {
 |Module|Coverage||
 |:-|:-:|:-:|
 |text|84.62% **\`-0.15%\`**|:green_apple:|
-|math|51.35% **\`-0.16%\`**|:x:|
-|app|6.85% **\`-0.29%\`**|:x:|
+|math|51.35% **\`-0.14%\`**|:x:|
+|app|6.85% **\`-0.05%\`**|:x:|
 
 <details>
 <summary>Files</summary>

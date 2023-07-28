@@ -199,6 +199,8 @@ const PROJECT = {
             ],
           },
         ],
+        covered: 43,
+        missed: 79,
       },
     ],
     isMultiModule: false,
@@ -209,6 +211,8 @@ const PROJECT = {
       {
         name: 'text',
         percentage: 84.62,
+        covered: 11,
+        missed: 2,
         files: [
           {
             name: 'StringOp.java',
@@ -234,6 +238,8 @@ const PROJECT = {
       {
         name: 'math',
         percentage: 51.35,
+        covered: 19,
+        missed: 18,
         files: [
           {
             name: 'Math.kt',
@@ -273,6 +279,8 @@ const PROJECT = {
       {
         name: 'app',
         percentage: 6.85,
+        covered: 10,
+        missed: 136,
         files: [
           {
             name: 'MainViewModel.kt',
