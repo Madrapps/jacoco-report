@@ -33,6 +33,9 @@ describe('process', function () {
           modules: [],
           isMultiModule: false,
           'coverage-changed-files': 100,
+          covered: 43,
+          missed: 79,
+          percentage: 35.25,
         })
       })
 
@@ -45,6 +48,9 @@ describe('process', function () {
         expect(actual).toEqual({
           'coverage-changed-files': 42,
           isMultiModule: false,
+          covered: 43,
+          missed: 79,
+          percentage: 35.25,
           modules: [
             {
               files: [
@@ -124,6 +130,9 @@ describe('process', function () {
           modules: [],
           isMultiModule: true,
           'coverage-changed-files': 100,
+          covered: 40,
+          missed: 156,
+          percentage: 20.41,
         })
       })
 
@@ -136,6 +145,9 @@ describe('process', function () {
         expect(actual).toEqual({
           'coverage-changed-files': 84.62,
           isMultiModule: true,
+          covered: 40,
+          missed: 156,
+          percentage: 20.41,
           modules: [
             {
               files: [
@@ -185,6 +197,9 @@ describe('process', function () {
           modules: [],
           isMultiModule: true,
           'coverage-changed-files': 100,
+          covered: 28212,
+          missed: 8754,
+          percentage: 76.32,
         })
       })
 
@@ -196,6 +211,9 @@ describe('process', function () {
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           'coverage-changed-files': 58.82,
+          covered: 28212,
+          missed: 8754,
+          percentage: 76.32,
           isMultiModule: true,
           modules: [
             {
@@ -231,6 +249,9 @@ describe('process', function () {
         expect(actual).toEqual({
           'coverage-changed-files': 65.91,
           isMultiModule: true,
+          covered: 28212,
+          missed: 8754,
+          percentage: 76.32,
           modules: [
             {
               files: [

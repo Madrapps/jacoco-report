@@ -23,9 +23,13 @@ function getProjectCoverage(reports, files) {
   const totalFiles = moduleCoverages.flatMap((module) => {
     return module.files
   })
+  const projectCoverage = getOverallProjectCoverage(reports)
   const project = {
     modules: moduleCoverages,
     isMultiModule: reports.length > 1 || modules.length > 1,
+    covered: projectCoverage.covered,
+    missed: projectCoverage.missed,
+    percentage: projectCoverage.percentage,
   }
   const totalPercentage = getTotalPercentage(totalFiles)
   if (totalPercentage) {
@@ -149,18 +153,22 @@ function getOverallCoverage(reports) {
       coverage: moduleCoverage,
     })
   })
-  coverage.project = getOverallProjectCoverage(reports)
+  coverage.project = getOverallProjectCoverage(reports).percentage
   coverage.modules = modules
   return coverage
 }
 
 function getOverallProjectCoverage(reports) {
-  const coverages = reports
-    .map((report) => getDetailedCoverage(report['counter'], 'INSTRUCTION'))
-    .filter((coverage) => coverage)
+  const coverages = reports.map((report) =>
+    getDetailedCoverage(report['counter'], 'INSTRUCTION')
+  )
   const covered = coverages.reduce((acc, coverage) => acc + coverage.covered, 0)
   const missed = coverages.reduce((acc, coverage) => acc + coverage.missed, 0)
-  return parseFloat(((covered / (covered + missed)) * 100).toFixed(2))
+  return {
+    covered,
+    missed,
+    percentage: parseFloat(((covered / (covered + missed)) * 100).toFixed(2)),
+  }
 }
 
 function getDetailedCoverage(counters, type) {
