@@ -1,7 +1,7 @@
 const fs = require('fs')
 const parser = require('xml2js')
 const process = require('../src/process')
-const { CHANGED_FILE } = require('./mocks.test')
+const { CHANGED_FILE, PROJECT } = require('./mocks.test')
 
 describe('process', function () {
   describe('get overall coverage', function () {
@@ -9,7 +9,7 @@ describe('process', function () {
       test('get project coverage', async () => {
         const reports = await getSingleReport()
         const coverage = process.getOverallCoverage(reports)
-        expect(coverage.project).toBeCloseTo(49.01, 1)
+        expect(coverage.project).toBeCloseTo(35.25, 1)
       })
     })
 
@@ -17,7 +17,7 @@ describe('process', function () {
       test('get project coverage', async () => {
         const reports = await getMultipleReports()
         const coverage = process.getOverallCoverage(reports)
-        expect(coverage.project).toBeCloseTo(25.32, 1)
+        expect(coverage.project).toBeCloseTo(20.41, 1)
       })
     })
   })
@@ -38,89 +38,78 @@ describe('process', function () {
 
       it('one file changed', async () => {
         const reports = await getSingleReport()
-        const changedFiles = [CHANGED_FILE.STRING_OP]
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE.filter((file) => {
+          return file.filePath.endsWith('Math.kt')
+        })
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
+          'coverage-changed-files': 42,
+          isMultiModule: false,
           modules: [
             {
-              name: 'jacoco-playground',
               files: [
                 {
-                  url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
-                  name: 'StringOp.java',
-                  covered: 7,
-                  missed: 0,
-                  percentage: 100,
+                  covered: 21,
                   lines: [
                     {
-                      number: 10,
+                      branch: { covered: 1, missed: 1 },
+                      instruction: { covered: 3, missed: 0 },
+                      number: 6,
+                    },
+                    {
+                      branch: { covered: 0, missed: 2 },
+                      instruction: { covered: 0, missed: 3 },
+                      number: 13,
+                    },
+                    {
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 0, missed: 4 },
+                      number: 14,
+                    },
+                    {
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 0, missed: 4 },
+                      number: 16,
+                    },
+                    {
+                      branch: { covered: 1, missed: 1 },
+                      instruction: { covered: 3, missed: 0 },
+                      number: 26,
+                    },
+                    {
                       branch: { covered: 0, missed: 0 },
                       instruction: { covered: 4, missed: 0 },
+                      number: 27,
+                    },
+                    {
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 0, missed: 4 },
+                      number: 29,
+                    },
+                    {
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 0, missed: 6 },
+                      number: 43,
                     },
                   ],
+                  missed: 29,
+                  name: 'Math.kt',
+                  percentage: 42,
+                  url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt',
                 },
               ],
-              percentage: 49.02,
+              name: 'jacoco-playground',
+              percentage: 35.25,
             },
           ],
-          isMultiModule: false,
-          'coverage-changed-files': 100,
         })
       })
 
       it('multiple files changed', async () => {
         const reports = await getSingleReport()
-        const changedFiles = [
-          CHANGED_FILE.STRING_OP,
-          CHANGED_FILE.MATH,
-          CHANGED_FILE.STRING_OP_TEST,
-        ]
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE
         const actual = process.getProjectCoverage(reports, changedFiles)
-        expect(actual).toEqual({
-          modules: [
-            {
-              name: 'jacoco-playground',
-              files: [
-                {
-                  url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
-                  name: 'StringOp.java',
-                  covered: 7,
-                  missed: 0,
-                  percentage: 100,
-                  lines: [
-                    {
-                      number: 10,
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 4, missed: 0 },
-                    },
-                  ],
-                },
-                {
-                  covered: 7,
-                  missed: 8,
-                  percentage: 46.67,
-                  name: 'Math.kt',
-                  url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt',
-                  lines: [
-                    {
-                      number: 18,
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 4, missed: 0 },
-                    },
-                    {
-                      number: 22,
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 0, missed: 5 },
-                    },
-                  ],
-                },
-              ],
-              percentage: 49.02,
-            },
-          ],
-          isMultiModule: false,
-          'coverage-changed-files': 63.64,
-        })
+        expect(actual).toEqual(PROJECT.SINGLE_MODULE)
       })
     })
 
@@ -138,27 +127,40 @@ describe('process', function () {
 
       it('one file changed', async () => {
         const reports = await getMultipleReports()
-        const changedFiles = [CHANGED_FILE.MAIN_VIEW_MODEL]
+        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter((file) => {
+          return file.filePath.endsWith('StringOp.java')
+        })
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
+          'coverage-changed-files': 84.62,
+          isMultiModule: true,
           modules: [
             {
               files: [
                 {
-                  covered: 10,
-                  missed: 7,
-                  name: 'MainViewModel.kt',
-                  percentage: 58.82,
-                  url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
-                  lines: [],
+                  covered: 11,
+                  lines: [
+                    {
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 3, missed: 0 },
+                      number: 6,
+                    },
+                    {
+                      branch: { covered: 0, missed: 0 },
+                      instruction: { covered: 0, missed: 2 },
+                      number: 20,
+                    },
+                  ],
+                  missed: 2,
+                  name: 'StringOp.java',
+                  percentage: 84.62,
+                  url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java',
                 },
               ],
-              name: 'app',
-              percentage: 8.33,
+              name: 'text',
+              percentage: 84.62,
             },
           ],
-          isMultiModule: true,
-          'coverage-changed-files': 58.82,
         })
       })
 
@@ -166,51 +168,7 @@ describe('process', function () {
         const reports = await getMultipleReports()
         const changedFiles = CHANGED_FILE.MULTI_MODULE
         const actual = process.getProjectCoverage(reports, changedFiles)
-        expect(actual).toEqual({
-          modules: [
-            {
-              files: [
-                {
-                  covered: 19,
-                  missed: 8,
-                  name: 'Math.kt',
-                  percentage: 70.37,
-                  url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt',
-                  lines: [
-                    {
-                      number: 18,
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 4, missed: 0 },
-                    },
-                    {
-                      number: 22,
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 0, missed: 5 },
-                    },
-                  ],
-                },
-              ],
-              name: 'math',
-              percentage: 70.37,
-            },
-            {
-              name: 'app',
-              percentage: 8.33,
-              files: [
-                {
-                  covered: 10,
-                  missed: 7,
-                  name: 'MainViewModel.kt',
-                  percentage: 58.82,
-                  url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
-                  lines: [],
-                },
-              ],
-            },
-          ],
-          isMultiModule: true,
-          'coverage-changed-files': 65.91,
-        })
+        expect(actual).toEqual(PROJECT.MULTI_MODULE)
       })
     })
 

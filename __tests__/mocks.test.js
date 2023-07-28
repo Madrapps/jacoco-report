@@ -43,70 +43,70 @@ const CHANGED_FILE = {
   MULTI_MODULE: [
     {
       filePath: '.github/workflows/coverage.yml',
-      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/.github%2Fworkflows%2Fcoverage.yml',
+      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/.github/workflows/coverage.yml',
       lines: [26, 29, 30, 34, 35, 36, 37, 38],
     },
     {
       filePath: 'app/src/main/java/com/madrapps/playground/MainActivity.kt',
-      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app%2Fsrc%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fplayground%2FMainActivity.kt',
+      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainActivity.kt',
       lines: [20],
     },
     {
       filePath: 'app/src/main/java/com/madrapps/playground/MainViewModel.kt',
-      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app%2Fsrc%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fplayground%2FMainViewModel.kt',
+      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
       lines: [11, 14, 15, 16, 17],
     },
     {
       filePath:
         'app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt',
-      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app%2Fsrc%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fplayground%2Fevents%2FOnClickEvent.kt',
+      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt',
       lines: [1, 2, 3, 4, 5, 6, 7, 8],
     },
     {
       filePath: 'math/src/main/java/com/madrapps/math/Math.kt',
-      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math%2Fsrc%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fmath%2FMath.kt',
+      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt',
       lines: [21, 22, 23, 24],
     },
     {
       filePath: 'math/src/main/java/com/madrapps/math/MathOperation.kt',
-      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math%2Fsrc%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fmath%2FMathOperation.kt',
+      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/MathOperation.kt',
       lines: [8],
     },
     {
       filePath: 'math/src/main/java/com/madrapps/math/Statistics.kt',
-      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math%2Fsrc%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fmath%2FStatistics.kt',
+      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Statistics.kt',
       lines: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     },
     {
       filePath: 'text/src/main/java/com/madrapps/text/IStringOperation.java',
-      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text%2Fsrc%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Ftext%2FIStringOperation.java',
+      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/IStringOperation.java',
       lines: [3, 7, 8],
     },
     {
       filePath: 'text/src/main/java/com/madrapps/text/StringOp.java',
-      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text%2Fsrc%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Ftext%2FStringOp.java',
+      url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java',
       lines: [6, 17, 18, 19, 20, 21],
     },
   ],
   SINGLE_MODULE: [
     {
       filePath: '.github/workflows/coverage.yml',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/.github%2Fworkflows%2Fcoverage.yml',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/.github/workflows/coverage.yml',
       lines: [13, 16, 32, 34, 38, 39, 40],
     },
     {
       filePath: 'src/main/java/com/madrapps/jacoco/Utility.java',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fjacoco%2FUtility.java',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java',
       lines: [3],
     },
     {
       filePath: 'src/main/java/com/madrapps/jacoco/operation/StringOp.java',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src%2Fmain%2Fjava%2Fcom%2Fmadrapps%2Fjacoco%2Foperation%2FStringOp.java',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
       lines: [5, 6, 7, 8, 9, 10, 16],
     },
     {
       filePath: 'src/main/kotlin/com/madrapps/jacoco/Math.kt',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src%2Fmain%2Fkotlin%2Fcom%2Fmadrapps%2Fjacoco%2FMath.kt',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt',
       lines: [
         6, 7, 8, 13, 14, 15, 16, 17, 21, 26, 27, 28, 29, 30, 34, 42, 43, 44, 45,
         46,
@@ -114,20 +114,230 @@ const CHANGED_FILE = {
     },
     {
       filePath: 'src/test/java/com/madrapps/jacoco/UtilityTest.java',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src%2Ftest%2Fjava%2Fcom%2Fmadrapps%2Fjacoco%2FUtilityTest.java',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/test/java/com/madrapps/jacoco/UtilityTest.java',
       lines: [6, 10, 17],
     },
     {
       filePath: 'src/test/kotlin/com/madrapps/jacoco/MathTest.kt',
-      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src%2Ftest%2Fkotlin%2Fcom%2Fmadrapps%2Fjacoco%2FMathTest.kt',
+      url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/test/kotlin/com/madrapps/jacoco/MathTest.kt',
       lines: [],
     },
   ],
 }
 
+const PROJECT = {
+  SINGLE_MODULE: {
+    modules: [
+      {
+        name: 'jacoco-playground',
+        percentage: 35.25,
+        files: [
+          {
+            name: 'StringOp.java',
+            url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
+            missed: 0,
+            covered: 11,
+            percentage: 100,
+            lines: [],
+          },
+          {
+            name: 'Math.kt',
+            url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt',
+            missed: 29,
+            covered: 21,
+            percentage: 42,
+            lines: [
+              {
+                number: 6,
+                instruction: { missed: 0, covered: 3 },
+                branch: { missed: 1, covered: 1 },
+              },
+              {
+                number: 13,
+                instruction: { missed: 3, covered: 0 },
+                branch: { missed: 2, covered: 0 },
+              },
+              {
+                number: 14,
+                instruction: { missed: 4, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+              {
+                number: 16,
+                instruction: { missed: 4, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+              {
+                number: 26,
+                instruction: { missed: 0, covered: 3 },
+                branch: { missed: 1, covered: 1 },
+              },
+              {
+                number: 27,
+                instruction: { missed: 0, covered: 4 },
+                branch: { missed: 0, covered: 0 },
+              },
+              {
+                number: 29,
+                instruction: { missed: 4, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+              {
+                number: 43,
+                instruction: { missed: 6, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+            ],
+          },
+          {
+            name: 'Utility.java',
+            url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java',
+            missed: 50,
+            covered: 11,
+            percentage: 18.03,
+            lines: [
+              {
+                number: 3,
+                instruction: { missed: 0, covered: 3 },
+                branch: { missed: 0, covered: 0 },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    isMultiModule: false,
+    'coverage-changed-files': 35.25,
+  },
+  MULTI_MODULE: {
+    modules: [
+      {
+        name: 'text',
+        percentage: 84.62,
+        files: [
+          {
+            name: 'StringOp.java',
+            url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java',
+            missed: 2,
+            covered: 11,
+            percentage: 84.62,
+            lines: [
+              {
+                number: 6,
+                instruction: { missed: 0, covered: 3 },
+                branch: { missed: 0, covered: 0 },
+              },
+              {
+                number: 20,
+                instruction: { missed: 2, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'math',
+        percentage: 51.35,
+        files: [
+          {
+            name: 'Math.kt',
+            url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt',
+            missed: 13,
+            covered: 19,
+            percentage: 59.38,
+            lines: [
+              {
+                number: 22,
+                instruction: { missed: 5, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+            ],
+          },
+          {
+            name: 'Statistics.kt',
+            url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Statistics.kt',
+            missed: 5,
+            covered: 0,
+            percentage: 0,
+            lines: [
+              {
+                number: 5,
+                instruction: { missed: 3, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+              {
+                number: 8,
+                instruction: { missed: 2, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'app',
+        percentage: 6.85,
+        files: [
+          {
+            name: 'MainViewModel.kt',
+            url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
+            missed: 18,
+            covered: 10,
+            percentage: 35.71,
+            lines: [
+              {
+                number: 16,
+                instruction: { missed: 8, covered: 0 },
+                branch: { missed: 2, covered: 0 },
+              },
+            ],
+          },
+          {
+            name: 'MainActivity.kt',
+            url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainActivity.kt',
+            missed: 100,
+            covered: 0,
+            percentage: 0,
+            lines: [
+              {
+                number: 20,
+                instruction: { missed: 14, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+            ],
+          },
+          {
+            name: 'OnClickEvent.kt',
+            url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt',
+            missed: 4,
+            covered: 0,
+            percentage: 0,
+            lines: [
+              {
+                number: 3,
+                instruction: { missed: 3, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+              {
+                number: 7,
+                instruction: { missed: 1, covered: 0 },
+                branch: { missed: 0, covered: 0 },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    isMultiModule: true,
+    'coverage-changed-files': 21.98,
+  },
+}
+
 module.exports = {
   PATCH,
   CHANGED_FILE,
+  PROJECT,
 }
 
 test.skip('Suppress - Your test suite must contain at least one test.', () => 1)

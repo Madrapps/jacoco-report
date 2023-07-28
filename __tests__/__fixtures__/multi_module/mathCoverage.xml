@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC
-    "-//JACOCO//DTD Report 1.1//EN" "report.dtd">
+        "-//JACOCO//DTD Report 1.1//EN" "report.dtd">
 <report name="math">
-    <sessioninfo dump="1630475836741" id="FWS-CHE-LT-2648-dd5996a5" start="1630475831008" />
+    <sessioninfo dump="1690537659683" id="Admins-MBP-102-828212c8" start="1690537659371" />
     <package name="com/madrapps/math">
         <class name="com/madrapps/math/MathOperation$MathOp" sourcefilename="MathOperation.kt" />
         <class name="com/madrapps/math/MathOperation" sourcefilename="MathOperation.kt" />
@@ -36,24 +36,58 @@
                 <counter covered="1" missed="0" type="COMPLEXITY" />
                 <counter covered="1" missed="0" type="METHOD" />
             </method>
-            <method name="modulo" desc="(II)I" line="22">
+            <method name="difference" desc="(II)I" line="22">
+                <counter covered="0" missed="5" type="INSTRUCTION" />
+                <counter covered="0" missed="1" type="LINE" />
+                <counter covered="0" missed="1" type="COMPLEXITY" />
+                <counter covered="0" missed="1" type="METHOD" />
+            </method>
+            <method name="modulo" desc="(II)I" line="26">
                 <counter covered="0" missed="4" type="INSTRUCTION" />
                 <counter covered="0" missed="1" type="LINE" />
                 <counter covered="0" missed="1" type="COMPLEXITY" />
                 <counter covered="0" missed="1" type="METHOD" />
             </method>
-            <method name="area" desc="(II)I" line="26">
+            <method name="area" desc="(II)I" line="30">
                 <counter covered="0" missed="4" type="INSTRUCTION" />
                 <counter covered="0" missed="1" type="LINE" />
                 <counter covered="0" missed="1" type="COMPLEXITY" />
                 <counter covered="0" missed="1" type="METHOD" />
             </method>
-            <counter covered="19" missed="8" type="INSTRUCTION" />
-            <counter covered="5" missed="2" type="LINE" />
-            <counter covered="5" missed="2" type="COMPLEXITY" />
-            <counter covered="5" missed="2" type="METHOD" />
+            <counter covered="19" missed="13" type="INSTRUCTION" />
+            <counter covered="5" missed="3" type="LINE" />
+            <counter covered="5" missed="3" type="COMPLEXITY" />
+            <counter covered="5" missed="3" type="METHOD" />
             <counter covered="1" missed="0" type="CLASS" />
         </class>
+        <class name="com/madrapps/math/Statistics" sourcefilename="Statistics.kt">
+            <method name="&lt;init&gt;" desc="()V" line="5">
+                <counter covered="0" missed="3" type="INSTRUCTION" />
+                <counter covered="0" missed="1" type="LINE" />
+                <counter covered="0" missed="1" type="COMPLEXITY" />
+                <counter covered="0" missed="1" type="METHOD" />
+            </method>
+            <method name="rateOfFlow" desc="()D" line="8">
+                <counter covered="0" missed="2" type="INSTRUCTION" />
+                <counter covered="0" missed="1" type="LINE" />
+                <counter covered="0" missed="1" type="COMPLEXITY" />
+                <counter covered="0" missed="1" type="METHOD" />
+            </method>
+            <counter covered="0" missed="5" type="INSTRUCTION" />
+            <counter covered="0" missed="2" type="LINE" />
+            <counter covered="0" missed="2" type="COMPLEXITY" />
+            <counter covered="0" missed="2" type="METHOD" />
+            <counter covered="0" missed="1" type="CLASS" />
+        </class>
+        <sourcefile name="Statistics.kt">
+            <line cb="0" ci="0" mb="0" mi="3" nr="5" />
+            <line cb="0" ci="0" mb="0" mi="2" nr="8" />
+            <counter covered="0" missed="5" type="INSTRUCTION" />
+            <counter covered="0" missed="2" type="LINE" />
+            <counter covered="0" missed="2" type="COMPLEXITY" />
+            <counter covered="0" missed="2" type="METHOD" />
+            <counter covered="0" missed="1" type="CLASS" />
+        </sourcefile>
         <sourcefile name="Math.kt">
             <line cb="0" ci="3" mb="0" mi="0" nr="3" />
             <line cb="0" ci="4" mb="0" mi="0" nr="6" />
@@ -62,22 +96,23 @@
             <line cb="0" ci="4" mb="0" mi="0" nr="18" />
             <line cb="0" ci="0" mb="0" mi="5" nr="22" />
             <line cb="0" ci="0" mb="0" mi="4" nr="26" />
-            <counter covered="19" missed="8" type="INSTRUCTION" />
-            <counter covered="5" missed="2" type="LINE" />
-            <counter covered="5" missed="2" type="COMPLEXITY" />
-            <counter covered="5" missed="2" type="METHOD" />
+            <line cb="0" ci="0" mb="0" mi="4" nr="30" />
+            <counter covered="19" missed="13" type="INSTRUCTION" />
+            <counter covered="5" missed="3" type="LINE" />
+            <counter covered="5" missed="3" type="COMPLEXITY" />
+            <counter covered="5" missed="3" type="METHOD" />
             <counter covered="1" missed="0" type="CLASS" />
         </sourcefile>
         <sourcefile name="MathOperation.kt" />
-        <counter covered="19" missed="8" type="INSTRUCTION" />
-        <counter covered="5" missed="2" type="LINE" />
-        <counter covered="5" missed="2" type="COMPLEXITY" />
-        <counter covered="5" missed="2" type="METHOD" />
-        <counter covered="1" missed="0" type="CLASS" />
+        <counter covered="19" missed="18" type="INSTRUCTION" />
+        <counter covered="5" missed="5" type="LINE" />
+        <counter covered="5" missed="5" type="COMPLEXITY" />
+        <counter covered="5" missed="5" type="METHOD" />
+        <counter covered="1" missed="1" type="CLASS" />
     </package>
-    <counter covered="19" missed="8" type="INSTRUCTION" />
-    <counter covered="5" missed="2" type="LINE" />
-    <counter covered="5" missed="2" type="COMPLEXITY" />
-    <counter covered="5" missed="2" type="METHOD" />
-    <counter covered="1" missed="0" type="CLASS" />
+    <counter covered="19" missed="18" type="INSTRUCTION" />
+    <counter covered="5" missed="5" type="LINE" />
+    <counter covered="5" missed="5" type="COMPLEXITY" />
+    <counter covered="5" missed="5" type="METHOD" />
+    <counter covered="1" missed="1" type="CLASS" />
 </report>
