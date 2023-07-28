@@ -19483,8 +19483,8 @@ function getPRComment(
 }
 
 function getModuleTable(modules, minCoverage, emoji) {
-  const tableHeader = minCoverage ? '|Module|Coverage||' : '|Module|Coverage|'
-  const tableStructure = minCoverage ? '|:-|:-|:-:|' : '|:-|:-|'
+  const tableHeader = '|Module|Coverage||'
+  const tableStructure = '|:-|:-|:-:|'
   let table = tableHeader + '\n' + tableStructure
   modules.forEach((module) => {
     const coverageDifference = getCoverageDifferenceForModule(module)
@@ -19505,19 +19505,11 @@ function getModuleTable(modules, minCoverage, emoji) {
 
 function getFileTable(project, minCoverage, emoji) {
   const tableHeader = project.isMultiModule
-    ? minCoverage
-      ? '|Module|File|Coverage||'
-      : '|Module|File|Coverage|'
-    : minCoverage
-    ? '|File|Coverage||'
-    : '|File|Coverage|'
+    ? '|Module|File|Coverage||'
+    : '|File|Coverage||'
   const tableStructure = project.isMultiModule
-    ? minCoverage
-      ? '|:-|:-|:-|:-:|'
-      : '|:-|:-|:-|'
-    : minCoverage
-    ? '|:-|:-|:-:|'
-    : '|:-|:-|'
+    ? '|:-|:-|:-|:-:|'
+    : '|:-|:-|:-:|'
   let table = tableHeader + '\n' + tableStructure
   project.modules.forEach((module) => {
     module.files.forEach((file, index) => {
@@ -19599,10 +19591,8 @@ function getOverallTable(project, coverage, minCoverage, emoji) {
   if (shouldShow(coverageDifference)) {
     coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`
   }
-  const tableHeader = minCoverage
-    ? `|Total Project Coverage|${coveragePercentage}|${status}|`
-    : `|Total Project Coverage|${coveragePercentage}|`
-  const tableStructure = minCoverage ? '|:-|:-|:-:|' : '|:-|:-|'
+  const tableHeader = `|Total Project Coverage|${coveragePercentage}|${status}|`
+  const tableStructure = '|:-|:-|:-:|'
   return tableHeader + '\n' + tableStructure
 }
 
