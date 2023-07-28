@@ -16,7 +16,7 @@ describe('get PR Comment', function () {
       const comment = render.getPRComment(49.23, project, 30, 50, '', emoji)
       expect(comment).toEqual(
         `|Total Project Coverage|49.23%|:green_apple:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 > There is no coverage information present for the Files changed`
       )
@@ -26,7 +26,7 @@ describe('get PR Comment', function () {
       const comment = render.getPRComment(49.23, project, 70, 50, '', emoji)
       expect(comment).toEqual(
         `|Total Project Coverage|49.23%|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 > There is no coverage information present for the Files changed`
       )
@@ -44,7 +44,7 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `### Coverage
 |Total Project Coverage|49.23%|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 > There is no coverage information present for the Files changed`
       )
@@ -58,7 +58,7 @@ describe('get PR Comment', function () {
       const comment = render.getPRComment(49.23, project, 30, 60, '', emoji)
       expect(comment).toEqual(
         `|Total Project Coverage|49.23% **\`-17.21%\`**|:green_apple:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -72,7 +72,7 @@ describe('get PR Comment', function () {
       const comment = render.getPRComment(49.23, project, 50, 64, '', emoji)
       expect(comment).toEqual(
         `|Total Project Coverage|49.23% **\`-17.21%\`**|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -86,7 +86,7 @@ describe('get PR Comment', function () {
       const comment = render.getPRComment(49.23, project, 30, 80, '', emoji)
       expect(comment).toEqual(
         `|Total Project Coverage|49.23% **\`-17.21%\`**|:green_apple:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -100,7 +100,7 @@ describe('get PR Comment', function () {
       const comment = render.getPRComment(49.23, project, 50, 20, '', emoji)
       expect(comment).toEqual(
         `|Total Project Coverage|49.23% **\`-17.21%\`**|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -122,7 +122,7 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `### Coverage
 |Total Project Coverage|49.23% **\`-17.21%\`**|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -140,10 +140,10 @@ describe('get PR Comment', function () {
       const comment = render.getPRComment(49.23, project, 30, 60, '', emoji)
       expect(comment).toEqual(
         `|Total Project Coverage|49.23% **\`-19.39%\`**|:green_apple:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |Module|Coverage||
-|:-|:-:|:-:|
+|:-|:-|:-:|
 |text|84.62% **\`-15.38%\`**|:green_apple:|
 |math|51.35% **\`-27.03%\`**|:x:|
 |app|6.85% **\`-17.81%\`**|:x:|
@@ -168,10 +168,10 @@ describe('get PR Comment', function () {
       const comment = render.getPRComment(49.23, project, 50, 64, '', emoji)
       expect(comment).toEqual(
         `|Total Project Coverage|49.23% **\`-19.39%\`**|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |Module|Coverage||
-|:-|:-:|:-:|
+|:-|:-|:-:|
 |text|84.62% **\`-15.38%\`**|:green_apple:|
 |math|51.35% **\`-27.03%\`**|:x:|
 |app|6.85% **\`-17.81%\`**|:x:|
@@ -196,10 +196,10 @@ describe('get PR Comment', function () {
       const comment = render.getPRComment(49.23, project, 30, 80, '', emoji)
       expect(comment).toEqual(
         `|Total Project Coverage|49.23% **\`-19.39%\`**|:green_apple:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |Module|Coverage||
-|:-|:-:|:-:|
+|:-|:-|:-:|
 |text|84.62% **\`-15.38%\`**|:green_apple:|
 |math|51.35% **\`-27.03%\`**|:x:|
 |app|6.85% **\`-17.81%\`**|:x:|
@@ -224,10 +224,10 @@ describe('get PR Comment', function () {
       const comment = render.getPRComment(49.23, project, 50, 20, '', emoji)
       expect(comment).toEqual(
         `|Total Project Coverage|49.23% **\`-19.39%\`**|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |Module|Coverage||
-|:-|:-:|:-:|
+|:-|:-|:-:|
 |text|84.62% **\`-15.38%\`**|:green_apple:|
 |math|51.35% **\`-27.03%\`**|:green_apple:|
 |app|6.85% **\`-17.81%\`**|:x:|
@@ -260,10 +260,10 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `### Coverage
 |Total Project Coverage|49.23% **\`-19.39%\`**|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |Module|Coverage||
-|:-|:-:|:-:|
+|:-|:-|:-:|
 |text|84.62% **\`-15.38%\`**|:green_apple:|
 |math|51.35% **\`-27.03%\`**|:green_apple:|
 |app|6.85% **\`-17.81%\`**|:x:|

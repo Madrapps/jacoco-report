@@ -109,7 +109,7 @@ describe('Single report', function () {
 
       expect(createComment.mock.calls[0][0].body)
         .toEqual(`|Total Project Coverage|35.25%|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -233,7 +233,7 @@ describe('Single report', function () {
 
         expect(createComment.mock.calls[0][0].body)
           .toEqual(`|Total Project Coverage|35.25%|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -295,7 +295,7 @@ describe('Single report', function () {
 
         expect(createComment.mock.calls[0][0].body)
           .toEqual(`|Total Project Coverage|35.25%|red_circle|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|

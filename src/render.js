@@ -32,7 +32,7 @@ function getPRComment(
 
 function getModuleTable(modules, minCoverage, emoji) {
   const tableHeader = '|Module|Coverage||'
-  const tableStructure = '|:-|:-:|:-:|'
+  const tableStructure = '|:-|:-|:-:|'
   let table = tableHeader + '\n' + tableStructure
   modules.forEach((module) => {
     const coverageDifference = getCoverageDifferenceForModule(module)
@@ -140,7 +140,7 @@ function getOverallTable(project, coverage, minCoverage, emoji) {
     coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`
   }
   const tableHeader = `|Total Project Coverage|${coveragePercentage}|${status}|`
-  const tableStructure = '|:-|:-:|:-:|'
+  const tableStructure = '|:-|:-|:-:|'
   return tableHeader + '\n' + tableStructure
 }
 

@@ -104,10 +104,10 @@ describe('Multiple reports', function () {
 
       expect(comment.mock.calls[0][0].body)
         .toEqual(`|Total Project Coverage|20.41% **\`-16.84%\`**|:x:|
-|:-|:-:|:-:|
+|:-|:-|:-:|
 
 |Module|Coverage||
-|:-|:-:|:-:|
+|:-|:-|:-:|
 |text|84.62% **\`-15.38%\`**|:green_apple:|
 |math|51.35% **\`-13.51%\`**|:x:|
 |app|6.85% **\`-17.81%\`**|:x:|
