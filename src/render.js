@@ -41,12 +41,14 @@ function getModuleTable(modules, minCoverage, emoji) {
   return table
 
   function renderFileRow(name, coverage, coverageDiff, emoji) {
-    const status = getStatus(coverage, minCoverage, emoji)
+    const status = minCoverage ? getStatus(coverage, minCoverage, emoji) : null
     let coveragePercentage = `${formatCoverage(coverage)}`
     if (shouldShow(coverageDiff)) {
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
     }
-    const row = `|${name}|${coveragePercentage}|${status}|`
+    const row = status
+      ? `|${name}|${coveragePercentage}|${status}|`
+      : `|${name}|${coveragePercentage}|`
     table = table + '\n' + row
   }
 }
@@ -96,14 +98,18 @@ function getFileTable(project, minCoverage, emoji) {
     isMultiModule,
     emoji
   ) {
-    const status = getStatus(coverage, minCoverage, emoji)
+    const status = minCoverage ? getStatus(coverage, minCoverage, emoji) : null
     let coveragePercentage = `${formatCoverage(coverage)}`
     if (shouldShow(coverageDiff)) {
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
     }
     const row = isMultiModule
-      ? `|${moduleName}|${fileName}|${coveragePercentage}|${status}|`
-      : `|${fileName}|${coveragePercentage}|${status}|`
+      ? minCoverage
+        ? `|${moduleName}|${fileName}|${coveragePercentage}|${status}|`
+        : `|${moduleName}|${fileName}|${coveragePercentage}|`
+      : minCoverage
+      ? `|${fileName}|${coveragePercentage}|${status}|`
+      : `|${fileName}|${coveragePercentage}|`
     table = table + '\n' + row
   }
 }
