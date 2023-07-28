@@ -97,12 +97,12 @@ describe('Aggregate report', function () {
       await action.action()
 
       expect(createComment.mock.calls[0][0].body)
-        .toEqual(`|Total Project Coverage|76.32%|:green_apple:|
+        .toEqual(`|Total Project Coverage|76.32% **\`-0.01%\`**|:green_apple:|
 |:-|:-:|:-:|
 
 |Module|Coverage||
 |:-|:-:|:-:|
-|module-2|70.37% **\`-0.19%\`**|:green_apple:|
+|module-2|70.37% **\`-18.52%\`**|:green_apple:|
 |module-3|8.33%|:x:|
 
 <details>
@@ -110,7 +110,7 @@ describe('Aggregate report', function () {
 
 |Module|File|Coverage||
 |:-|:-|:-|:-:|
-|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|70.37% **\`-0.19%\`**|:green_apple:|
+|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|70.37% **\`-18.52%\`**|:green_apple:|
 |module-3|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
 
 </details>`)

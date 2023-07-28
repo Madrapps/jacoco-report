@@ -43,7 +43,7 @@ function getModuleTable(modules, minCoverage, emoji) {
   function renderFileRow(name, coverage, coverageDiff, emoji) {
     const status = getStatus(coverage, minCoverage, emoji)
     let coveragePercentage = `${formatCoverage(coverage)}`
-    if (isZero(coverageDiff)) {
+    if (shouldShow(coverageDiff)) {
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
     }
     const row = `|${name}|${coveragePercentage}|${status}|`
@@ -90,7 +90,7 @@ function getFileTable(project, minCoverage, emoji) {
   ) {
     const status = getStatus(coverage, minCoverage, emoji)
     let coveragePercentage = `${formatCoverage(coverage)}`
-    if (isZero(coverageDiff)) {
+    if (shouldShow(coverageDiff)) {
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
     }
     const row = isMultiModule
@@ -111,7 +111,7 @@ function getCoverageDifferenceForFile(file) {
       return toFloat(line.instruction.missed)
     })
     .reduce(sumReducer, 0.0)
-  return -(missed / totalInstructions)
+  return -(missed / totalInstructions) * 100
 }
 
 function getCoverageDifferenceForModule(module) {
@@ -120,7 +120,7 @@ function getCoverageDifferenceForModule(module) {
     .flatMap((file) => file.lines)
     .map((line) => toFloat(line.instruction.missed))
     .reduce(sumReducer, 0.0)
-  return -(missed / totalInstructions)
+  return -(missed / totalInstructions) * 100
 }
 
 function getCoverageDifferenceForProject(project) {
@@ -129,14 +129,14 @@ function getCoverageDifferenceForProject(project) {
     .flatMap((module) => module.files.flatMap((file) => file.lines))
     .map((line) => toFloat(line.instruction.missed))
     .reduce(sumReducer, 0.0)
-  return -(missed / totalInstructions)
+  return -(missed / totalInstructions) * 100
 }
 
 function getOverallTable(project, coverage, minCoverage, emoji) {
   const status = getStatus(coverage, minCoverage, emoji)
   const coverageDifference = getCoverageDifferenceForProject(project)
   let coveragePercentage = `${formatCoverage(coverage)}`
-  if (isZero(coverageDifference)) {
+  if (shouldShow(coverageDifference)) {
     coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`
   }
   const tableHeader = `|Total Project Coverage|${coveragePercentage}|${status}|`
@@ -144,8 +144,13 @@ function getOverallTable(project, coverage, minCoverage, emoji) {
   return tableHeader + '\n' + tableStructure
 }
 
-function isZero(value) {
+function round(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100
+}
+
+function shouldShow(value) {
+  const rounded = Math.abs(round(value))
+  return rounded !== 0 && rounded !== 100
 }
 
 function getTitle(title) {
