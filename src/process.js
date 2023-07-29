@@ -106,17 +106,19 @@ function getFileCoverageFromPackages(packages, files) {
         resultFiles.push({
           name,
           url: githubFile.url,
-          missed,
-          covered,
-          percentage: parseFloat(
-            ((covered / (covered + missed)) * 100).toFixed(2)
-          ),
+          overall: {
+            missed,
+            covered,
+            percentage: parseFloat(
+              ((covered / (covered + missed)) * 100).toFixed(2)
+            ),
+          },
           lines,
         })
       }
     }
   })
-  resultFiles.sort((a, b) => b.percentage - a.percentage)
+  resultFiles.sort((a, b) => b.overall.percentage - a.overall.percentage)
 
   result.files = resultFiles
   if (resultFiles.length !== 0) {
@@ -132,8 +134,8 @@ function getTotalPercentage(files) {
   let covered = 0
   if (files.length !== 0) {
     files.forEach((file) => {
-      missed += file.missed
-      covered += file.covered
+      missed += file.overall.missed
+      covered += file.overall.covered
     })
     return parseFloat(((covered / (covered + missed)) * 100).toFixed(2))
   } else {

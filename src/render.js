@@ -74,7 +74,7 @@ function getFileTable(project, minCoverage, emoji) {
       renderFileRow(
         moduleName,
         `[${file.name}](${file.url})`,
-        file.percentage,
+        file.overall.percentage,
         coverageDifference,
         project.isMultiModule,
         emoji
@@ -111,7 +111,7 @@ const sumReducer = (total, value) => {
 }
 
 function getCoverageDifferenceForFile(file) {
-  const totalInstructions = file.covered + file.missed
+  const totalInstructions = file.overall.covered + file.overall.missed
   const missed = file.lines
     .map((line) => {
       return toFloat(line.instruction.missed)

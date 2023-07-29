@@ -36,7 +36,6 @@ describe('process', function () {
             {
               files: [
                 {
-                  covered: 21,
                   lines: [
                     {
                       branch: { covered: 1, missed: 1 },
@@ -79,9 +78,12 @@ describe('process', function () {
                       number: 43,
                     },
                   ],
-                  missed: 29,
                   name: 'Math.kt',
-                  percentage: 42,
+                  overall: {
+                    covered: 21,
+                    missed: 29,
+                    percentage: 42,
+                  },
                   url: 'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt',
                 },
               ],
@@ -139,7 +141,6 @@ describe('process', function () {
             {
               files: [
                 {
-                  covered: 11,
                   lines: [
                     {
                       branch: { covered: 0, missed: 0 },
@@ -152,9 +153,12 @@ describe('process', function () {
                       number: 20,
                     },
                   ],
-                  missed: 2,
                   name: 'StringOp.java',
-                  percentage: 84.62,
+                  overall: {
+                    covered: 11,
+                    missed: 2,
+                    percentage: 84.62,
+                  },
                   url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java',
                 },
               ],
@@ -212,11 +216,13 @@ describe('process', function () {
             {
               files: [
                 {
-                  covered: 10,
+                  overall: {
+                    covered: 10,
+                    missed: 7,
+                    percentage: 58.82,
+                  },
                   lines: [],
-                  missed: 7,
                   name: 'MainViewModel.kt',
-                  percentage: 58.82,
                   url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
                 },
               ],
@@ -253,7 +259,6 @@ describe('process', function () {
             {
               files: [
                 {
-                  covered: 19,
                   lines: [
                     {
                       branch: { covered: 0, missed: 0 },
@@ -261,9 +266,12 @@ describe('process', function () {
                       number: 22,
                     },
                   ],
-                  missed: 8,
+                  overall: {
+                    covered: 19,
+                    missed: 8,
+                    percentage: 70.37,
+                  },
                   name: 'Math.kt',
-                  percentage: 70.37,
                   url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt',
                 },
               ],
@@ -277,11 +285,13 @@ describe('process', function () {
             {
               files: [
                 {
-                  covered: 10,
-                  lines: [],
-                  missed: 7,
+                  overall: {
+                    covered: 10,
+                    missed: 7,
+                    percentage: 58.82,
+                  },
                   name: 'MainViewModel.kt',
-                  percentage: 58.82,
+                  lines: [],
                   url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
                 },
               ],
