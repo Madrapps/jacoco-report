@@ -19258,6 +19258,12 @@ function getProjectCoverage(reports, files) {
     )
     if (filesCoverage.files.length !== 0) {
       const moduleCoverage = getModuleCoverage(module.root)
+      const changedMissed = filesCoverage.files
+        .map((file) => file.changed.missed)
+        .reduce(sumReducer, 0.0)
+      const changedCovered = filesCoverage.files
+        .map((file) => file.changed.covered)
+        .reduce(sumReducer, 0.0)
       moduleCoverages.push({
         name: module.name,
         files: filesCoverage.files,
@@ -19265,6 +19271,11 @@ function getProjectCoverage(reports, files) {
           percentage: moduleCoverage.percentage,
           covered: moduleCoverage.covered,
           missed: moduleCoverage.missed,
+        },
+        changed: {
+          covered: changedCovered,
+          missed: changedMissed,
+          percentage: calculatePercentage(changedCovered, changedMissed),
         },
       })
     }
@@ -19580,16 +19591,14 @@ function getCoverageDifferenceForFile(file) {
 
 function getCoverageDifferenceForModule(module) {
   const totalInstructions = module.overall.covered + module.overall.missed
-  const missed = module.files
-    .map((file) => file.changed.missed)
-    .reduce(sumReducer, 0.0)
+  const missed = module.changed.missed
   return -(missed / totalInstructions) * 100
 }
 
 function getCoverageDifferenceForProject(project) {
   const totalInstructions = project.overall.covered + project.overall.missed
   const missed = project.modules
-    .flatMap((module) => module.files.flatMap((file) => file.changed.missed))
+    .map((module) => module.changed.missed)
     .reduce(sumReducer, 0.0)
   return -(missed / totalInstructions) * 100
 }

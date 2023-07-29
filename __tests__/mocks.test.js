@@ -224,6 +224,11 @@ const PROJECT = {
           missed: 79,
           percentage: 35.25,
         },
+        changed: {
+          covered: 13,
+          missed: 21,
+          percentage: 38.24,
+        },
       },
     ],
     isMultiModule: false,
@@ -270,6 +275,11 @@ const PROJECT = {
           percentage: 84.62,
           covered: 11,
           missed: 2,
+        },
+        changed: {
+          covered: 3,
+          missed: 2,
+          percentage: 60,
         },
       },
       {
@@ -327,6 +337,11 @@ const PROJECT = {
           percentage: 51.35,
           covered: 19,
           missed: 18,
+        },
+        changed: {
+          covered: 0,
+          missed: 10,
+          percentage: 0,
         },
       },
       {
@@ -405,6 +420,11 @@ const PROJECT = {
           percentage: 6.85,
           covered: 10,
           missed: 136,
+        },
+        changed: {
+          covered: 0,
+          missed: 26,
+          percentage: 0,
         },
       },
     ],

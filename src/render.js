@@ -118,16 +118,14 @@ function getCoverageDifferenceForFile(file) {
 
 function getCoverageDifferenceForModule(module) {
   const totalInstructions = module.overall.covered + module.overall.missed
-  const missed = module.files
-    .map((file) => file.changed.missed)
-    .reduce(sumReducer, 0.0)
+  const missed = module.changed.missed
   return -(missed / totalInstructions) * 100
 }
 
 function getCoverageDifferenceForProject(project) {
   const totalInstructions = project.overall.covered + project.overall.missed
   const missed = project.modules
-    .flatMap((module) => module.files.flatMap((file) => file.changed.missed))
+    .map((module) => module.changed.missed)
     .reduce(sumReducer, 0.0)
   return -(missed / totalInstructions) * 100
 }

@@ -98,6 +98,11 @@ describe('process', function () {
                 covered: 43,
                 missed: 79,
               },
+              changed: {
+                covered: 10,
+                missed: 21,
+                percentage: 32.26,
+              },
             },
           ],
           overall: {
@@ -178,6 +183,11 @@ describe('process', function () {
                 covered: 11,
                 missed: 2,
               },
+              changed: {
+                covered: 3,
+                missed: 2,
+                percentage: 60,
+              },
             },
           ],
           overall: {
@@ -247,6 +257,11 @@ describe('process', function () {
                 covered: 10,
                 missed: 110,
               },
+              changed: {
+                covered: 0,
+                missed: 0,
+                percentage: null,
+              },
             },
           ],
           overall: {
@@ -301,6 +316,11 @@ describe('process', function () {
                 covered: 19,
                 missed: 8,
               },
+              changed: {
+                covered: 0,
+                missed: 5,
+                percentage: 0,
+              },
             },
             {
               files: [
@@ -325,6 +345,11 @@ describe('process', function () {
                 percentage: 8.33,
                 covered: 10,
                 missed: 110,
+              },
+              changed: {
+                covered: 0,
+                missed: 0,
+                percentage: null,
               },
             },
           ],

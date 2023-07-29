@@ -10,6 +10,12 @@ function getProjectCoverage(reports, files) {
     )
     if (filesCoverage.files.length !== 0) {
       const moduleCoverage = getModuleCoverage(module.root)
+      const changedMissed = filesCoverage.files
+        .map((file) => file.changed.missed)
+        .reduce(sumReducer, 0.0)
+      const changedCovered = filesCoverage.files
+        .map((file) => file.changed.covered)
+        .reduce(sumReducer, 0.0)
       moduleCoverages.push({
         name: module.name,
         files: filesCoverage.files,
@@ -17,6 +23,11 @@ function getProjectCoverage(reports, files) {
           percentage: moduleCoverage.percentage,
           covered: moduleCoverage.covered,
           missed: moduleCoverage.missed,
+        },
+        changed: {
+          covered: changedCovered,
+          missed: changedMissed,
+          percentage: calculatePercentage(changedCovered, changedMissed),
         },
       })
     }
