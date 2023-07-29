@@ -44,6 +44,14 @@ function getProjectCoverage(reports, files) {
   return project
 }
 
+const sumReducer = (total, value) => {
+  return total + value
+}
+
+function toFloat(value) {
+  return parseFloat(value.toFixed(2))
+}
+
 function getModulesFromReports(reports) {
   const modules = []
   reports.forEach((report) => {
@@ -103,15 +111,24 @@ function getFileCoverageFromPackages(packages, files) {
             })
           }
         })
+        const changedMissed = lines
+          .map((line) => toFloat(line.instruction.missed))
+          .reduce(sumReducer, 0.0)
+        const changedCovered = lines
+          .map((line) => toFloat(line.instruction.covered))
+          .reduce(sumReducer, 0.0)
         resultFiles.push({
           name,
           url: githubFile.url,
           overall: {
             missed,
             covered,
-            percentage: parseFloat(
-              ((covered / (covered + missed)) * 100).toFixed(2)
-            ),
+            percentage: calculatePercentage(covered, missed),
+          },
+          changed: {
+            missed: changedMissed,
+            covered: changedCovered,
+            percentage: calculatePercentage(changedCovered, changedMissed),
           },
           lines,
         })
@@ -127,6 +144,15 @@ function getFileCoverageFromPackages(packages, files) {
     result.percentage = 100
   }
   return result
+}
+
+function calculatePercentage(covered, missed) {
+  const total = covered + missed
+  if (total !== 0) {
+    return parseFloat(((covered / total) * 100).toFixed(2))
+  } else {
+    return null
+  }
 }
 
 function getTotalPercentage(files) {

@@ -134,6 +134,11 @@ const PROJECT = {
               covered: 11,
               percentage: 100,
             },
+            changed: {
+              covered: 0,
+              missed: 0,
+              percentage: null,
+            },
             lines: [],
           },
           {
@@ -143,6 +148,11 @@ const PROJECT = {
               missed: 29,
               covered: 21,
               percentage: 42,
+            },
+            changed: {
+              missed: 21,
+              covered: 10,
+              percentage: 32.26,
             },
             lines: [
               {
@@ -195,6 +205,11 @@ const PROJECT = {
               covered: 11,
               percentage: 18.03,
             },
+            changed: {
+              missed: 0,
+              covered: 3,
+              percentage: 100,
+            },
             lines: [
               {
                 number: 3,
@@ -232,6 +247,11 @@ const PROJECT = {
               covered: 11,
               percentage: 84.62,
             },
+            changed: {
+              missed: 2,
+              covered: 3,
+              percentage: 60,
+            },
             lines: [
               {
                 number: 6,
@@ -263,6 +283,11 @@ const PROJECT = {
               covered: 19,
               percentage: 59.38,
             },
+            changed: {
+              missed: 5,
+              covered: 0,
+              percentage: 0,
+            },
             lines: [
               {
                 number: 22,
@@ -275,6 +300,11 @@ const PROJECT = {
             name: 'Statistics.kt',
             url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Statistics.kt',
             overall: {
+              missed: 5,
+              covered: 0,
+              percentage: 0,
+            },
+            changed: {
               missed: 5,
               covered: 0,
               percentage: 0,
@@ -310,6 +340,11 @@ const PROJECT = {
               covered: 10,
               percentage: 35.71,
             },
+            changed: {
+              missed: 8,
+              covered: 0,
+              percentage: 0,
+            },
             lines: [
               {
                 number: 16,
@@ -323,6 +358,11 @@ const PROJECT = {
             url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainActivity.kt',
             overall: {
               missed: 100,
+              covered: 0,
+              percentage: 0,
+            },
+            changed: {
+              missed: 14,
               covered: 0,
               percentage: 0,
             },
@@ -340,6 +380,11 @@ const PROJECT = {
             overall: {
               missed: 4,
               covered: 0,
+              percentage: 0,
+            },
+            changed: {
+              covered: 0,
+              missed: 4,
               percentage: 0,
             },
             lines: [

@@ -112,19 +112,14 @@ const sumReducer = (total, value) => {
 
 function getCoverageDifferenceForFile(file) {
   const totalInstructions = file.overall.covered + file.overall.missed
-  const missed = file.lines
-    .map((line) => {
-      return toFloat(line.instruction.missed)
-    })
-    .reduce(sumReducer, 0.0)
+  const missed = file.changed.missed
   return -(missed / totalInstructions) * 100
 }
 
 function getCoverageDifferenceForModule(module) {
   const totalInstructions = module.overall.covered + module.overall.missed
   const missed = module.files
-    .flatMap((file) => file.lines)
-    .map((line) => toFloat(line.instruction.missed))
+    .map((file) => file.changed.missed)
     .reduce(sumReducer, 0.0)
   return -(missed / totalInstructions) * 100
 }
@@ -132,8 +127,7 @@ function getCoverageDifferenceForModule(module) {
 function getCoverageDifferenceForProject(project) {
   const totalInstructions = project.overall.covered + project.overall.missed
   const missed = project.modules
-    .flatMap((module) => module.files.flatMap((file) => file.lines))
-    .map((line) => toFloat(line.instruction.missed))
+    .flatMap((module) => module.files.flatMap((file) => file.changed.missed))
     .reduce(sumReducer, 0.0)
   return -(missed / totalInstructions) * 100
 }
@@ -157,14 +151,12 @@ function getOverallTable(
   const tableHeader = `|Overall Project|${coveragePercentage}|${status}|`
   const tableStructure = '|:-|:-|:-:|'
 
-  const changedLines = project.modules.flatMap((module) =>
-    module.files.flatMap((file) => file.lines)
-  )
-  const missedLines = changedLines
-    .map((line) => toFloat(line.instruction.missed))
+  const changedFiles = project.modules.flatMap((module) => module.files)
+  const missedLines = changedFiles
+    .map((file) => file.changed.missed)
     .reduce(sumReducer, 0.0)
-  const coveredLines = changedLines
-    .map((line) => toFloat(line.instruction.covered))
+  const coveredLines = changedFiles
+    .map((file) => file.changed.covered)
     .reduce(sumReducer, 0.0)
   const totalChangedLines = missedLines + coveredLines
   let changedCoverageRow = ''
