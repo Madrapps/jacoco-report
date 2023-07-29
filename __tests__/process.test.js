@@ -86,9 +86,11 @@ describe('process', function () {
                 },
               ],
               name: 'jacoco-playground',
-              percentage: 35.25,
-              covered: 43,
-              missed: 79,
+              overall: {
+                percentage: 35.25,
+                covered: 43,
+                missed: 79,
+              },
             },
           ],
           overall: {
@@ -157,9 +159,11 @@ describe('process', function () {
                 },
               ],
               name: 'text',
-              percentage: 84.62,
-              covered: 11,
-              missed: 2,
+              overall: {
+                percentage: 84.62,
+                covered: 11,
+                missed: 2,
+              },
             },
           ],
           overall: {
@@ -217,9 +221,11 @@ describe('process', function () {
                 },
               ],
               name: 'module-3',
-              percentage: 8.33,
-              covered: 10,
-              missed: 110,
+              overall: {
+                percentage: 8.33,
+                covered: 10,
+                missed: 110,
+              },
             },
           ],
           overall: {
@@ -262,9 +268,11 @@ describe('process', function () {
                 },
               ],
               name: 'module-2',
-              percentage: 70.37,
-              covered: 19,
-              missed: 8,
+              overall: {
+                percentage: 70.37,
+                covered: 19,
+                missed: 8,
+              },
             },
             {
               files: [
@@ -278,9 +286,11 @@ describe('process', function () {
                 },
               ],
               name: 'module-3',
-              percentage: 8.33,
-              covered: 10,
-              missed: 110,
+              overall: {
+                percentage: 8.33,
+                covered: 10,
+                missed: 110,
+              },
             },
           ],
           overall: {

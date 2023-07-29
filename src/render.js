@@ -35,7 +35,12 @@ function getModuleTable(modules, minCoverage, emoji) {
   let table = tableHeader + '\n' + tableStructure
   modules.forEach((module) => {
     const coverageDifference = getCoverageDifferenceForModule(module)
-    renderFileRow(module.name, module.percentage, coverageDifference, emoji)
+    renderFileRow(
+      module.name,
+      module.overall.percentage,
+      coverageDifference,
+      emoji
+    )
   })
   return table
 
@@ -116,7 +121,7 @@ function getCoverageDifferenceForFile(file) {
 }
 
 function getCoverageDifferenceForModule(module) {
-  const totalInstructions = module.covered + module.missed
+  const totalInstructions = module.overall.covered + module.overall.missed
   const missed = module.files
     .flatMap((file) => file.lines)
     .map((line) => toFloat(line.instruction.missed))

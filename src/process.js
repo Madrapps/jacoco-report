@@ -12,14 +12,16 @@ function getProjectCoverage(reports, files) {
       const moduleCoverage = getModuleCoverage(module.root)
       moduleCoverages.push({
         name: module.name,
-        percentage: moduleCoverage.percentage,
-        covered: moduleCoverage.covered,
-        missed: moduleCoverage.missed,
         files: filesCoverage.files,
+        overall: {
+          percentage: moduleCoverage.percentage,
+          covered: moduleCoverage.covered,
+          missed: moduleCoverage.missed,
+        },
       })
     }
   })
-  moduleCoverages.sort((a, b) => b.percentage - a.percentage)
+  moduleCoverages.sort((a, b) => b.overall.percentage - a.overall.percentage)
   const totalFiles = moduleCoverages.flatMap((module) => {
     return module.files
   })

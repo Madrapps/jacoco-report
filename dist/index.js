@@ -19260,14 +19260,16 @@ function getProjectCoverage(reports, files) {
       const moduleCoverage = getModuleCoverage(module.root)
       moduleCoverages.push({
         name: module.name,
-        percentage: moduleCoverage.percentage,
-        covered: moduleCoverage.covered,
-        missed: moduleCoverage.missed,
         files: filesCoverage.files,
+        overall: {
+          percentage: moduleCoverage.percentage,
+          covered: moduleCoverage.covered,
+          missed: moduleCoverage.missed,
+        },
       })
     }
   })
-  moduleCoverages.sort((a, b) => b.percentage - a.percentage)
+  moduleCoverages.sort((a, b) => b.overall.percentage - a.overall.percentage)
   const totalFiles = moduleCoverages.flatMap((module) => {
     return module.files
   })
@@ -19467,7 +19469,12 @@ function getModuleTable(modules, minCoverage, emoji) {
   let table = tableHeader + '\n' + tableStructure
   modules.forEach((module) => {
     const coverageDifference = getCoverageDifferenceForModule(module)
-    renderFileRow(module.name, module.percentage, coverageDifference, emoji)
+    renderFileRow(
+      module.name,
+      module.overall.percentage,
+      coverageDifference,
+      emoji
+    )
   })
   return table
 
@@ -19548,7 +19555,7 @@ function getCoverageDifferenceForFile(file) {
 }
 
 function getCoverageDifferenceForModule(module) {
-  const totalInstructions = module.covered + module.missed
+  const totalInstructions = module.overall.covered + module.overall.missed
   const missed = module.files
     .flatMap((file) => file.lines)
     .map((line) => toFloat(line.instruction.missed))

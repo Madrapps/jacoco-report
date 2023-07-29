@@ -125,7 +125,6 @@ const PROJECT = {
     modules: [
       {
         name: 'jacoco-playground',
-        percentage: 35.25,
         files: [
           {
             name: 'StringOp.java',
@@ -199,8 +198,11 @@ const PROJECT = {
             ],
           },
         ],
-        covered: 43,
-        missed: 79,
+        overall: {
+          covered: 43,
+          missed: 79,
+          percentage: 35.25,
+        },
       },
     ],
     isMultiModule: false,
@@ -215,9 +217,6 @@ const PROJECT = {
     modules: [
       {
         name: 'text',
-        percentage: 84.62,
-        covered: 11,
-        missed: 2,
         files: [
           {
             name: 'StringOp.java',
@@ -239,12 +238,14 @@ const PROJECT = {
             ],
           },
         ],
+        overall: {
+          percentage: 84.62,
+          covered: 11,
+          missed: 2,
+        },
       },
       {
         name: 'math',
-        percentage: 51.35,
-        covered: 19,
-        missed: 18,
         files: [
           {
             name: 'Math.kt',
@@ -280,12 +281,14 @@ const PROJECT = {
             ],
           },
         ],
+        overall: {
+          percentage: 51.35,
+          covered: 19,
+          missed: 18,
+        },
       },
       {
         name: 'app',
-        percentage: 6.85,
-        covered: 10,
-        missed: 136,
         files: [
           {
             name: 'MainViewModel.kt',
@@ -335,6 +338,11 @@ const PROJECT = {
             ],
           },
         ],
+        overall: {
+          percentage: 6.85,
+          covered: 10,
+          missed: 136,
+        },
       },
     ],
     isMultiModule: true,
