@@ -57,7 +57,7 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `|Overall Project|35.25% **\`-17.21%\`**|:green_apple:|
 |:-|:-|:-:|
-|Changed files|38.24%|:x:|
+|Files changed|38.24%|:x:|
 <br>
 
 |File|Coverage||
@@ -73,7 +73,7 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `|Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
-|Changed files|38.24%|:x:|
+|Files changed|38.24%|:x:|
 <br>
 
 |File|Coverage||
@@ -89,7 +89,7 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `|Overall Project|35.25% **\`-17.21%\`**|:green_apple:|
 |:-|:-|:-:|
-|Changed files|38.24%|:x:|
+|Files changed|38.24%|:x:|
 <br>
 
 |File|Coverage||
@@ -105,7 +105,7 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `|Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
-|Changed files|38.24%|:green_apple:|
+|Files changed|38.24%|:green_apple:|
 <br>
 
 |File|Coverage||
@@ -122,7 +122,7 @@ describe('get PR Comment', function () {
         `### Coverage
 |Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
-|Changed files|38.24%|:green_apple:|
+|Files changed|38.24%|:green_apple:|
 <br>
 
 |File|Coverage||
@@ -142,7 +142,7 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `|Overall Project|20.41% **\`-19.39%\`**|:green_apple:|
 |:-|:-|:-:|
-|Changed files|7.32%|:x:|
+|Files changed|7.32%|:x:|
 <br>
 
 |Module|Coverage||
@@ -172,7 +172,7 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `|Overall Project|20.41% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
-|Changed files|7.32%|:x:|
+|Files changed|7.32%|:x:|
 <br>
 
 |Module|Coverage||
@@ -202,7 +202,7 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `|Overall Project|20.41% **\`-19.39%\`**|:green_apple:|
 |:-|:-|:-:|
-|Changed files|7.32%|:x:|
+|Files changed|7.32%|:x:|
 <br>
 
 |Module|Coverage||
@@ -232,7 +232,7 @@ describe('get PR Comment', function () {
       expect(comment).toEqual(
         `|Overall Project|20.41% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
-|Changed files|7.32%|:green_apple:|
+|Files changed|7.32%|:green_apple:|
 <br>
 
 |Module|Coverage||
@@ -263,7 +263,7 @@ describe('get PR Comment', function () {
         `### Coverage
 |Overall Project|20.41% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
-|Changed files|7.32%|:x:|
+|Files changed|7.32%|:x:|
 <br>
 
 |Module|Coverage||

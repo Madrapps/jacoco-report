@@ -282,7 +282,7 @@ describe('Single report', function () {
         expect(createComment.mock.calls[0][0].body)
           .toEqual(`|Overall Project|35.25% **\`-17.21%\`**|red_circle|
 |:-|:-|:-:|
-|Changed files|38.24%|red_circle|
+|Files changed|38.24%|red_circle|
 <br>
 
 |File|Coverage||
@@ -369,7 +369,7 @@ function initContext(eventName, payload) {
 
 const PROPER_COMMENT = `|Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
-|Changed files|38.24%|:x:|
+|Files changed|38.24%|:x:|
 <br>
 
 |File|Coverage||

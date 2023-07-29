@@ -99,7 +99,7 @@ describe('Aggregate report', function () {
       expect(createComment.mock.calls[0][0].body)
         .toEqual(`|Overall Project|76.32% **\`-0.01%\`**|:green_apple:|
 |:-|:-|:-:|
-|Changed files|0%|:x:|
+|Files changed|0%|:x:|
 <br>
 
 |Module|Coverage||
