@@ -4,24 +4,6 @@ const process = require('../src/process')
 const { CHANGED_FILE, PROJECT } = require('./mocks.test')
 
 describe('process', function () {
-  describe('get overall coverage', function () {
-    describe('single report', function () {
-      test('get project coverage', async () => {
-        const reports = await getSingleReport()
-        const coverage = process.getOverallCoverage(reports)
-        expect(coverage.project).toBeCloseTo(35.25, 1)
-      })
-    })
-
-    describe('multiple reports', function () {
-      test('get project coverage', async () => {
-        const reports = await getMultipleReports()
-        const coverage = process.getOverallCoverage(reports)
-        expect(coverage.project).toBeCloseTo(20.41, 1)
-      })
-    })
-  })
-
   describe('get file coverage', function () {
     describe('single report', function () {
       it('no files changed', async () => {

@@ -1,5 +1,4 @@
 function getPRComment(
-  overallCoverage,
   project,
   minCoverageOverall,
   minCoverageChangedFiles,
@@ -9,7 +8,6 @@ function getPRComment(
   const heading = getTitle(title)
   const overallTable = getOverallTable(
     project,
-    overallCoverage,
     minCoverageOverall,
     minCoverageChangedFiles,
     emoji
@@ -137,14 +135,13 @@ function getCoverageDifferenceForProject(project) {
 
 function getOverallTable(
   project,
-  coverage,
   minCoverageOverall,
   minCoverageChanged,
   emoji
 ) {
-  const status = getStatus(coverage, minCoverageOverall, emoji)
+  const status = getStatus(project.percentage, minCoverageOverall, emoji)
   const coverageDifference = getCoverageDifferenceForProject(project)
-  let coveragePercentage = `${formatCoverage(coverage)}`
+  let coveragePercentage = `${formatCoverage(project.percentage)}`
   if (shouldShow(coverageDifference)) {
     coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`
   }

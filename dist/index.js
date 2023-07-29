@@ -19124,16 +19124,12 @@ async function action() {
     const reportsJson = await reportsJsonAsync
     const reports = reportsJson.map((report) => report['report'])
 
-    // TODO Replace this with the getProjectCoverage itself
-    const overallCoverage = process.getOverallCoverage(reports)
-    if (debugMode) core.info(`overallCoverage: ${debug(overallCoverage)}`)
-    core.setOutput(
-      'coverage-overall',
-      parseFloat(overallCoverage.project.toFixed(2))
-    )
-
     const project = process.getProjectCoverage(reports, changedFiles)
     if (debugMode) core.info(`project: ${debug(project)}`)
+    core.setOutput(
+      'coverage-overall',
+      parseFloat(project.percentage.toFixed(2))
+    )
     core.setOutput(
       'coverage-changed-files',
       parseFloat(project['coverage-changed-files'].toFixed(2))
@@ -19152,7 +19148,6 @@ async function action() {
         updateComment,
         render.getTitle(title),
         render.getPRComment(
-          overallCoverage.project,
           project,
           minCoverageOverall,
           minCoverageChangedFiles,
@@ -19395,22 +19390,6 @@ function getModuleCoverage(report) {
   return getDetailedCoverage(counters, 'INSTRUCTION')
 }
 
-function getOverallCoverage(reports) {
-  const coverage = {}
-  const modules = []
-  reports.forEach((report) => {
-    const moduleName = report[TAG.SELF].name
-    const moduleCoverage = getModuleCoverage(report)
-    modules.push({
-      module: moduleName,
-      coverage: moduleCoverage,
-    })
-  })
-  coverage.project = getOverallProjectCoverage(reports).percentage
-  coverage.modules = modules
-  return coverage
-}
-
 function getOverallProjectCoverage(reports) {
   const coverages = reports.map((report) =>
     getDetailedCoverage(report['counter'], 'INSTRUCTION')
@@ -19441,7 +19420,6 @@ function getDetailedCoverage(counters, type) {
 
 module.exports = {
   getProjectCoverage,
-  getOverallCoverage,
 }
 
 
@@ -19451,7 +19429,6 @@ module.exports = {
 /***/ ((module) => {
 
 function getPRComment(
-  overallCoverage,
   project,
   minCoverageOverall,
   minCoverageChangedFiles,
@@ -19461,7 +19438,6 @@ function getPRComment(
   const heading = getTitle(title)
   const overallTable = getOverallTable(
     project,
-    overallCoverage,
     minCoverageOverall,
     minCoverageChangedFiles,
     emoji
@@ -19589,14 +19565,13 @@ function getCoverageDifferenceForProject(project) {
 
 function getOverallTable(
   project,
-  coverage,
   minCoverageOverall,
   minCoverageChanged,
   emoji
 ) {
-  const status = getStatus(coverage, minCoverageOverall, emoji)
+  const status = getStatus(project.percentage, minCoverageOverall, emoji)
   const coverageDifference = getCoverageDifferenceForProject(project)
-  let coveragePercentage = `${formatCoverage(coverage)}`
+  let coveragePercentage = `${formatCoverage(project.percentage)}`
   if (shouldShow(coverageDifference)) {
     coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`
   }

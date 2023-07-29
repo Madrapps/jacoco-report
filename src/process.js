@@ -142,22 +142,6 @@ function getModuleCoverage(report) {
   return getDetailedCoverage(counters, 'INSTRUCTION')
 }
 
-function getOverallCoverage(reports) {
-  const coverage = {}
-  const modules = []
-  reports.forEach((report) => {
-    const moduleName = report[TAG.SELF].name
-    const moduleCoverage = getModuleCoverage(report)
-    modules.push({
-      module: moduleName,
-      coverage: moduleCoverage,
-    })
-  })
-  coverage.project = getOverallProjectCoverage(reports).percentage
-  coverage.modules = modules
-  return coverage
-}
-
 function getOverallProjectCoverage(reports) {
   const coverages = reports.map((report) =>
     getDetailedCoverage(report['counter'], 'INSTRUCTION')
@@ -188,5 +172,4 @@ function getDetailedCoverage(counters, type) {
 
 module.exports = {
   getProjectCoverage,
-  getOverallCoverage,
 }
