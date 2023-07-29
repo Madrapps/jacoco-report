@@ -125,7 +125,7 @@ function getCoverageDifferenceForModule(module) {
 }
 
 function getCoverageDifferenceForProject(project) {
-  const totalInstructions = project.covered + project.missed
+  const totalInstructions = project.overall.covered + project.overall.missed
   const missed = project.modules
     .flatMap((module) => module.files.flatMap((file) => file.lines))
     .map((line) => toFloat(line.instruction.missed))
@@ -139,9 +139,13 @@ function getOverallTable(
   minCoverageChanged,
   emoji
 ) {
-  const status = getStatus(project.percentage, minCoverageOverall, emoji)
+  const status = getStatus(
+    project.overall.percentage,
+    minCoverageOverall,
+    emoji
+  )
   const coverageDifference = getCoverageDifferenceForProject(project)
-  let coveragePercentage = `${formatCoverage(project.percentage)}`
+  let coveragePercentage = `${formatCoverage(project.overall.percentage)}`
   if (shouldShow(coverageDifference)) {
     coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`
   }

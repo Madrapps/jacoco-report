@@ -27,9 +27,11 @@ function getProjectCoverage(reports, files) {
   const project = {
     modules: moduleCoverages,
     isMultiModule: reports.length > 1 || modules.length > 1,
-    covered: projectCoverage.covered,
-    missed: projectCoverage.missed,
-    percentage: projectCoverage.percentage,
+    overall: {
+      covered: projectCoverage.covered,
+      missed: projectCoverage.missed,
+      percentage: projectCoverage.percentage,
+    },
   }
   const totalPercentage = getTotalPercentage(totalFiles)
   if (totalPercentage) {

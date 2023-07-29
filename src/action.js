@@ -86,7 +86,7 @@ async function action() {
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-overall',
-      parseFloat(project.percentage.toFixed(2))
+      parseFloat(project.overall.percentage.toFixed(2))
     )
     core.setOutput(
       'coverage-changed-files',

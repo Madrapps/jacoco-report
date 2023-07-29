@@ -205,9 +205,11 @@ const PROJECT = {
     ],
     isMultiModule: false,
     'coverage-changed-files': 35.25,
-    covered: 43,
-    missed: 79,
-    percentage: 35.25,
+    overall: {
+      covered: 43,
+      missed: 79,
+      percentage: 35.25,
+    },
   },
   MULTI_MODULE: {
     modules: [
@@ -337,9 +339,11 @@ const PROJECT = {
     ],
     isMultiModule: true,
     'coverage-changed-files': 21.98,
-    covered: 40,
-    missed: 156,
-    percentage: 20.41,
+    overall: {
+      covered: 40,
+      missed: 156,
+      percentage: 20.41,
+    },
   },
 }
 
