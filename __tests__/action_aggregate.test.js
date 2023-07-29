@@ -103,7 +103,7 @@ describe('Aggregate report', function () {
 |Module|Coverage||
 |:-|:-|:-:|
 |module-2|70.37% **\`-18.52%\`**|:x:|
-|module-3|8.33%|:x:|
+|module-3|8.33%|:green_apple:|
 
 <details>
 <summary>Files</summary>

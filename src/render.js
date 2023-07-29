@@ -41,7 +41,8 @@ function getModuleTable(modules, minCoverage, emoji) {
   return table
 
   function renderFileRow(name, coverage, coverageDiff, emoji) {
-    const status = getStatus(coverage, minCoverage, emoji)
+    const changedModuleCoverage = 100 + coverageDiff
+    const status = getStatus(changedModuleCoverage, minCoverage, emoji)
     let coveragePercentage = `${formatCoverage(coverage)}`
     if (shouldShow(coverageDiff)) {
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
