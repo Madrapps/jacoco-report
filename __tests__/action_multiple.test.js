@@ -106,6 +106,7 @@ describe('Multiple reports', function () {
         .toEqual(`|Overall Project|20.41% **\`-16.84%\`**|:x:|
 |:-|:-|:-:|
 |Changed files|8.33%|:x:|
+<br>
 
 |Module|Coverage||
 |:-|:-|:-:|

@@ -107,15 +107,7 @@ describe('Single report', function () {
       initContext(eventName, payload)
       await action.action()
 
-      expect(createComment.mock.calls[0][0].body)
-        .toEqual(`|Overall Project|35.25% **\`-17.21%\`**|:x:|
-|:-|:-|:-:|
-|Changed files|38.24%|:x:|
-
-|File|Coverage||
-|:-|:-|:-:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:x:|
-|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`)
+      expect(createComment.mock.calls[0][0].body).toEqual(PROPER_COMMENT)
     })
 
     it('set overall coverage output', async () => {
@@ -232,15 +224,7 @@ describe('Single report', function () {
 
         await action.action()
 
-        expect(createComment.mock.calls[0][0].body)
-          .toEqual(`|Overall Project|35.25% **\`-17.21%\`**|:x:|
-|:-|:-|:-:|
-|Changed files|38.24%|:x:|
-
-|File|Coverage||
-|:-|:-|:-:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:x:|
-|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`)
+        expect(createComment.mock.calls[0][0].body).toEqual(PROPER_COMMENT)
       })
 
       it("Don't add comment when coverage absent for changes files", async () => {
@@ -299,6 +283,7 @@ describe('Single report', function () {
           .toEqual(`|Overall Project|35.25% **\`-17.21%\`**|red_circle|
 |:-|:-|:-:|
 |Changed files|38.24%|red_circle|
+<br>
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -381,3 +366,13 @@ function initContext(eventName, payload) {
   context.repo = 'jacoco-playground'
   context.owner = 'madrapps'
 }
+
+const PROPER_COMMENT = `|Overall Project|35.25% **\`-17.21%\`**|:x:|
+|:-|:-|:-:|
+|Changed files|38.24%|:x:|
+<br>
+
+|File|Coverage||
+|:-|:-|:-:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:x:|
+|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`

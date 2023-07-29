@@ -167,7 +167,8 @@ function getOverallTable(
     const status = getStatus(changedLinesPercentage, minCoverageChanged, emoji)
     changedCoverageRow =
       '\n' +
-      `|Changed files|${formatCoverage(changedLinesPercentage)}|${status}|`
+      `|Changed files|${formatCoverage(changedLinesPercentage)}|${status}|` +
+      '\n<br>'
   }
   return tableHeader + '\n' + tableStructure + changedCoverageRow
 }

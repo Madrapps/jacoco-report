@@ -60,6 +60,7 @@ describe('get PR Comment', function () {
         `|Overall Project|49.23% **\`-17.21%\`**|:green_apple:|
 |:-|:-|:-:|
 |Changed files|38.24%|:x:|
+<br>
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -75,6 +76,7 @@ describe('get PR Comment', function () {
         `|Overall Project|49.23% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
 |Changed files|38.24%|:x:|
+<br>
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -90,6 +92,7 @@ describe('get PR Comment', function () {
         `|Overall Project|49.23% **\`-17.21%\`**|:green_apple:|
 |:-|:-|:-:|
 |Changed files|38.24%|:x:|
+<br>
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -105,6 +108,7 @@ describe('get PR Comment', function () {
         `|Overall Project|49.23% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
 |Changed files|38.24%|:green_apple:|
+<br>
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -128,6 +132,7 @@ describe('get PR Comment', function () {
 |Overall Project|49.23% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
 |Changed files|38.24%|:green_apple:|
+<br>
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -147,6 +152,7 @@ describe('get PR Comment', function () {
         `|Overall Project|49.23% **\`-19.39%\`**|:green_apple:|
 |:-|:-|:-:|
 |Changed files|7.32%|:x:|
+<br>
 
 |Module|Coverage||
 |:-|:-|:-:|
@@ -176,6 +182,7 @@ describe('get PR Comment', function () {
         `|Overall Project|49.23% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
 |Changed files|7.32%|:x:|
+<br>
 
 |Module|Coverage||
 |:-|:-|:-:|
@@ -205,6 +212,7 @@ describe('get PR Comment', function () {
         `|Overall Project|49.23% **\`-19.39%\`**|:green_apple:|
 |:-|:-|:-:|
 |Changed files|7.32%|:x:|
+<br>
 
 |Module|Coverage||
 |:-|:-|:-:|
@@ -234,6 +242,7 @@ describe('get PR Comment', function () {
         `|Overall Project|49.23% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
 |Changed files|7.32%|:green_apple:|
+<br>
 
 |Module|Coverage||
 |:-|:-|:-:|
@@ -271,6 +280,7 @@ describe('get PR Comment', function () {
 |Overall Project|49.23% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
 |Changed files|7.32%|:x:|
+<br>
 
 |Module|Coverage||
 |:-|:-|:-:|

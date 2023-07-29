@@ -100,6 +100,7 @@ describe('Aggregate report', function () {
         .toEqual(`|Overall Project|76.32% **\`-0.01%\`**|:green_apple:|
 |:-|:-|:-:|
 |Changed files|0%|:x:|
+<br>
 
 |Module|Coverage||
 |:-|:-|:-:|
