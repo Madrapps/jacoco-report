@@ -19463,6 +19463,7 @@ function getPRComment(
     project,
     overallCoverage,
     minCoverageOverall,
+    minCoverageChangedFiles,
     emoji
   )
   const moduleTable = getModuleTable(
@@ -19586,16 +19587,41 @@ function getCoverageDifferenceForProject(project) {
   return -(missed / totalInstructions) * 100
 }
 
-function getOverallTable(project, coverage, minCoverage, emoji) {
-  const status = getStatus(coverage, minCoverage, emoji)
+function getOverallTable(
+  project,
+  coverage,
+  minCoverageOverall,
+  minCoverageChanged,
+  emoji
+) {
+  const status = getStatus(coverage, minCoverageOverall, emoji)
   const coverageDifference = getCoverageDifferenceForProject(project)
   let coveragePercentage = `${formatCoverage(coverage)}`
   if (shouldShow(coverageDifference)) {
     coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`
   }
-  const tableHeader = `|Total Project Coverage|${coveragePercentage}|${status}|`
+  const tableHeader = `|Overall Project|${coveragePercentage}|${status}|`
   const tableStructure = '|:-|:-|:-:|'
-  return tableHeader + '\n' + tableStructure
+
+  const changedLines = project.modules.flatMap((module) =>
+    module.files.flatMap((file) => file.lines)
+  )
+  const missedLines = changedLines
+    .map((line) => toFloat(line.instruction.missed))
+    .reduce(sumReducer, 0.0)
+  const coveredLines = changedLines
+    .map((line) => toFloat(line.instruction.covered))
+    .reduce(sumReducer, 0.0)
+  const totalChangedLines = missedLines + coveredLines
+  let changedCoverageRow = ''
+  if (totalChangedLines !== 0) {
+    const changedLinesPercentage = (coveredLines / totalChangedLines) * 100
+    const status = getStatus(changedLinesPercentage, minCoverageChanged, emoji)
+    changedCoverageRow =
+      '\n' +
+      `|Changed files|${formatCoverage(changedLinesPercentage)}|${status}|`
+  }
+  return tableHeader + '\n' + tableStructure + changedCoverageRow
 }
 
 function round(value) {

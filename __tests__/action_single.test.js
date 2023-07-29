@@ -108,8 +108,9 @@ describe('Single report', function () {
       await action.action()
 
       expect(createComment.mock.calls[0][0].body)
-        .toEqual(`|Total Project Coverage|35.25% **\`-17.21%\`**|:x:|
+        .toEqual(`|Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
+|Changed files|38.24%|:x:|
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -232,8 +233,9 @@ describe('Single report', function () {
         await action.action()
 
         expect(createComment.mock.calls[0][0].body)
-          .toEqual(`|Total Project Coverage|35.25% **\`-17.21%\`**|:x:|
+          .toEqual(`|Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
+|Changed files|38.24%|:x:|
 
 |File|Coverage||
 |:-|:-|:-:|
@@ -294,8 +296,9 @@ describe('Single report', function () {
         await action.action()
 
         expect(createComment.mock.calls[0][0].body)
-          .toEqual(`|Total Project Coverage|35.25% **\`-17.21%\`**|red_circle|
+          .toEqual(`|Overall Project|35.25% **\`-17.21%\`**|red_circle|
 |:-|:-|:-:|
+|Changed files|38.24%|red_circle|
 
 |File|Coverage||
 |:-|:-|:-:|

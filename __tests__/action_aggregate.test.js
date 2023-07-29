@@ -97,8 +97,9 @@ describe('Aggregate report', function () {
       await action.action()
 
       expect(createComment.mock.calls[0][0].body)
-        .toEqual(`|Total Project Coverage|76.32% **\`-0.01%\`**|:green_apple:|
+        .toEqual(`|Overall Project|76.32% **\`-0.01%\`**|:green_apple:|
 |:-|:-|:-:|
+|Changed files|0%|:x:|
 
 |Module|Coverage||
 |:-|:-|:-:|

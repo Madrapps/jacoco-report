@@ -103,8 +103,9 @@ describe('Multiple reports', function () {
       await action.action()
 
       expect(comment.mock.calls[0][0].body)
-        .toEqual(`|Total Project Coverage|20.41% **\`-16.84%\`**|:x:|
+        .toEqual(`|Overall Project|20.41% **\`-16.84%\`**|:x:|
 |:-|:-|:-:|
+|Changed files|8.33%|:x:|
 
 |Module|Coverage||
 |:-|:-|:-:|
