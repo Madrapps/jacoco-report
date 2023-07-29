@@ -22,7 +22,7 @@ describe('Single report', function () {
       case 'min-coverage-overall':
         return 45
       case 'min-coverage-changed-files':
-        return 60
+        return 80
       case 'pass-emoji':
         return ':green_apple:'
       case 'fail-emoji':
@@ -108,13 +108,13 @@ describe('Single report', function () {
       await action.action()
 
       expect(createComment.mock.calls[0][0].body)
-        .toEqual(`|Total Project Coverage|35.25%|:x:|
+        .toEqual(`|Total Project Coverage|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42%|:x:|
-|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:x:|`)
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:x:|
+|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`)
     })
 
     it('set overall coverage output', async () => {
@@ -232,13 +232,13 @@ describe('Single report', function () {
         await action.action()
 
         expect(createComment.mock.calls[0][0].body)
-          .toEqual(`|Total Project Coverage|35.25%|:x:|
+          .toEqual(`|Total Project Coverage|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42%|:x:|
-|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:x:|`)
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:x:|
+|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`)
       })
 
       it("Don't add comment when coverage absent for changes files", async () => {
@@ -294,13 +294,13 @@ describe('Single report', function () {
         await action.action()
 
         expect(createComment.mock.calls[0][0].body)
-          .toEqual(`|Total Project Coverage|35.25%|red_circle|
+          .toEqual(`|Total Project Coverage|35.25% **\`-17.21%\`**|red_circle|
 |:-|:-|:-:|
 
 |File|Coverage||
 |:-|:-|:-:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42%|red_circle|
-|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|red_circle|`)
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|red_circle|
+|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_circle:|`)
       })
     })
   })

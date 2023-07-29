@@ -22,7 +22,7 @@ describe('Aggregate report', function () {
       case 'min-coverage-overall':
         return 45
       case 'min-coverage-changed-files':
-        return 60
+        return 90
       case 'pass-emoji':
         return ':green_apple:'
       case 'fail-emoji':
@@ -102,7 +102,7 @@ describe('Aggregate report', function () {
 
 |Module|Coverage||
 |:-|:-|:-:|
-|module-2|70.37% **\`-18.52%\`**|:green_apple:|
+|module-2|70.37% **\`-18.52%\`**|:x:|
 |module-3|8.33%|:x:|
 
 <details>
@@ -110,8 +110,8 @@ describe('Aggregate report', function () {
 
 |Module|File|Coverage||
 |:-|:-|:-|:-:|
-|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|70.37% **\`-18.52%\`**|:green_apple:|
-|module-3|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
+|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|70.37% **\`-18.52%\`**|:x:|
+|module-3|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:green_apple:|
 
 </details>`)
     })
