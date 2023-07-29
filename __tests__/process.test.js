@@ -20,6 +20,11 @@ describe('process', function () {
             missed: 79,
             percentage: 35.25,
           },
+          changed: {
+            covered: 0,
+            missed: 0,
+            percentage: null,
+          },
         })
       })
 
@@ -110,6 +115,11 @@ describe('process', function () {
             missed: 79,
             percentage: 35.25,
           },
+          changed: {
+            covered: 10,
+            missed: 21,
+            percentage: 32.26,
+          },
         })
       })
 
@@ -134,6 +144,11 @@ describe('process', function () {
             covered: 40,
             missed: 156,
             percentage: 20.41,
+          },
+          changed: {
+            covered: 0,
+            missed: 0,
+            percentage: null,
           },
         })
       })
@@ -195,6 +210,11 @@ describe('process', function () {
             missed: 156,
             percentage: 20.41,
           },
+          changed: {
+            covered: 3,
+            missed: 2,
+            percentage: 60,
+          },
         })
       })
 
@@ -219,6 +239,11 @@ describe('process', function () {
             covered: 28212,
             missed: 8754,
             percentage: 76.32,
+          },
+          changed: {
+            covered: 0,
+            missed: 0,
+            percentage: null,
           },
         })
       })
@@ -268,6 +293,11 @@ describe('process', function () {
             covered: 28212,
             missed: 8754,
             percentage: 76.32,
+          },
+          changed: {
+            covered: 0,
+            missed: 0,
+            percentage: null,
           },
         })
       })
@@ -357,6 +387,11 @@ describe('process', function () {
             covered: 28212,
             missed: 8754,
             percentage: 76.32,
+          },
+          changed: {
+            covered: 0,
+            missed: 5,
+            percentage: 0,
           },
         })
       })

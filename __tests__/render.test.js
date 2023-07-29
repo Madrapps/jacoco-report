@@ -11,6 +11,11 @@ describe('get PR Comment', function () {
       ...PROJECT.SINGLE_MODULE,
       modules: [],
       'coverage-changed-files': 100,
+      changed: {
+        covered: 0,
+        missed: 0,
+        percentage: null,
+      },
     }
     it('coverage greater than min coverage', function () {
       const comment = render.getPRComment(project, 30, 50, '', emoji)

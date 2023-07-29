@@ -238,6 +238,11 @@ const PROJECT = {
       missed: 79,
       percentage: 35.25,
     },
+    changed: {
+      covered: 13,
+      missed: 21,
+      percentage: 38.24,
+    },
   },
   MULTI_MODULE: {
     modules: [
@@ -434,6 +439,11 @@ const PROJECT = {
       covered: 40,
       missed: 156,
       percentage: 20.41,
+    },
+    changed: {
+      covered: 3,
+      missed: 38,
+      percentage: 7.32,
     },
   },
 }
