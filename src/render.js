@@ -34,7 +34,10 @@ function getModuleTable(modules, minCoverage, emoji) {
   const tableStructure = '|:-|:-|:-:|'
   let table = tableHeader + '\n' + tableStructure
   modules.forEach((module) => {
-    const coverageDifference = getCoverageDifferenceForModule(module)
+    const coverageDifference = getCoverageDifference(
+      module.overall,
+      module.changed
+    )
     renderFileRow(
       module.name,
       module.overall.percentage,
@@ -70,7 +73,10 @@ function getFileTable(project, minCoverage, emoji) {
       if (index !== 0) {
         moduleName = ''
       }
-      const coverageDifference = getCoverageDifferenceForFile(file)
+      const coverageDifference = getCoverageDifference(
+        file.overall,
+        file.changed
+      )
       renderFileRow(
         moduleName,
         `[${file.name}](${file.url})`,
@@ -106,25 +112,9 @@ function getFileTable(project, minCoverage, emoji) {
   }
 }
 
-const sumReducer = (total, value) => {
-  return total + value
-}
-
-function getCoverageDifferenceForFile(file) {
-  const totalInstructions = file.overall.covered + file.overall.missed
-  const missed = file.changed.missed
-  return -(missed / totalInstructions) * 100
-}
-
-function getCoverageDifferenceForModule(module) {
-  const totalInstructions = module.overall.covered + module.overall.missed
-  const missed = module.changed.missed
-  return -(missed / totalInstructions) * 100
-}
-
-function getCoverageDifferenceForProject(project) {
-  const totalInstructions = project.overall.covered + project.overall.missed
-  const missed = project.changed.missed
+function getCoverageDifference(overall, changed) {
+  const totalInstructions = overall.covered + overall.missed
+  const missed = changed.missed
   return -(missed / totalInstructions) * 100
 }
 
@@ -139,7 +129,10 @@ function getOverallTable(
     minCoverageOverall,
     emoji
   )
-  const coverageDifference = getCoverageDifferenceForProject(project)
+  const coverageDifference = getCoverageDifference(
+    project.overall,
+    project.changed
+  )
   let coveragePercentage = `${formatCoverage(project.overall.percentage)}`
   if (shouldShow(coverageDifference)) {
     coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`
@@ -147,13 +140,8 @@ function getOverallTable(
   const tableHeader = `|Overall Project|${coveragePercentage}|${status}|`
   const tableStructure = '|:-|:-|:-:|'
 
-  const changedFiles = project.modules.flatMap((module) => module.files)
-  const missedLines = changedFiles
-    .map((file) => file.changed.missed)
-    .reduce(sumReducer, 0.0)
-  const coveredLines = changedFiles
-    .map((file) => file.changed.covered)
-    .reduce(sumReducer, 0.0)
+  const missedLines = project.changed.missed
+  const coveredLines = project.changed.covered
   const totalChangedLines = missedLines + coveredLines
   let changedCoverageRow = ''
   if (totalChangedLines !== 0) {
