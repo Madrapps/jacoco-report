@@ -137,7 +137,7 @@ async function getJsonReports(xmlPaths, debugMode) {
 }
 
 async function getChangedFiles(base, head, client) {
-  const response = await client.repos.compareCommits({
+  const response = await client.rest.repos.compareCommits({
     base,
     head,
     owner: github.context.repo.owner,
@@ -164,7 +164,7 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
   if (debugMode) core.info(`JaCoCo Comment: ${body}`)
   if (update && title) {
     if (debugMode) core.info('Listing all comments')
-    const comments = await client.issues.listComments({
+    const comments = await client.rest.issues.listComments({
       issue_number: prNumber,
       ...github.context.repo,
     })
@@ -177,7 +177,7 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
         core.info(
           `Updating existing comment: id=${comment.id} \n body=${comment.body}`
         )
-      await client.issues.updateComment({
+      await client.rest.issues.updateComment({
         comment_id: comment.id,
         body,
         ...github.context.repo,
@@ -188,7 +188,7 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
 
   if (!commentUpdated) {
     if (debugMode) core.info('Creating a new comment')
-    await client.issues.createComment({
+    await client.rest.issues.createComment({
       issue_number: prNumber,
       body,
       ...github.context.repo,
