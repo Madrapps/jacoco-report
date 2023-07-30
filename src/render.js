@@ -1,23 +1,8 @@
-function getPRComment(
-  overallCoverage,
-  project,
-  minCoverageOverall,
-  minCoverageChangedFiles,
-  title,
-  emoji
-) {
+function getPRComment(project, minCoverage, title, emoji) {
   const heading = getTitle(title)
-  const overallTable = getOverallTable(
-    overallCoverage,
-    minCoverageOverall,
-    emoji
-  )
-  const moduleTable = getModuleTable(
-    project.modules,
-    minCoverageChangedFiles,
-    emoji
-  )
-  const filesTable = getFileTable(project, minCoverageChangedFiles, emoji)
+  const overallTable = getOverallTable(project, minCoverage, emoji)
+  const moduleTable = getModuleTable(project.modules, minCoverage, emoji)
+  const filesTable = getFileTable(project, minCoverage, emoji)
 
   const tables =
     project.modules.length === 0
@@ -31,28 +16,47 @@ function getPRComment(
 
 function getModuleTable(modules, minCoverage, emoji) {
   const tableHeader = '|Module|Coverage||'
-  const tableStructure = '|:-|:-:|:-:|'
+  const tableStructure = '|:-|:-|:-:|'
   let table = tableHeader + '\n' + tableStructure
   modules.forEach((module) => {
-    renderFileRow(module.name, module.percentage, emoji)
+    const coverageDifference = getCoverageDifference(
+      module.overall,
+      module.changed
+    )
+    renderRow(
+      module.name,
+      module.overall.percentage,
+      coverageDifference,
+      module.changed.percentage,
+      emoji
+    )
   })
   return table
 
-  function renderFileRow(name, coverage, emoji) {
-    const status = getStatus(coverage, minCoverage, emoji)
-    const row = `|${name}|${formatCoverage(coverage)}|${status}|`
+  function renderRow(
+    name,
+    overallCoverage,
+    coverageDiff,
+    changedCoverage,
+    emoji
+  ) {
+    const status = getStatus(changedCoverage, minCoverage.changed, emoji)
+    let coveragePercentage = `${formatCoverage(overallCoverage)}`
+    if (shouldShow(coverageDiff)) {
+      coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
+    }
+    const row = `|${name}|${coveragePercentage}|${status}|`
     table = table + '\n' + row
   }
 }
 
 function getFileTable(project, minCoverage, emoji) {
-  const coverage = project['coverage-changed-files']
   const tableHeader = project.isMultiModule
-    ? `|Module|File|Coverage [${formatCoverage(coverage)}]||`
-    : `|File|Coverage [${formatCoverage(coverage)}]||`
+    ? '|Module|File|Coverage||'
+    : '|File|Coverage||'
   const tableStructure = project.isMultiModule
-    ? '|:-|:-|:-:|:-:|'
-    : '|:-|:-:|:-:|'
+    ? '|:-|:-|:-|:-:|'
+    : '|:-|:-|:-:|'
   let table = tableHeader + '\n' + tableStructure
   project.modules.forEach((module) => {
     module.files.forEach((file, index) => {
@@ -60,10 +64,16 @@ function getFileTable(project, minCoverage, emoji) {
       if (index !== 0) {
         moduleName = ''
       }
-      renderFileRow(
+      const coverageDifference = getCoverageDifference(
+        file.overall,
+        file.changed
+      )
+      renderRow(
         moduleName,
         `[${file.name}](${file.url})`,
-        file.percentage,
+        file.overall.percentage,
+        coverageDifference,
+        file.changed.percentage,
         project.isMultiModule,
         emoji
       )
@@ -73,22 +83,72 @@ function getFileTable(project, minCoverage, emoji) {
     ? '<details>\n' + '<summary>Files</summary>\n\n' + table + '\n\n</details>'
     : table
 
-  function renderFileRow(moduleName, fileName, coverage, isMultiModule, emoji) {
-    const status = getStatus(coverage, minCoverage, emoji)
+  function renderRow(
+    moduleName,
+    fileName,
+    overallCoverage,
+    coverageDiff,
+    changedCoverage,
+    isMultiModule,
+    emoji
+  ) {
+    const status = getStatus(changedCoverage, minCoverage.changed, emoji)
+    let coveragePercentage = `${formatCoverage(overallCoverage)}`
+    if (shouldShow(coverageDiff)) {
+      coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
+    }
     const row = isMultiModule
-      ? `|${moduleName}|${fileName}|${formatCoverage(coverage)}|${status}|`
-      : `|${fileName}|${formatCoverage(coverage)}|${status}|`
+      ? `|${moduleName}|${fileName}|${coveragePercentage}|${status}|`
+      : `|${fileName}|${coveragePercentage}|${status}|`
     table = table + '\n' + row
   }
 }
 
-function getOverallTable(coverage, minCoverage, emoji) {
-  const status = getStatus(coverage, minCoverage, emoji)
-  const tableHeader = `|Total Project Coverage|${formatCoverage(
-    coverage
-  )}|${status}|`
-  const tableStructure = '|:-|:-:|:-:|'
-  return tableHeader + '\n' + tableStructure
+function getCoverageDifference(overall, changed) {
+  const totalInstructions = overall.covered + overall.missed
+  const missed = changed.missed
+  return -(missed / totalInstructions) * 100
+}
+
+function getOverallTable(project, minCoverage, emoji) {
+  const status = getStatus(
+    project.overall.percentage,
+    minCoverage.overall,
+    emoji
+  )
+  const coverageDifference = getCoverageDifference(
+    project.overall,
+    project.changed
+  )
+  let coveragePercentage = `${formatCoverage(project.overall.percentage)}`
+  if (shouldShow(coverageDifference)) {
+    coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`
+  }
+  const tableHeader = `|Overall Project|${coveragePercentage}|${status}|`
+  const tableStructure = '|:-|:-|:-:|'
+
+  const missedLines = project.changed.missed
+  const coveredLines = project.changed.covered
+  const totalChangedLines = missedLines + coveredLines
+  let changedCoverageRow = ''
+  if (totalChangedLines !== 0) {
+    const changedLinesPercentage = (coveredLines / totalChangedLines) * 100
+    const status = getStatus(changedLinesPercentage, minCoverage.changed, emoji)
+    changedCoverageRow =
+      '\n' +
+      `|Files changed|${formatCoverage(changedLinesPercentage)}|${status}|` +
+      '\n<br>'
+  }
+  return tableHeader + '\n' + tableStructure + changedCoverageRow
+}
+
+function round(value) {
+  return Math.round((value + Number.EPSILON) * 100) / 100
+}
+
+function shouldShow(value) {
+  const rounded = Math.abs(round(value))
+  return rounded !== 0 && rounded !== 100
 }
 
 function getTitle(title) {
@@ -101,14 +161,18 @@ function getTitle(title) {
 
 function getStatus(coverage, minCoverage, emoji) {
   let status = emoji.pass
-  if (coverage < minCoverage) {
+  if (coverage != null && coverage < minCoverage) {
     status = emoji.fail
   }
   return status
 }
 
 function formatCoverage(coverage) {
-  return `${parseFloat(coverage.toFixed(2))}%`
+  return `${toFloat(coverage)}%`
+}
+
+function toFloat(value) {
+  return parseFloat(value.toFixed(2))
 }
 
 module.exports = {

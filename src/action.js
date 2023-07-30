@@ -5,7 +5,7 @@ const parser = require('xml2js')
 const { parseBooleans } = require('xml2js/lib/processors')
 const process = require('./process')
 const render = require('./render')
-const { debug } = require('./util')
+const { debug, getChangedLines } = require('./util')
 const glob = require('@actions/glob')
 
 async function action() {
@@ -82,16 +82,12 @@ async function action() {
     const reportsJson = await reportsJsonAsync
     const reports = reportsJson.map((report) => report['report'])
 
-    // TODO Replace this with the getProjectCoverage itself
-    const overallCoverage = process.getOverallCoverage(reports)
-    if (debugMode) core.info(`overallCoverage: ${debug(overallCoverage)}`)
-    core.setOutput(
-      'coverage-overall',
-      parseFloat(overallCoverage.project.toFixed(2))
-    )
-
     const project = process.getProjectCoverage(reports, changedFiles)
     if (debugMode) core.info(`project: ${debug(project)}`)
+    core.setOutput(
+      'coverage-overall',
+      parseFloat(project.overall.percentage.toFixed(2))
+    )
     core.setOutput(
       'coverage-changed-files',
       parseFloat(project['coverage-changed-files'].toFixed(2))
@@ -110,10 +106,11 @@ async function action() {
         updateComment,
         render.getTitle(title),
         render.getPRComment(
-          overallCoverage.project,
           project,
-          minCoverageOverall,
-          minCoverageChangedFiles,
+          {
+            overall: minCoverageOverall,
+            changed: minCoverageChangedFiles,
+          },
           title,
           emoji
         ),
@@ -152,6 +149,7 @@ async function getChangedFiles(base, head, client) {
     const changedFile = {
       filePath: file.filename,
       url: file.blob_url,
+      lines: getChangedLines(file.patch),
     }
     changedFiles.push(changedFile)
   })

@@ -1,6 +1,8 @@
+/* eslint-disable no-template-curly-in-string */
 const action = require('../src/action')
 const core = require('@actions/core')
 const github = require('@actions/github')
+const { PATCH } = require('./mocks.test')
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -20,7 +22,7 @@ describe('Aggregate report', function () {
       case 'min-coverage-overall':
         return 45
       case 'min-coverage-changed-files':
-        return 60
+        return 90
       case 'pass-emoji':
         return ':green_apple:'
       case 'fail-emoji':
@@ -60,14 +62,17 @@ describe('Aggregate report', function () {
     data: {
       files: [
         {
-          filename: 'src/main/java/com/madrapps/playground/MainViewModel.kt',
+          filename:
+            'app/src/main/java/com/madrapps/playground/MainViewModel.kt',
           blob_url:
-            'https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
+          patch: PATCH.MULTI_MODULE.MAIN_VIEW_MODEL,
         },
         {
-          filename: 'src/main/java/com/madrapps/math/Math.kt',
+          filename: 'math/src/main/java/com/madrapps/math/Math.kt',
           blob_url:
-            'https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt',
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt',
+          patch: PATCH.MULTI_MODULE.MATH,
         },
       ],
     },
@@ -92,21 +97,23 @@ describe('Aggregate report', function () {
       await action.action()
 
       expect(createComment.mock.calls[0][0].body)
-        .toEqual(`|Total Project Coverage|76.32%|:green_apple:|
-|:-|:-:|:-:|
+        .toEqual(`|Overall Project|76.32% **\`-0.01%\`**|:green_apple:|
+|:-|:-|:-:|
+|Files changed|0%|:x:|
+<br>
 
 |Module|Coverage||
-|:-|:-:|:-:|
-|module-2|70.37%|:green_apple:|
-|module-3|8.33%|:x:|
+|:-|:-|:-:|
+|module-2|70.37% **\`-18.52%\`**|:x:|
+|module-3|8.33%|:green_apple:|
 
 <details>
 <summary>Files</summary>
 
-|Module|File|Coverage [65.91%]||
-|:-|:-|:-:|:-:|
-|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|module-3|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
+|Module|File|Coverage||
+|:-|:-|:-|:-:|
+|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|70.37% **\`-18.52%\`**|:x:|
+|module-3|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:green_apple:|
 
 </details>`)
     })

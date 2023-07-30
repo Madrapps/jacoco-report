@@ -1,6 +1,8 @@
+/* eslint-disable no-template-curly-in-string */
 const action = require('../src/action')
 const core = require('@actions/core')
 const github = require('@actions/github')
+const { PATCH } = require('./mocks.test')
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -13,14 +15,36 @@ describe('Multiple reports', function () {
     data: {
       files: [
         {
-          filename: 'src/main/java/com/madrapps/playground/MainViewModel.kt',
+          filename:
+            'app/src/main/java/com/madrapps/playground/MainViewModel.kt',
           blob_url:
-            'https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
+          patch: PATCH.MULTI_MODULE.MAIN_VIEW_MODEL,
         },
         {
-          filename: 'src/main/java/com/madrapps/math/Math.kt',
+          filename: 'math/src/main/java/com/madrapps/math/Math.kt',
           blob_url:
-            'https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt',
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt',
+          patch: PATCH.MULTI_MODULE.MATH,
+        },
+        {
+          filename: 'text/src/main/java/com/madrapps/text/StringOp.java',
+          blob_url:
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java',
+          patch: PATCH.MULTI_MODULE.STRING_OP,
+        },
+        {
+          filename:
+            'app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt',
+          blob_url:
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt',
+          patch: PATCH.MULTI_MODULE.ON_CLICK_EVENT,
+        },
+        {
+          filename: 'app/src/main/java/com/madrapps/playground/MainActivity.kt',
+          blob_url:
+            'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainActivity.kt',
+          patch: PATCH.MULTI_MODULE.MAIN_ACTIVITY,
         },
       ],
     },
@@ -35,7 +59,7 @@ describe('Multiple reports', function () {
       case 'min-coverage-overall':
         return 45
       case 'min-coverage-changed-files':
-        return 60
+        return 90
       case 'pass-emoji':
         return ':green_apple:'
       case 'fail-emoji':
@@ -79,21 +103,27 @@ describe('Multiple reports', function () {
       await action.action()
 
       expect(comment.mock.calls[0][0].body)
-        .toEqual(`|Total Project Coverage|25.32%|:x:|
-|:-|:-:|:-:|
+        .toEqual(`|Overall Project|20.41% **\`-16.84%\`**|:x:|
+|:-|:-|:-:|
+|Files changed|8.33%|:x:|
+<br>
 
 |Module|Coverage||
-|:-|:-:|:-:|
-|math|70.37%|:green_apple:|
-|app|8.33%|:x:|
+|:-|:-|:-:|
+|text|84.62% **\`-15.38%\`**|:x:|
+|math|51.35% **\`-13.51%\`**|:x:|
+|app|6.85% **\`-17.81%\`**|:x:|
 
 <details>
 <summary>Files</summary>
 
-|Module|File|Coverage [65.91%]||
-|:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/math/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/main/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
+|Module|File|Coverage||
+|:-|:-|:-|:-:|
+|text|[StringOp.java](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java)|84.62% **\`-15.38%\`**|:x:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|59.38% **\`-15.63%\`**|:x:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|35.71% **\`-28.57%\`**|:x:|
+||[MainActivity.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainActivity.kt)|0% **\`-14%\`**|:x:|
+||[OnClickEvent.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt)|0%|:x:|
 
 </details>`)
     })
@@ -105,7 +135,7 @@ describe('Multiple reports', function () {
       await action.action()
 
       const out = output.mock.calls[0]
-      expect(out).toEqual(['coverage-overall', 25.32])
+      expect(out).toEqual(['coverage-overall', 20.41])
     })
 
     it('set changed files coverage output', async () => {
@@ -115,7 +145,7 @@ describe('Multiple reports', function () {
       await action.action()
 
       const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 65.91])
+      expect(out).toEqual(['coverage-changed-files', 22.6])
     })
   })
 
@@ -132,7 +162,7 @@ describe('Multiple reports', function () {
       await action.action()
 
       const out = output.mock.calls[0]
-      expect(out).toEqual(['coverage-overall', 25.32])
+      expect(out).toEqual(['coverage-overall', 20.41])
     })
 
     it('set changed files coverage output', async () => {
@@ -142,7 +172,7 @@ describe('Multiple reports', function () {
       await action.action()
 
       const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 65.91])
+      expect(out).toEqual(['coverage-changed-files', 22.6])
     })
   })
 })

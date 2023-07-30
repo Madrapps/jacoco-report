@@ -1,4 +1,5 @@
 const render = require('../src/render')
+const { PROJECT } = require('./mocks.test')
 
 describe('get PR Comment', function () {
   const emoji = {
@@ -7,24 +8,46 @@ describe('get PR Comment', function () {
   }
   describe('no modules', function () {
     const project = {
+      ...PROJECT.SINGLE_MODULE,
       modules: [],
       'coverage-changed-files': 100,
+      changed: {
+        covered: 0,
+        missed: 0,
+        percentage: null,
+      },
     }
     it('coverage greater than min coverage', function () {
-      const comment = render.getPRComment(49.23, project, 30, 50, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 30,
+          changed: 50,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
-        `|Total Project Coverage|49.23%|:green_apple:|
-|:-|:-:|:-:|
+        `|Overall Project|35.25%|:green_apple:|
+|:-|:-|:-:|
 
 > There is no coverage information present for the Files changed`
       )
     })
 
     it('coverage lesser than min coverage', function () {
-      const comment = render.getPRComment(49.23, project, 70, 50, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 70,
+          changed: 50,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
-        `|Total Project Coverage|49.23%|:x:|
-|:-|:-:|:-:|
+        `|Overall Project|35.25%|:x:|
+|:-|:-|:-:|
 
 > There is no coverage information present for the Files changed`
       )
@@ -32,17 +55,18 @@ describe('get PR Comment', function () {
 
     it('with title', function () {
       const comment = render.getPRComment(
-        49.23,
         project,
-        70,
-        50,
+        {
+          overall: 70,
+          changed: 50,
+        },
         'Coverage',
         emoji
       )
       expect(comment).toEqual(
         `### Coverage
-|Total Project Coverage|49.23%|:x:|
-|:-|:-:|:-:|
+|Overall Project|35.25%|:x:|
+|:-|:-|:-:|
 
 > There is no coverage information present for the Files changed`
       )
@@ -50,246 +74,280 @@ describe('get PR Comment', function () {
   })
 
   describe('single module', function () {
-    const project = {
-      modules: [
-        {
-          name: 'jacoco-playground',
-          percentage: 49.23,
-          files: [
-            {
-              filePath:
-                'src/main/java/com/madrapps/jacoco/operation/StringOp.java',
-              url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java',
-              name: 'StringOp.java',
-              covered: 7,
-              missed: 0,
-              percentage: 100,
-            },
-            {
-              covered: 7,
-              missed: 8,
-              percentage: 46.67,
-              filePath: 'src/main/kotlin/com/madrapps/jacoco/Math.kt',
-              name: 'Math.kt',
-              url: 'https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt',
-            },
-          ],
-        },
-      ],
-      isMultiModule: false,
-      'coverage-changed-files': 63.64,
-    }
+    const project = PROJECT.SINGLE_MODULE
 
     it('coverage greater than min coverage for overall project', function () {
-      const comment = render.getPRComment(49.23, project, 30, 60, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 30,
+          changed: 60,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
-        `|Total Project Coverage|49.23%|:green_apple:|
-|:-|:-:|:-:|
+        `|Overall Project|35.25% **\`-17.21%\`**|:green_apple:|
+|:-|:-|:-:|
+|Files changed|38.24%|:x:|
+<br>
 
-|File|Coverage [63.64%]||
-|:-|:-:|:-:|
-|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|`
+|File|Coverage||
+|:-|:-|:-:|
+|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:x:|
+|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`
       )
     })
 
     it('coverage lesser than min coverage for overall project', function () {
-      const comment = render.getPRComment(49.23, project, 50, 64, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 50,
+          changed: 64,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
-        `|Total Project Coverage|49.23%|:x:|
-|:-|:-:|:-:|
+        `|Overall Project|35.25% **\`-17.21%\`**|:x:|
+|:-|:-|:-:|
+|Files changed|38.24%|:x:|
+<br>
 
-|File|Coverage [63.64%]||
-|:-|:-:|:-:|
-|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|`
+|File|Coverage||
+|:-|:-|:-:|
+|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:x:|
+|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`
       )
     })
 
     it('coverage lesser than min coverage for changed files', function () {
-      const comment = render.getPRComment(49.23, project, 30, 80, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 30,
+          changed: 80,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
-        `|Total Project Coverage|49.23%|:green_apple:|
-|:-|:-:|:-:|
+        `|Overall Project|35.25% **\`-17.21%\`**|:green_apple:|
+|:-|:-|:-:|
+|Files changed|38.24%|:x:|
+<br>
 
-|File|Coverage [63.64%]||
-|:-|:-:|:-:|
-|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:x:|`
+|File|Coverage||
+|:-|:-|:-:|
+|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:x:|
+|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`
       )
     })
 
     it('coverage greater than min coverage for changed files', function () {
-      const comment = render.getPRComment(49.23, project, 50, 20, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 50,
+          changed: 20,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
-        `|Total Project Coverage|49.23%|:x:|
-|:-|:-:|:-:|
+        `|Overall Project|35.25% **\`-17.21%\`**|:x:|
+|:-|:-|:-:|
+|Files changed|38.24%|:green_apple:|
+<br>
 
-|File|Coverage [63.64%]||
-|:-|:-:|:-:|
-|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|`
+|File|Coverage||
+|:-|:-|:-:|
+|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:green_apple:|
+|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`
       )
     })
 
     it('with title', function () {
       const comment = render.getPRComment(
-        49.23,
         project,
-        50,
-        20,
+        {
+          overall: 50,
+          changed: 20,
+        },
         'Coverage',
         emoji
       )
       expect(comment).toEqual(
         `### Coverage
-|Total Project Coverage|49.23%|:x:|
-|:-|:-:|:-:|
+|Overall Project|35.25% **\`-17.21%\`**|:x:|
+|:-|:-|:-:|
+|Files changed|38.24%|:green_apple:|
+<br>
 
-|File|Coverage [63.64%]||
-|:-|:-:|:-:|
-|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
-|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/77b14eb61efcd211ee93a7d8bac80cf292d207cc/src/main/kotlin/com/madrapps/jacoco/Math.kt)|46.67%|:green_apple:|`
+|File|Coverage||
+|:-|:-|:-:|
+|[StringOp.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/operation/StringOp.java)|100%|:green_apple:|
+|[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:green_apple:|
+|[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`
       )
     })
   })
 
   describe('multi module', function () {
-    const project = {
-      modules: [
-        {
-          name: 'math',
-          percentage: 70.37,
-          files: [
-            {
-              covered: 19,
-              filePath: 'src/main/java/com/madrapps/math/Math.kt',
-              missed: 8,
-              name: 'Math.kt',
-              percentage: 70.37,
-              url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt',
-            },
-          ],
-        },
-        {
-          name: 'app',
-          percentage: 8.33,
-          files: [
-            {
-              covered: 10,
-              filePath:
-                'src/main/java/com/madrapps/playground/MainViewModel.kt',
-              missed: 7,
-              name: 'MainViewModel.kt',
-              percentage: 58.82,
-              url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt',
-            },
-            {
-              covered: 10,
-              filePath: 'src/main/java/com/madrapps/playground/StringOp.kt',
-              missed: 21,
-              name: 'StringOp.kt',
-              percentage: 32.25,
-              url: 'https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt',
-            },
-          ],
-        },
-      ],
-      isMultiModule: true,
-      'coverage-changed-files': 63.64,
-    }
+    const project = PROJECT.MULTI_MODULE
 
     it('coverage greater than min coverage for overall project', function () {
-      const comment = render.getPRComment(49.23, project, 30, 60, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 20,
+          changed: 60,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
-        `|Total Project Coverage|49.23%|:green_apple:|
-|:-|:-:|:-:|
+        `|Overall Project|20.41% **\`-19.39%\`**|:green_apple:|
+|:-|:-|:-:|
+|Files changed|7.32%|:x:|
+<br>
 
 |Module|Coverage||
-|:-|:-:|:-:|
-|math|70.37%|:green_apple:|
-|app|8.33%|:x:|
+|:-|:-|:-:|
+|text|84.62% **\`-15.38%\`**|:green_apple:|
+|math|51.35% **\`-27.03%\`**|:x:|
+|app|6.85% **\`-17.81%\`**|:x:|
 
 <details>
 <summary>Files</summary>
 
-|Module|File|Coverage [63.64%]||
-|:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
-||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25%|:x:|
+|Module|File|Coverage||
+|:-|:-|:-|:-:|
+|text|[StringOp.java](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java)|84.62% **\`-15.38%\`**|:green_apple:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|59.38% **\`-15.63%\`**|:x:|
+||[Statistics.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Statistics.kt)|0%|:x:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|35.71% **\`-28.57%\`**|:x:|
+||[MainActivity.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainActivity.kt)|0% **\`-14%\`**|:x:|
+||[OnClickEvent.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt)|0%|:x:|
 
 </details>`
       )
     })
 
     it('coverage lesser than min coverage for overall project', function () {
-      const comment = render.getPRComment(49.23, project, 50, 64, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 50,
+          changed: 30,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
-        `|Total Project Coverage|49.23%|:x:|
-|:-|:-:|:-:|
+        `|Overall Project|20.41% **\`-19.39%\`**|:x:|
+|:-|:-|:-:|
+|Files changed|7.32%|:x:|
+<br>
 
 |Module|Coverage||
-|:-|:-:|:-:|
-|math|70.37%|:green_apple:|
-|app|8.33%|:x:|
+|:-|:-|:-:|
+|text|84.62% **\`-15.38%\`**|:green_apple:|
+|math|51.35% **\`-27.03%\`**|:x:|
+|app|6.85% **\`-17.81%\`**|:x:|
 
 <details>
 <summary>Files</summary>
 
-|Module|File|Coverage [63.64%]||
-|:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
-||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25%|:x:|
+|Module|File|Coverage||
+|:-|:-|:-|:-:|
+|text|[StringOp.java](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java)|84.62% **\`-15.38%\`**|:green_apple:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|59.38% **\`-15.63%\`**|:x:|
+||[Statistics.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Statistics.kt)|0%|:x:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|35.71% **\`-28.57%\`**|:x:|
+||[MainActivity.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainActivity.kt)|0% **\`-14%\`**|:x:|
+||[OnClickEvent.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt)|0%|:x:|
 
 </details>`
       )
     })
 
     it('coverage lesser than min coverage for changed files', function () {
-      const comment = render.getPRComment(49.23, project, 30, 80, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 20,
+          changed: 90,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
-        `|Total Project Coverage|49.23%|:green_apple:|
-|:-|:-:|:-:|
+        `|Overall Project|20.41% **\`-19.39%\`**|:green_apple:|
+|:-|:-|:-:|
+|Files changed|7.32%|:x:|
+<br>
 
 |Module|Coverage||
-|:-|:-:|:-:|
-|math|70.37%|:x:|
-|app|8.33%|:x:|
+|:-|:-|:-:|
+|text|84.62% **\`-15.38%\`**|:x:|
+|math|51.35% **\`-27.03%\`**|:x:|
+|app|6.85% **\`-17.81%\`**|:x:|
 
 <details>
 <summary>Files</summary>
 
-|Module|File|Coverage [63.64%]||
-|:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37%|:x:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:x:|
-||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25%|:x:|
+|Module|File|Coverage||
+|:-|:-|:-|:-:|
+|text|[StringOp.java](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java)|84.62% **\`-15.38%\`**|:x:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|59.38% **\`-15.63%\`**|:x:|
+||[Statistics.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Statistics.kt)|0%|:x:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|35.71% **\`-28.57%\`**|:x:|
+||[MainActivity.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainActivity.kt)|0% **\`-14%\`**|:x:|
+||[OnClickEvent.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt)|0%|:x:|
 
 </details>`
       )
     })
 
     it('coverage greater than min coverage for changed files', function () {
-      const comment = render.getPRComment(49.23, project, 50, 20, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 50,
+          changed: 7,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
-        `|Total Project Coverage|49.23%|:x:|
-|:-|:-:|:-:|
+        `|Overall Project|20.41% **\`-19.39%\`**|:x:|
+|:-|:-|:-:|
+|Files changed|7.32%|:green_apple:|
+<br>
 
 |Module|Coverage||
-|:-|:-:|:-:|
-|math|70.37%|:green_apple:|
-|app|8.33%|:x:|
+|:-|:-|:-:|
+|text|84.62% **\`-15.38%\`**|:green_apple:|
+|math|51.35% **\`-27.03%\`**|:x:|
+|app|6.85% **\`-17.81%\`**|:x:|
 
 <details>
 <summary>Files</summary>
 
-|Module|File|Coverage [63.64%]||
-|:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:green_apple:|
-||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25%|:green_apple:|
+|Module|File|Coverage||
+|:-|:-|:-|:-:|
+|text|[StringOp.java](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java)|84.62% **\`-15.38%\`**|:green_apple:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|59.38% **\`-15.63%\`**|:x:|
+||[Statistics.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Statistics.kt)|0%|:x:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|35.71% **\`-28.57%\`**|:x:|
+||[MainActivity.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainActivity.kt)|0% **\`-14%\`**|:x:|
+||[OnClickEvent.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt)|0%|:x:|
 
 </details>`
       )
@@ -297,31 +355,38 @@ describe('get PR Comment', function () {
 
     it('with title', function () {
       const comment = render.getPRComment(
-        49.23,
         project,
-        50,
-        20,
+        {
+          overall: 50,
+          changed: 90,
+        },
         'Coverage',
         emoji
       )
       expect(comment).toEqual(
         `### Coverage
-|Total Project Coverage|49.23%|:x:|
-|:-|:-:|:-:|
+|Overall Project|20.41% **\`-19.39%\`**|:x:|
+|:-|:-|:-:|
+|Files changed|7.32%|:x:|
+<br>
 
 |Module|Coverage||
-|:-|:-:|:-:|
-|math|70.37%|:green_apple:|
-|app|8.33%|:x:|
+|:-|:-|:-:|
+|text|84.62% **\`-15.38%\`**|:x:|
+|math|51.35% **\`-27.03%\`**|:x:|
+|app|6.85% **\`-17.81%\`**|:x:|
 
 <details>
 <summary>Files</summary>
 
-|Module|File|Coverage [63.64%]||
-|:-|:-|:-:|:-:|
-|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/math/Math.kt)|70.37%|:green_apple:|
-|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:green_apple:|
-||[StringOp.kt](https://github.com/thsaravana/jacoco-android-playground/src/main/java/com/madrapps/playground/StringOp.kt)|32.25%|:green_apple:|
+|Module|File|Coverage||
+|:-|:-|:-|:-:|
+|text|[StringOp.java](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java)|84.62% **\`-15.38%\`**|:x:|
+|math|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|59.38% **\`-15.63%\`**|:x:|
+||[Statistics.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Statistics.kt)|0%|:x:|
+|app|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|35.71% **\`-28.57%\`**|:x:|
+||[MainActivity.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainActivity.kt)|0% **\`-14%\`**|:x:|
+||[OnClickEvent.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/events/OnClickEvent.kt)|0%|:x:|
 
 </details>`
       )
