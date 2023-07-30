@@ -33,6 +33,7 @@ const util_1 = __nccwpck_require__(7121);
 function action() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            core_1.default.info(`Event is --`);
             const token = core_1.default.getInput('token');
             if (!token) {
                 core_1.default.setFailed("'token' is missing");
@@ -198,6 +199,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __importDefault(__nccwpck_require__(6358));
 const action_1 = __nccwpck_require__(3096);
 (0, action_1.action)().catch(error => {
+    console.log(`error: ${error}`);
+    console.log(`core is null?: ${core_1.default == null}`);
     core_1.default.setFailed(error.message);
 });
 

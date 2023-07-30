@@ -11,6 +11,7 @@ import {debug, getChangedLines} from './util'
 
 export async function action() {
   try {
+    core.info(`Event is --`)
     const token = core.getInput('token')
     if (!token) {
       core.setFailed("'token' is missing")
