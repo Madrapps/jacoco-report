@@ -1,4 +1,5 @@
-function getPRComment(project, minCoverage, title, emoji) {
+// @ts-nocheck
+export function getPRComment(project, minCoverage, title, emoji) {
   const heading = getTitle(title)
   const overallTable = getOverallTable(project, minCoverage, emoji)
   const moduleTable = getModuleTable(project.modules, minCoverage, emoji)
@@ -18,7 +19,7 @@ function getModuleTable(modules, minCoverage, emoji) {
   const tableHeader = '|Module|Coverage||'
   const tableStructure = '|:-|:-|:-:|'
   let table = tableHeader + '\n' + tableStructure
-  modules.forEach((module) => {
+  modules.forEach(module => {
     const coverageDifference = getCoverageDifference(
       module.overall,
       module.changed
@@ -58,7 +59,7 @@ function getFileTable(project, minCoverage, emoji) {
     ? '|:-|:-|:-|:-:|'
     : '|:-|:-|:-:|'
   let table = tableHeader + '\n' + tableStructure
-  project.modules.forEach((module) => {
+  project.modules.forEach(module => {
     module.files.forEach((file, index) => {
       let moduleName = module.name
       if (index !== 0) {
@@ -151,7 +152,7 @@ function shouldShow(value) {
   return rounded !== 0 && rounded !== 100
 }
 
-function getTitle(title) {
+export function getTitle(title) {
   if (title != null && title.trim().length > 0) {
     const trimmed = title.trim()
     if (trimmed.startsWith('#')) {
@@ -178,9 +179,4 @@ function formatCoverage(coverage) {
 
 function toFloat(value) {
   return parseFloat(value.toFixed(2))
-}
-
-module.exports = {
-  getPRComment,
-  getTitle,
 }

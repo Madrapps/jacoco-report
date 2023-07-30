@@ -1,4 +1,5 @@
-const TAG = {
+// @ts-nocheck
+export const TAG = {
   SELF: '$',
   SOURCE_FILE: 'sourcefile',
   LINE: 'line',
@@ -7,24 +8,24 @@ const TAG = {
   GROUP: 'group',
 }
 
-function debug(obj) {
+export function debug(obj: Object) {
   return JSON.stringify(obj, ' ', 4)
 }
 
 const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/
 
-function getChangedLines(patch) {
+export function getChangedLines(patch: string) {
   const lines = patch.split('\n')
   const groups = getDiffGroups(lines)
   const lineNumbers = new Set()
-  groups.forEach((group) => {
+  groups.forEach(group => {
     const firstLine = group.shift()
     if (firstLine) {
       const diffGroup = firstLine.match(pattern)
       if (diffGroup) {
         let bX = parseInt(diffGroup[2])
 
-        group.forEach((line) => {
+        group.forEach(line => {
           bX++
 
           if (line.startsWith('+')) {
@@ -43,7 +44,7 @@ function getDiffGroups(lines) {
   const groups = []
 
   let group = []
-  lines.forEach((line) => {
+  lines.forEach(line => {
     if (line.startsWith('@@')) {
       group = []
       groups.push(group)
@@ -54,19 +55,19 @@ function getDiffGroups(lines) {
   return groups
 }
 
-function getFilesWithCoverage(packages) {
+export function getFilesWithCoverage(packages) {
   const files = []
-  packages.forEach((item) => {
+  packages.forEach(item => {
     const packageName = item[TAG.SELF].name
     const sourceFiles = item[TAG.SOURCE_FILE] ?? []
-    sourceFiles.forEach((sourceFile) => {
+    sourceFiles.forEach(sourceFile => {
       const sourceFileName = sourceFile[TAG.SELF].name
       const file = {
         name: sourceFileName,
         packageName,
       }
       const counters = sourceFile[TAG.COUNTER] ?? []
-      counters.forEach((counter) => {
+      counters.forEach(counter => {
         const counterSelf = counter[TAG.SELF]
         const type = counterSelf.type
         file[type.toLowerCase()] = {
@@ -77,7 +78,7 @@ function getFilesWithCoverage(packages) {
 
       file.lines = {}
       const lines = sourceFile[TAG.LINE] ?? []
-      lines.forEach((line) => {
+      lines.forEach(line => {
         const lineSelf = line[TAG.SELF]
         file.lines[lineSelf.nr] = {
           instruction: {
@@ -94,11 +95,4 @@ function getFilesWithCoverage(packages) {
     })
   })
   return files
-}
-
-module.exports = {
-  debug,
-  getChangedLines,
-  getFilesWithCoverage,
-  TAG,
 }

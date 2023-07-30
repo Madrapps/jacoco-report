@@ -1,12 +1,13 @@
-const core = require('@actions/core')
-const github = require('@actions/github')
-const fs = require('fs')
-const parser = require('xml2js')
-const { parseBooleans } = require('xml2js/lib/processors')
-const process = require('./process')
-const render = require('./render')
-const { debug, getChangedLines } = require('./util')
-const glob = require('@actions/glob')
+// @ts-nocheck
+import core from '@actions/core'
+import github from '@actions/github'
+import fs from 'fs'
+import parser from 'xml2js'
+import {parseBooleans} from 'xml2js/lib/processors'
+import glob from '@actions/glob'
+import {getProjectCoverage} from './process'
+import {getPRComment, getTitle} from './render'
+import {debug, getChangedLines} from './util'
 
 async function action() {
   try {
@@ -80,9 +81,9 @@ async function action() {
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
     const reportsJson = await reportsJsonAsync
-    const reports = reportsJson.map((report) => report['report'])
+    const reports = reportsJson.map(report => report['report'])
 
-    const project = process.getProjectCoverage(reports, changedFiles)
+    const project = getProjectCoverage(reports, changedFiles)
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-overall',
@@ -104,8 +105,8 @@ async function action() {
       await addComment(
         prNumber,
         updateComment,
-        render.getTitle(title),
-        render.getPRComment(
+        getTitle(title),
+        getPRComment(
           project,
           {
             overall: minCoverageOverall,
@@ -129,7 +130,7 @@ async function getJsonReports(xmlPaths, debugMode) {
   if (debugMode) core.info(`Resolved files: ${files}`)
 
   return Promise.all(
-    files.map(async (path) => {
+    files.map(async path => {
       const reportXml = await fs.promises.readFile(path.trim(), 'utf-8')
       return await parser.parseStringPromise(reportXml)
     })
@@ -145,7 +146,7 @@ async function getChangedFiles(base, head, client) {
   })
 
   const changedFiles = []
-  response.data.files.forEach((file) => {
+  response.data.files.forEach(file => {
     const changedFile = {
       filePath: file.filename,
       url: file.blob_url,
@@ -168,7 +169,7 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
       issue_number: prNumber,
       ...github.context.repo,
     })
-    const comment = comments.data.find((comment) =>
+    const comment = comments.data.find(comment =>
       comment.body.startsWith(title)
     )
 
