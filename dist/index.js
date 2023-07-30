@@ -254,24 +254,24 @@ const action_1 = __nccwpck_require__(3096);
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getProjectCoverage = void 0;
-// @ts-nocheck
 const util_1 = __nccwpck_require__(7121);
-function getProjectCoverage(reports, files) {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function getProjectCoverage(reports, changedFiles) {
     const moduleCoverages = [];
     const modules = getModulesFromReports(reports);
-    modules.forEach(module => {
-        const filesCoverage = getFileCoverageFromPackages([].concat(...module.packages), files);
-        if (filesCoverage.files.length !== 0) {
+    for (const module of modules) {
+        const files = getFileCoverageFromPackages([].concat(...module.packages), changedFiles);
+        if (files.length !== 0) {
             const moduleCoverage = getModuleCoverage(module.root);
-            const changedMissed = filesCoverage.files
+            const changedMissed = files
                 .map(file => file.changed.missed)
                 .reduce(sumReducer, 0.0);
-            const changedCovered = filesCoverage.files
+            const changedCovered = files
                 .map(file => file.changed.covered)
                 .reduce(sumReducer, 0.0);
             moduleCoverages.push({
                 name: module.name,
-                files: filesCoverage.files,
+                files,
                 overall: {
                     percentage: moduleCoverage.percentage,
                     covered: moduleCoverage.covered,
@@ -284,8 +284,8 @@ function getProjectCoverage(reports, files) {
                 },
             });
         }
-    });
-    moduleCoverages.sort((a, b) => b.overall.percentage - a.overall.percentage);
+    }
+    moduleCoverages.sort((a, b) => { var _a, _b; return ((_a = b.overall.percentage) !== null && _a !== void 0 ? _a : 0) - ((_b = a.overall.percentage) !== null && _b !== void 0 ? _b : 0); });
     const totalFiles = moduleCoverages.flatMap(module => {
         return module.files;
     });
@@ -296,7 +296,8 @@ function getProjectCoverage(reports, files) {
         .map(module => module.changed.covered)
         .reduce(sumReducer, 0.0);
     const projectCoverage = getOverallProjectCoverage(reports);
-    const project = {
+    const totalPercentage = getTotalPercentage(totalFiles);
+    return {
         modules: moduleCoverages,
         isMultiModule: reports.length > 1 || modules.length > 1,
         overall: {
@@ -309,45 +310,38 @@ function getProjectCoverage(reports, files) {
             missed: changedMissed,
             percentage: calculatePercentage(changedCovered, changedMissed),
         },
+        'coverage-changed-files': totalPercentage !== null && totalPercentage !== void 0 ? totalPercentage : 100,
     };
-    const totalPercentage = getTotalPercentage(totalFiles);
-    if (totalPercentage) {
-        project['coverage-changed-files'] = totalPercentage;
-    }
-    else {
-        project['coverage-changed-files'] = 100;
-    }
-    return project;
 }
 exports.getProjectCoverage = getProjectCoverage;
-const sumReducer = (total, value) => {
+function sumReducer(total, value) {
     return total + value;
-};
+}
 function toFloat(value) {
     return parseFloat(value.toFixed(2));
 }
 function getModulesFromReports(reports) {
     const modules = [];
-    reports.forEach(report => {
+    for (const report of reports) {
         const groupTag = report[util_1.TAG.GROUP];
         if (groupTag) {
-            const groups = groupTag.filter(group => group !== undefined);
-            groups.forEach(group => {
+            const groups = groupTag.filter((group) => group !== undefined);
+            for (const group of groups) {
                 const module = getModuleFromParent(group);
                 modules.push(module);
-            });
+            }
         }
         const module = getModuleFromParent(report);
         if (module) {
             modules.push(module);
         }
-    });
+    }
     return modules;
 }
 function getModuleFromParent(parent) {
     const packageTag = parent[util_1.TAG.PACKAGE];
     if (packageTag) {
-        const packages = packageTag.filter(pacage => pacage !== undefined);
+        const packages = packageTag.filter((pacage) => pacage !== undefined);
         if (packages.length !== 0) {
             return {
                 name: parent['$'].name,
@@ -359,7 +353,6 @@ function getModuleFromParent(parent) {
     return null;
 }
 function getFileCoverageFromPackages(packages, files) {
-    const result = {};
     const resultFiles = [];
     const jacocoFiles = (0, util_1.getFilesWithCoverage)(packages);
     for (const jacocoFile of jacocoFiles) {
@@ -371,8 +364,8 @@ function getFileCoverageFromPackages(packages, files) {
         if (githubFile) {
             const instruction = jacocoFile.counters.find(counter => counter.name === 'instruction');
             if (instruction) {
-                const missed = parseFloat(instruction.missed);
-                const covered = parseFloat(instruction.covered);
+                const missed = instruction.missed;
+                const covered = instruction.covered;
                 const lines = [];
                 for (const lineNumber of githubFile.lines) {
                     const jacocoLine = jacocoFile.lines.find(line => line.number === lineNumber);
@@ -404,15 +397,8 @@ function getFileCoverageFromPackages(packages, files) {
             }
         }
     }
-    resultFiles.sort((a, b) => b.overall.percentage - a.overall.percentage);
-    result.files = resultFiles;
-    if (resultFiles.length !== 0) {
-        result.percentage = getTotalPercentage(resultFiles);
-    }
-    else {
-        result.percentage = 100;
-    }
-    return result;
+    resultFiles.sort((a, b) => { var _a, _b; return ((_a = b.overall.percentage) !== null && _a !== void 0 ? _a : 0) - ((_b = a.overall.percentage) !== null && _b !== void 0 ? _b : 0); });
+    return resultFiles;
 }
 function calculatePercentage(covered, missed) {
     const total = covered + missed;
@@ -420,17 +406,17 @@ function calculatePercentage(covered, missed) {
         return parseFloat(((covered / total) * 100).toFixed(2));
     }
     else {
-        return null;
+        return undefined;
     }
 }
 function getTotalPercentage(files) {
     let missed = 0;
     let covered = 0;
     if (files.length !== 0) {
-        files.forEach(file => {
+        for (const file of files) {
             missed += file.overall.missed;
             covered += file.overall.covered;
-        });
+        }
         return parseFloat(((covered / (covered + missed)) * 100).toFixed(2));
     }
     else {
@@ -452,9 +438,9 @@ function getOverallProjectCoverage(reports) {
     };
 }
 function getDetailedCoverage(counters, type) {
-    const counter = counters.find(counter => counter[util_1.TAG.SELF].type === type);
-    if (counter) {
-        const attr = counter[util_1.TAG.SELF];
+    const counterTag = counters.find(counter => counter[util_1.TAG.SELF].type === type);
+    if (counterTag) {
+        const attr = counterTag[util_1.TAG.SELF];
         const missed = parseFloat(attr.missed);
         const covered = parseFloat(attr.covered);
         return {

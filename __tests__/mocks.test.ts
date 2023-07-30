@@ -137,7 +137,7 @@ const PROJECT = {
             changed: {
               covered: 0,
               missed: 0,
-              percentage: null,
+              percentage: undefined,
             },
             lines: [],
           },
@@ -157,43 +157,43 @@ const PROJECT = {
             lines: [
               {
                 number: 6,
-                instruction: { missed: 0, covered: 3 },
-                branch: { missed: 1, covered: 1 },
+                instruction: {missed: 0, covered: 3},
+                branch: {missed: 1, covered: 1},
               },
               {
                 number: 13,
-                instruction: { missed: 3, covered: 0 },
-                branch: { missed: 2, covered: 0 },
+                instruction: {missed: 3, covered: 0},
+                branch: {missed: 2, covered: 0},
               },
               {
                 number: 14,
-                instruction: { missed: 4, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 4, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 16,
-                instruction: { missed: 4, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 4, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 26,
-                instruction: { missed: 0, covered: 3 },
-                branch: { missed: 1, covered: 1 },
+                instruction: {missed: 0, covered: 3},
+                branch: {missed: 1, covered: 1},
               },
               {
                 number: 27,
-                instruction: { missed: 0, covered: 4 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 0, covered: 4},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 29,
-                instruction: { missed: 4, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 4, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 43,
-                instruction: { missed: 6, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 6, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -213,8 +213,8 @@ const PROJECT = {
             lines: [
               {
                 number: 3,
-                instruction: { missed: 0, covered: 3 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 0, covered: 3},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -265,13 +265,13 @@ const PROJECT = {
             lines: [
               {
                 number: 6,
-                instruction: { missed: 0, covered: 3 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 0, covered: 3},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 20,
-                instruction: { missed: 2, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 2, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -306,8 +306,8 @@ const PROJECT = {
             lines: [
               {
                 number: 22,
-                instruction: { missed: 5, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 5, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -327,13 +327,13 @@ const PROJECT = {
             lines: [
               {
                 number: 5,
-                instruction: { missed: 3, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 3, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 8,
-                instruction: { missed: 2, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 2, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -368,8 +368,8 @@ const PROJECT = {
             lines: [
               {
                 number: 16,
-                instruction: { missed: 8, covered: 0 },
-                branch: { missed: 2, covered: 0 },
+                instruction: {missed: 8, covered: 0},
+                branch: {missed: 2, covered: 0},
               },
             ],
           },
@@ -389,8 +389,8 @@ const PROJECT = {
             lines: [
               {
                 number: 20,
-                instruction: { missed: 14, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 14, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -410,13 +410,13 @@ const PROJECT = {
             lines: [
               {
                 number: 3,
-                instruction: { missed: 3, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 3, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 7,
-                instruction: { missed: 1, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 1, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },

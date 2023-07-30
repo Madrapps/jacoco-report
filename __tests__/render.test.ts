@@ -1,5 +1,5 @@
 const render = require('../src/render')
-const { PROJECT } = require('./mocks.test')
+const {PROJECT} = require('./mocks.test')
 
 describe('Render', function () {
   describe('getTitle', function () {
@@ -57,7 +57,7 @@ describe('Render', function () {
         changed: {
           covered: 0,
           missed: 0,
-          percentage: null,
+          percentage: undefined,
         },
       }
       it('coverage greater than min coverage', function () {

@@ -24,7 +24,7 @@ describe('process', function () {
           changed: {
             covered: 0,
             missed: 0,
-            percentage: null,
+            percentage: undefined,
           },
         })
       })
@@ -149,7 +149,7 @@ describe('process', function () {
           changed: {
             covered: 0,
             missed: 0,
-            percentage: null,
+            percentage: undefined,
           },
         })
       })
@@ -244,7 +244,7 @@ describe('process', function () {
           changed: {
             covered: 0,
             missed: 0,
-            percentage: null,
+            percentage: undefined,
           },
         })
       })
@@ -270,7 +270,7 @@ describe('process', function () {
                   changed: {
                     covered: 0,
                     missed: 0,
-                    percentage: null,
+                    percentage: undefined,
                   },
                   lines: [],
                   name: 'MainViewModel.kt',
@@ -286,7 +286,7 @@ describe('process', function () {
               changed: {
                 covered: 0,
                 missed: 0,
-                percentage: null,
+                percentage: undefined,
               },
             },
           ],
@@ -298,7 +298,7 @@ describe('process', function () {
           changed: {
             covered: 0,
             missed: 0,
-            percentage: null,
+            percentage: undefined,
           },
         })
       })
@@ -364,7 +364,7 @@ describe('process', function () {
                   changed: {
                     covered: 0,
                     missed: 0,
-                    percentage: null,
+                    percentage: undefined,
                   },
                   name: 'MainViewModel.kt',
                   lines: [],
@@ -380,7 +380,7 @@ describe('process', function () {
               changed: {
                 covered: 0,
                 missed: 0,
-                percentage: null,
+                percentage: undefined,
               },
             },
           ],
