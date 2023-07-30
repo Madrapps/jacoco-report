@@ -9,7 +9,7 @@ import {getProjectCoverage} from './process'
 import {getPRComment, getTitle} from './render'
 import {debug, getChangedLines} from './util'
 
-async function action() {
+export async function action() {
   try {
     const token = core.getInput('token')
     if (!token) {

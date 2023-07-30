@@ -19,6 +19,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.action = void 0;
 // @ts-nocheck
 const core_1 = __importDefault(__nccwpck_require__(6358));
 const github_1 = __importDefault(__nccwpck_require__(9551));
@@ -117,6 +118,7 @@ function action() {
         }
     });
 }
+exports.action = action;
 function getJsonReports(xmlPaths, debugMode) {
     return __awaiter(this, void 0, void 0, function* () {
         const globber = yield glob_1.default.create(xmlPaths.join('\n'));
@@ -193,10 +195,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-// @ts-nocheck
 const core_1 = __importDefault(__nccwpck_require__(6358));
-const action_1 = __importDefault(__nccwpck_require__(3096));
-action_1.default.action().catch(error => {
+const action_1 = __nccwpck_require__(3096);
+(0, action_1.action)().catch(error => {
     core_1.default.setFailed(error.message);
 });
 
