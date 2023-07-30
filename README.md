@@ -141,9 +141,10 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
        min-coverage-changed-files: 60
    ```
 
-4. When you need to customize the pass/fail emojis in the comment
+4. When you need to customize the pass/fail emojis or the style of title in the comment
 
-   > Set the `pass-emoji` and `fail-emoji` to a valid emoji supported in Github.
+   > Set the `pass-emoji` and `fail-emoji` to a valid emoji supported in Github. You can add `#` to choose the style of
+   > title from H1 to H6. If you don't choose, the default is H3.
    > Refer [sample pull request](https://github.com/thsaravana/jacoco-android-playground/pull/10) and
    > its [workflow](https://github.com/thsaravana/jacoco-android-playground/blob/testing-custom-emoji-support/.github/workflows/coverage.yml)
 
@@ -156,7 +157,7 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
        token: ${{ secrets.GITHUB_TOKEN }}
        min-coverage-overall: 40
        min-coverage-changed-files: 60
-       title: ':lobster: Coverage Report'
+       title: '# :lobster: Coverage Report'
        pass-emoji: ':green_circle:'
        fail-emoji: ':red_circle:'
    ```

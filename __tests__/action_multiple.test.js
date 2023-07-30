@@ -70,13 +70,15 @@ describe('Multiple reports', function () {
   })
   github.getOctokit = jest.fn(() => {
     return {
-      repos: {
-        compareCommits: jest.fn(() => {
-          return compareCommitsResponse
-        }),
-      },
-      issues: {
-        createComment: comment,
+      rest: {
+        repos: {
+          compareCommits: jest.fn(() => {
+            return compareCommitsResponse
+          }),
+        },
+        issues: {
+          createComment: comment,
+        },
       },
     }
   })

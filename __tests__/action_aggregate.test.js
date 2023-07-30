@@ -41,15 +41,17 @@ describe('Aggregate report', function () {
     core.getInput = jest.fn(getInput)
     github.getOctokit = jest.fn(() => {
       return {
-        repos: {
-          compareCommits: jest.fn(() => {
-            return compareCommitsResponse
-          }),
-        },
-        issues: {
-          createComment,
-          listComments,
-          updateComment,
+        rest: {
+          repos: {
+            compareCommits: jest.fn(() => {
+              return compareCommitsResponse
+            }),
+          },
+          issues: {
+            createComment,
+            listComments,
+            updateComment,
+          },
         },
       }
     })
