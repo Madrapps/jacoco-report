@@ -152,8 +152,13 @@ function shouldShow(value) {
 }
 
 function getTitle(title) {
-  if (title != null && title.length > 0) {
-    return '### ' + title + '\n'
+  if (title != null && title.trim().length > 0) {
+    const trimmed = title.trim()
+    if (trimmed.startsWith('#')) {
+      return trimmed + '\n'
+    } else {
+      return '### ' + trimmed + '\n'
+    }
   } else {
     return ''
   }
