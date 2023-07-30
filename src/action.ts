@@ -9,6 +9,7 @@ import * as glob from '@actions/glob'
 import {getProjectCoverage} from './process'
 import {getPRComment, getTitle} from './render'
 import {debug, getChangedLines} from './util'
+import {Project} from './models/project'
 
 export async function action(): Promise<void> {
   try {
@@ -84,7 +85,7 @@ export async function action(): Promise<void> {
     const reportsJson = await reportsJsonAsync
     const reports = reportsJson.map(report => report['report'])
 
-    const project = getProjectCoverage(reports, changedFiles)
+    const project: Project = getProjectCoverage(reports, changedFiles)
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-overall',
