@@ -362,24 +362,24 @@ function getFileCoverageFromPackages(packages, files) {
     const result = {};
     const resultFiles = [];
     const jacocoFiles = (0, util_1.getFilesWithCoverage)(packages);
-    jacocoFiles.forEach(jacocoFile => {
+    for (const jacocoFile of jacocoFiles) {
         const name = jacocoFile.name;
         const packageName = jacocoFile.packageName;
         const githubFile = files.find(function (f) {
             return f.filePath.endsWith(`${packageName}/${name}`);
         });
         if (githubFile) {
-            const instruction = jacocoFile.instruction;
+            const instruction = jacocoFile.counters.find(counter => counter.name === 'instruction');
             if (instruction) {
                 const missed = parseFloat(instruction.missed);
                 const covered = parseFloat(instruction.covered);
                 const lines = [];
-                githubFile.lines.forEach(lineNumber => {
-                    const jacocoLine = jacocoFile.lines[lineNumber];
+                for (const lineNumber of githubFile.lines) {
+                    const jacocoLine = jacocoFile.lines.find(line => line.number === lineNumber);
                     if (jacocoLine) {
-                        lines.push(Object.assign({ number: lineNumber }, jacocoLine));
+                        lines.push(Object.assign({}, jacocoLine));
                     }
-                });
+                }
                 const changedMissed = lines
                     .map(line => toFloat(line.instruction.missed))
                     .reduce(sumReducer, 0.0);
@@ -403,7 +403,7 @@ function getFileCoverageFromPackages(packages, files) {
                 });
             }
         }
-    });
+    }
     resultFiles.sort((a, b) => b.overall.percentage - a.overall.percentage);
     result.files = resultFiles;
     if (resultFiles.length !== 0) {
@@ -616,7 +616,6 @@ function toFloat(value) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getFilesWithCoverage = exports.getChangedLines = exports.debug = exports.TAG = void 0;
-// @ts-nocheck
 exports.TAG = {
     SELF: '$',
     SOURCE_FILE: 'sourcefile',
@@ -667,8 +666,9 @@ function getDiffGroups(lines) {
     }
     return groups;
 }
+/* eslint-disable @typescript-eslint/no-explicit-any */
 function getFilesWithCoverage(packages) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
     const files = [];
     for (const item of packages) {
         const packageName = item[exports.TAG.SELF].name;
@@ -678,30 +678,33 @@ function getFilesWithCoverage(packages) {
             const file = {
                 name: sourceFileName,
                 packageName,
+                lines: [],
+                counters: [],
             };
             const counters = (_b = sourceFile[exports.TAG.COUNTER]) !== null && _b !== void 0 ? _b : [];
             for (const counter of counters) {
                 const counterSelf = counter[exports.TAG.SELF];
                 const type = counterSelf.type;
-                file[type.toLowerCase()] = {
+                file.counters.push({
+                    name: type.toLowerCase(),
                     missed: (_c = parseInt(counterSelf.missed)) !== null && _c !== void 0 ? _c : 0,
                     covered: (_d = parseInt(counterSelf.covered)) !== null && _d !== void 0 ? _d : 0,
-                };
+                });
             }
-            file.lines = {};
             const lines = (_e = sourceFile[exports.TAG.LINE]) !== null && _e !== void 0 ? _e : [];
             for (const line of lines) {
                 const lineSelf = line[exports.TAG.SELF];
-                file.lines[lineSelf.nr] = {
+                file.lines.push({
+                    number: (_f = parseInt(lineSelf.nr)) !== null && _f !== void 0 ? _f : 0,
                     instruction: {
-                        missed: (_f = parseInt(lineSelf.mi)) !== null && _f !== void 0 ? _f : 0,
-                        covered: (_g = parseInt(lineSelf.ci)) !== null && _g !== void 0 ? _g : 0,
+                        missed: (_g = parseInt(lineSelf.mi)) !== null && _g !== void 0 ? _g : 0,
+                        covered: (_h = parseInt(lineSelf.ci)) !== null && _h !== void 0 ? _h : 0,
                     },
                     branch: {
-                        missed: (_h = parseInt(lineSelf.mb)) !== null && _h !== void 0 ? _h : 0,
-                        covered: (_j = parseInt(lineSelf.cb)) !== null && _j !== void 0 ? _j : 0,
+                        missed: (_j = parseInt(lineSelf.mb)) !== null && _j !== void 0 ? _j : 0,
+                        covered: (_k = parseInt(lineSelf.cb)) !== null && _k !== void 0 ? _k : 0,
                     },
-                };
+                });
             }
             files.push(file);
         }

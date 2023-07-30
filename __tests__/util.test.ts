@@ -54,144 +54,177 @@ describe('Util', function () {
       const files = util.getFilesWithCoverage(packages)
       expect(files).toEqual([
         {
-          class: {covered: 1, missed: 0},
-          complexity: {covered: 3, missed: 8},
-          instruction: {covered: 11, missed: 50},
-          line: {covered: 3, missed: 8},
-          lines: {
-            3: {
+          counters: [
+            {covered: 11, missed: 50, name: 'instruction'},
+            {covered: 3, missed: 8, name: 'line'},
+            {covered: 3, missed: 8, name: 'complexity'},
+            {covered: 3, missed: 8, name: 'method'},
+            {covered: 1, missed: 0, name: 'class'},
+          ],
+          lines: [
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 3, missed: 0},
+              number: 3,
             },
-            6: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 4},
+              number: 6,
             },
-            10: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 4, missed: 0},
+              number: 10,
             },
-            14: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 4, missed: 0},
+              number: 14,
             },
-            18: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 4},
+              number: 18,
             },
-            22: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 4},
+              number: 22,
             },
-            26: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 4},
+              number: 26,
             },
-            30: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 6},
+              number: 30,
             },
-            34: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 8},
+              number: 34,
             },
-            38: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 10},
+              number: 38,
             },
-            42: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 10},
+              number: 42,
             },
-          },
-          method: {covered: 3, missed: 8},
+          ],
           name: 'Utility.java',
           packageName: 'com/madrapps/jacoco',
         },
         {
-          branch: {covered: 2, missed: 4},
-          class: {covered: 1, missed: 0},
-          complexity: {covered: 4, missed: 7},
-          instruction: {covered: 21, missed: 29},
-          line: {covered: 6, missed: 7},
-          lines: {
-            3: {
+          counters: [
+            {covered: 21, missed: 29, name: 'instruction'},
+            {covered: 2, missed: 4, name: 'branch'},
+            {covered: 6, missed: 7, name: 'line'},
+            {covered: 4, missed: 7, name: 'complexity'},
+            {covered: 4, missed: 4, name: 'method'},
+            {covered: 1, missed: 0, name: 'class'},
+          ],
+          lines: [
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 3, missed: 0},
+              number: 3,
             },
-            6: {
+            {
               branch: {covered: 1, missed: 1},
               instruction: {covered: 3, missed: 0},
+              number: 6,
             },
-            9: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 4, missed: 0},
+              number: 9,
             },
-            13: {
+            {
               branch: {covered: 0, missed: 2},
               instruction: {covered: 0, missed: 3},
+              number: 13,
             },
-            14: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 4},
+              number: 14,
             },
-            16: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 4},
+              number: 16,
             },
-            22: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 4, missed: 0},
+              number: 22,
             },
-            26: {
+            {
               branch: {covered: 1, missed: 1},
               instruction: {covered: 3, missed: 0},
+              number: 26,
             },
-            27: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 4, missed: 0},
+              number: 27,
             },
-            29: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 4},
+              number: 29,
             },
-            35: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 4},
+              number: 35,
             },
-            39: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 4},
+              number: 39,
             },
-            43: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 0, missed: 6},
+              number: 43,
             },
-          },
-          method: {covered: 4, missed: 4},
+          ],
           name: 'Math.kt',
           packageName: 'com/madrapps/jacoco',
         },
         {
-          class: {covered: 1, missed: 0},
-          complexity: {covered: 3, missed: 0},
-          instruction: {covered: 11, missed: 0},
-          line: {covered: 3, missed: 0},
-          lines: {
-            3: {
+          counters: [
+            {covered: 11, missed: 0, name: 'instruction'},
+            {covered: 3, missed: 0, name: 'line'},
+            {covered: 3, missed: 0, name: 'complexity'},
+            {covered: 3, missed: 0, name: 'method'},
+            {covered: 1, missed: 0, name: 'class'},
+          ],
+          lines: [
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 3, missed: 0},
+              number: 3,
             },
-            12: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 4, missed: 0},
+              number: 12,
             },
-            17: {
+            {
               branch: {covered: 0, missed: 0},
               instruction: {covered: 4, missed: 0},
+              number: 17,
             },
-          },
-          method: {covered: 3, missed: 0},
+          ],
           name: 'StringOp.java',
           packageName: 'com/madrapps/jacoco/operation',
         },

@@ -1,4 +1,5 @@
-// @ts-nocheck
+import {JacocoFile} from './models/jacoco'
+
 export const TAG = {
   SELF: '$',
   SOURCE_FILE: 'sourcefile',
@@ -14,10 +15,10 @@ export function debug(obj: Object): string {
 
 const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/
 
-export function getChangedLines(patch: string) {
+export function getChangedLines(patch: string): number[] {
   const lines = patch.split('\n')
   const groups = getDiffGroups(lines)
-  const lineNumbers = new Set()
+  const lineNumbers = new Set<number>()
   for (const group of groups) {
     const firstLine = group.shift()
     if (firstLine) {
@@ -40,10 +41,10 @@ export function getChangedLines(patch: string) {
   return [...lineNumbers]
 }
 
-function getDiffGroups(lines) {
-  const groups = []
+function getDiffGroups(lines: string[]): string[][] {
+  const groups: string[][] = []
 
-  let group = []
+  let group: string[] = []
   for (const line of lines) {
     if (line.startsWith('@@')) {
       group = []
@@ -55,32 +56,36 @@ function getDiffGroups(lines) {
   return groups
 }
 
-export function getFilesWithCoverage(packages) {
-  const files = []
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function getFilesWithCoverage(packages: any): JacocoFile[] {
+  const files: JacocoFile[] = []
   for (const item of packages) {
-    const packageName = item[TAG.SELF].name
+    const packageName: string = item[TAG.SELF].name
     const sourceFiles = item[TAG.SOURCE_FILE] ?? []
     for (const sourceFile of sourceFiles) {
       const sourceFileName = sourceFile[TAG.SELF].name
-      const file = {
+      const file: JacocoFile = {
         name: sourceFileName,
         packageName,
+        lines: [],
+        counters: [],
       }
       const counters = sourceFile[TAG.COUNTER] ?? []
       for (const counter of counters) {
         const counterSelf = counter[TAG.SELF]
         const type = counterSelf.type
-        file[type.toLowerCase()] = {
+        file.counters.push({
+          name: type.toLowerCase(),
           missed: parseInt(counterSelf.missed) ?? 0,
           covered: parseInt(counterSelf.covered) ?? 0,
-        }
+        })
       }
 
-      file.lines = {}
       const lines = sourceFile[TAG.LINE] ?? []
       for (const line of lines) {
         const lineSelf = line[TAG.SELF]
-        file.lines[lineSelf.nr] = {
+        file.lines.push({
+          number: parseInt(lineSelf.nr) ?? 0,
           instruction: {
             missed: parseInt(lineSelf.mi) ?? 0,
             covered: parseInt(lineSelf.ci) ?? 0,
@@ -89,7 +94,7 @@ export function getFilesWithCoverage(packages) {
             missed: parseInt(lineSelf.mb) ?? 0,
             covered: parseInt(lineSelf.cb) ?? 0,
           },
-        }
+        })
       }
       files.push(file)
     }

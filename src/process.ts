@@ -1,5 +1,6 @@
 // @ts-nocheck
 import {getFilesWithCoverage, TAG} from './util'
+import {JacocoFile} from './models/jacoco'
 
 export function getProjectCoverage(reports, files) {
   const moduleCoverages = []
@@ -115,27 +116,30 @@ function getFileCoverageFromPackages(packages, files) {
   const result = {}
   const resultFiles = []
   const jacocoFiles = getFilesWithCoverage(packages)
-  jacocoFiles.forEach(jacocoFile => {
+  for (const jacocoFile of jacocoFiles) {
     const name = jacocoFile.name
     const packageName = jacocoFile.packageName
     const githubFile = files.find(function (f) {
       return f.filePath.endsWith(`${packageName}/${name}`)
     })
     if (githubFile) {
-      const instruction = jacocoFile.instruction
+      const instruction = jacocoFile.counters.find(
+        counter => counter.name === 'instruction'
+      )
       if (instruction) {
         const missed = parseFloat(instruction.missed)
         const covered = parseFloat(instruction.covered)
         const lines = []
-        githubFile.lines.forEach(lineNumber => {
-          const jacocoLine = jacocoFile.lines[lineNumber]
+        for (const lineNumber of githubFile.lines) {
+          const jacocoLine = jacocoFile.lines.find(
+            line => line.number === lineNumber
+          )
           if (jacocoLine) {
             lines.push({
-              number: lineNumber,
               ...jacocoLine,
             })
           }
-        })
+        }
         const changedMissed = lines
           .map(line => toFloat(line.instruction.missed))
           .reduce(sumReducer, 0.0)
@@ -159,7 +163,7 @@ function getFileCoverageFromPackages(packages, files) {
         })
       }
     }
-  })
+  }
   resultFiles.sort((a, b) => b.overall.percentage - a.overall.percentage)
 
   result.files = resultFiles
