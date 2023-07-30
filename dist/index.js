@@ -49,7 +49,7 @@ const github = __importStar(__nccwpck_require__(9551));
 const fs = __importStar(__nccwpck_require__(7147));
 const xml2js_1 = __importDefault(__nccwpck_require__(3374));
 const processors_1 = __nccwpck_require__(1406);
-const glob_1 = __importDefault(__nccwpck_require__(6562));
+const glob = __importStar(__nccwpck_require__(6562));
 const process_1 = __nccwpck_require__(9558);
 const render_1 = __nccwpck_require__(281);
 const util_1 = __nccwpck_require__(7121);
@@ -147,7 +147,7 @@ function action() {
 exports.action = action;
 function getJsonReports(xmlPaths, debugMode) {
     return __awaiter(this, void 0, void 0, function* () {
-        const globber = yield glob_1.default.create(xmlPaths.join('\n'));
+        const globber = yield glob.create(xmlPaths.join('\n'));
         const files = yield globber.glob();
         if (debugMode)
             core.info(`Resolved files: ${files}`);
