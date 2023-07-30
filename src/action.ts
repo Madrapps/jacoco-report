@@ -1,5 +1,5 @@
 // @ts-nocheck
-import core from '@actions/core'
+import * as core from '@actions/core'
 import github from '@actions/github'
 import fs from 'fs'
 import parser from 'xml2js'
@@ -10,7 +10,9 @@ import {getPRComment, getTitle} from './render'
 import {debug, getChangedLines} from './util'
 
 export async function action() {
+  console.log('Action invoked!!! 1')
   try {
+    console.log('Action invoked!!! 2')
     core.info(`Event is --`)
     const token = core.getInput('token')
     if (!token) {
