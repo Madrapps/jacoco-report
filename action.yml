@@ -47,7 +47,7 @@ outputs:
 
 runs:
   using: 'node16'
-  main: 'dist/index.ts'
+  main: 'dist/index.js'
 
 branding:
   icon: 'percent'
