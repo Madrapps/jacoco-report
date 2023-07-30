@@ -71,9 +71,9 @@ jobs:
 ```
 
 <br>
-<img src="/preview/single-module-screenshot.png" alt="single module screenshot" title="single module screenshot" width="800" />
+<img src="/preview/single-module-screenshot.png" alt="single module screenshot" title="single module screenshot" width="700" />
 <br>
-<img src="/preview/multi-module-screenshot.png" alt="multi-module screenshot" title="multi-module screenshot" width="800" />
+<img src="/preview/multi-module-screenshot.png" alt="multi-module screenshot" title="multi-module screenshot" width="700" />
 
 ### Example Project
 
