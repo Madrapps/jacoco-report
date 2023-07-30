@@ -19149,8 +19149,10 @@ async function action() {
         render.getTitle(title),
         render.getPRComment(
           project,
-          minCoverageOverall,
-          minCoverageChangedFiles,
+          {
+            overall: minCoverageOverall,
+            changed: minCoverageChangedFiles,
+          },
           title,
           emoji
         ),
@@ -19484,26 +19486,11 @@ module.exports = {
 /***/ 3080:
 /***/ ((module) => {
 
-function getPRComment(
-  project,
-  minCoverageOverall,
-  minCoverageChangedFiles,
-  title,
-  emoji
-) {
+function getPRComment(project, minCoverage, title, emoji) {
   const heading = getTitle(title)
-  const overallTable = getOverallTable(
-    project,
-    minCoverageOverall,
-    minCoverageChangedFiles,
-    emoji
-  )
-  const moduleTable = getModuleTable(
-    project.modules,
-    minCoverageChangedFiles,
-    emoji
-  )
-  const filesTable = getFileTable(project, minCoverageChangedFiles, emoji)
+  const overallTable = getOverallTable(project, minCoverage, emoji)
+  const moduleTable = getModuleTable(project.modules, minCoverage, emoji)
+  const filesTable = getFileTable(project, minCoverage, emoji)
 
   const tables =
     project.modules.length === 0
@@ -19535,7 +19522,7 @@ function getModuleTable(modules, minCoverage, emoji) {
 
   function renderFileRow(name, coverage, coverageDiff, emoji) {
     const changedModuleCoverage = 100 + coverageDiff
-    const status = getStatus(changedModuleCoverage, minCoverage, emoji)
+    const status = getStatus(changedModuleCoverage, minCoverage.changed, emoji)
     let coveragePercentage = `${formatCoverage(coverage)}`
     if (shouldShow(coverageDiff)) {
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
@@ -19586,7 +19573,7 @@ function getFileTable(project, minCoverage, emoji) {
     emoji
   ) {
     const changedFilesCoverage = 100 + coverageDiff
-    const status = getStatus(changedFilesCoverage, minCoverage, emoji)
+    const status = getStatus(changedFilesCoverage, minCoverage.changed, emoji)
     let coveragePercentage = `${formatCoverage(coverage)}`
     if (shouldShow(coverageDiff)) {
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
@@ -19604,15 +19591,10 @@ function getCoverageDifference(overall, changed) {
   return -(missed / totalInstructions) * 100
 }
 
-function getOverallTable(
-  project,
-  minCoverageOverall,
-  minCoverageChanged,
-  emoji
-) {
+function getOverallTable(project, minCoverage, emoji) {
   const status = getStatus(
     project.overall.percentage,
-    minCoverageOverall,
+    minCoverage.overall,
     emoji
   )
   const coverageDifference = getCoverageDifference(
@@ -19632,7 +19614,7 @@ function getOverallTable(
   let changedCoverageRow = ''
   if (totalChangedLines !== 0) {
     const changedLinesPercentage = (coveredLines / totalChangedLines) * 100
-    const status = getStatus(changedLinesPercentage, minCoverageChanged, emoji)
+    const status = getStatus(changedLinesPercentage, minCoverage.changed, emoji)
     changedCoverageRow =
       '\n' +
       `|Files changed|${formatCoverage(changedLinesPercentage)}|${status}|` +

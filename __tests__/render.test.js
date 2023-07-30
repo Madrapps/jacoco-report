@@ -18,7 +18,15 @@ describe('get PR Comment', function () {
       },
     }
     it('coverage greater than min coverage', function () {
-      const comment = render.getPRComment(project, 30, 50, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 30,
+          changed: 50,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
         `|Overall Project|35.25%|:green_apple:|
 |:-|:-|:-:|
@@ -28,7 +36,15 @@ describe('get PR Comment', function () {
     })
 
     it('coverage lesser than min coverage', function () {
-      const comment = render.getPRComment(project, 70, 50, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 70,
+          changed: 50,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
         `|Overall Project|35.25%|:x:|
 |:-|:-|:-:|
@@ -38,7 +54,15 @@ describe('get PR Comment', function () {
     })
 
     it('with title', function () {
-      const comment = render.getPRComment(project, 70, 50, 'Coverage', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 70,
+          changed: 50,
+        },
+        'Coverage',
+        emoji
+      )
       expect(comment).toEqual(
         `### Coverage
 |Overall Project|35.25%|:x:|
@@ -53,7 +77,15 @@ describe('get PR Comment', function () {
     const project = PROJECT.SINGLE_MODULE
 
     it('coverage greater than min coverage for overall project', function () {
-      const comment = render.getPRComment(project, 30, 60, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 30,
+          changed: 60,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
         `|Overall Project|35.25% **\`-17.21%\`**|:green_apple:|
 |:-|:-|:-:|
@@ -69,7 +101,15 @@ describe('get PR Comment', function () {
     })
 
     it('coverage lesser than min coverage for overall project', function () {
-      const comment = render.getPRComment(project, 50, 64, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 50,
+          changed: 64,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
         `|Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
@@ -85,7 +125,15 @@ describe('get PR Comment', function () {
     })
 
     it('coverage lesser than min coverage for changed files', function () {
-      const comment = render.getPRComment(project, 30, 80, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 30,
+          changed: 80,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
         `|Overall Project|35.25% **\`-17.21%\`**|:green_apple:|
 |:-|:-|:-:|
@@ -101,7 +149,15 @@ describe('get PR Comment', function () {
     })
 
     it('coverage greater than min coverage for changed files', function () {
-      const comment = render.getPRComment(project, 50, 20, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 50,
+          changed: 20,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
         `|Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
@@ -117,7 +173,15 @@ describe('get PR Comment', function () {
     })
 
     it('with title', function () {
-      const comment = render.getPRComment(project, 50, 20, 'Coverage', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 50,
+          changed: 20,
+        },
+        'Coverage',
+        emoji
+      )
       expect(comment).toEqual(
         `### Coverage
 |Overall Project|35.25% **\`-17.21%\`**|:x:|
@@ -138,7 +202,15 @@ describe('get PR Comment', function () {
     const project = PROJECT.MULTI_MODULE
 
     it('coverage greater than min coverage for overall project', function () {
-      const comment = render.getPRComment(project, 20, 60, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 20,
+          changed: 60,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
         `|Overall Project|20.41% **\`-19.39%\`**|:green_apple:|
 |:-|:-|:-:|
@@ -168,7 +240,15 @@ describe('get PR Comment', function () {
     })
 
     it('coverage lesser than min coverage for overall project', function () {
-      const comment = render.getPRComment(project, 50, 64, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 50,
+          changed: 64,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
         `|Overall Project|20.41% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
@@ -198,7 +278,15 @@ describe('get PR Comment', function () {
     })
 
     it('coverage lesser than min coverage for changed files', function () {
-      const comment = render.getPRComment(project, 20, 90, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 20,
+          changed: 90,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
         `|Overall Project|20.41% **\`-19.39%\`**|:green_apple:|
 |:-|:-|:-:|
@@ -228,7 +316,15 @@ describe('get PR Comment', function () {
     })
 
     it('coverage greater than min coverage for changed files', function () {
-      const comment = render.getPRComment(project, 50, 7, '', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 50,
+          changed: 7,
+        },
+        '',
+        emoji
+      )
       expect(comment).toEqual(
         `|Overall Project|20.41% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
@@ -258,7 +354,15 @@ describe('get PR Comment', function () {
     })
 
     it('with title', function () {
-      const comment = render.getPRComment(project, 50, 90, 'Coverage', emoji)
+      const comment = render.getPRComment(
+        project,
+        {
+          overall: 50,
+          changed: 90,
+        },
+        'Coverage',
+        emoji
+      )
       expect(comment).toEqual(
         `### Coverage
 |Overall Project|20.41% **\`-19.39%\`**|:x:|

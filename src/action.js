@@ -107,8 +107,10 @@ async function action() {
         render.getTitle(title),
         render.getPRComment(
           project,
-          minCoverageOverall,
-          minCoverageChangedFiles,
+          {
+            overall: minCoverageOverall,
+            changed: minCoverageChangedFiles,
+          },
           title,
           emoji
         ),
