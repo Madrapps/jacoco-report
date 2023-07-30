@@ -1,8 +1,9 @@
 /* eslint-disable no-template-curly-in-string */
-const action = require('../src/action')
-const core = require('@actions/core')
-const github = require('@actions/github')
-const { PATCH } = require('./mocks.test')
+// @ts-nocheck
+import * as action from '../src/action'
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+import {PATCH} from './mocks.test'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -55,7 +56,7 @@ describe('Aggregate report', function () {
         },
       }
     })
-    core.setFailed = jest.fn((c) => {
+    core.setFailed = jest.fn(c => {
       fail(c)
     })
   })
@@ -123,7 +124,7 @@ describe('Aggregate report', function () {
     it('updates a previous comment', async () => {
       initContext(eventName, payload)
       const title = 'JaCoCo Report'
-      core.getInput = jest.fn((c) => {
+      core.getInput = jest.fn(c => {
         switch (c) {
           case 'title':
             return title
@@ -136,8 +137,8 @@ describe('Aggregate report', function () {
 
       listComments.mockReturnValue({
         data: [
-          { id: 1, body: 'some comment' },
-          { id: 2, body: `### ${title}\n to update` },
+          {id: 1, body: 'some comment'},
+          {id: 2, body: `### ${title}\n to update`},
         ],
       })
 

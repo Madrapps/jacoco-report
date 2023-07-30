@@ -1,6 +1,7 @@
-const action = require('../src/action')
-const core = require('@actions/core')
-const github = require('@actions/github')
+// @ts-nocheck
+import * as action from '../src/action'
+import * as core from '@actions/core'
+import * as github from '@actions/github'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -50,12 +51,12 @@ describe('Input validation', function () {
       },
     }
   })
-  core.setFailed = jest.fn((c) => {
+  core.setFailed = jest.fn(c => {
     fail(c)
   })
 
   it('Fail if paths is not present', async () => {
-    core.getInput = jest.fn((c) => {
+    core.getInput = jest.fn(c => {
       switch (c) {
         case 'paths':
           return ''
@@ -65,14 +66,14 @@ describe('Input validation', function () {
     })
     github.context.eventName = 'pull_request'
 
-    core.setFailed = jest.fn((c) => {
+    core.setFailed = jest.fn(c => {
       expect(c).toEqual("'paths' is missing")
     })
     await action.action()
   })
 
   it('Fail if token is not present', async () => {
-    core.getInput = jest.fn((c) => {
+    core.getInput = jest.fn(c => {
       switch (c) {
         case 'token':
           return ''
@@ -82,7 +83,7 @@ describe('Input validation', function () {
     })
     github.context.eventName = 'pull_request'
 
-    core.setFailed = jest.fn((c) => {
+    core.setFailed = jest.fn(c => {
       expect(c).toEqual("'token' is missing")
     })
     await action.action()
