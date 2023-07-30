@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "jest --coverage",
-    "build": "ncc build src/index.ts --license licenses.txt",
+    "build": "tsc && ncc build --source-map --license licenses.txt",
     "lint:eslint": "eslint '**/*.{js,ts}' --max-warnings=0",
     "lint:prettier": "prettier --check '**/*.{js,md,json,yml}'",
     "lint": "npm run lint:prettier && npm run lint:eslint",

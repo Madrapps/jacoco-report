@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import * as core from '@actions/core'
 import * as github from '@actions/github'
@@ -9,11 +10,8 @@ import {getProjectCoverage} from './process'
 import {getPRComment, getTitle} from './render'
 import {debug, getChangedLines} from './util'
 
-export async function action() {
-  console.log('Action invoked!!! 1')
+export async function action(): Promise<void> {
   try {
-    console.log('Action invoked!!! 2')
-    core.info(`Event is --`)
     const token = core.getInput('token')
     if (!token) {
       core.setFailed("'token' is missing")
@@ -160,7 +158,14 @@ async function getChangedFiles(base, head, client) {
   return changedFiles
 }
 
-async function addComment(prNumber, update, title, body, client, debugMode) {
+async function addComment(
+  prNumber,
+  update,
+  title,
+  body,
+  client,
+  debugMode
+): Promise<void> {
   let commentUpdated = false
 
   if (debugMode) core.info(`update: ${update}`)
@@ -198,8 +203,4 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
       ...github.context.repo,
     })
   }
-}
-
-module.exports = {
-  action,
 }
