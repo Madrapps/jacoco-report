@@ -1,7 +1,7 @@
 // @ts-nocheck
 import * as core from '@actions/core'
-import github from '@actions/github'
-import fs from 'fs'
+import * as github from '@actions/github'
+import * as fs from 'fs'
 import parser from 'xml2js'
 import {parseBooleans} from 'xml2js/lib/processors'
 import glob from '@actions/glob'

@@ -45,8 +45,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.action = void 0;
 // @ts-nocheck
 const core = __importStar(__nccwpck_require__(6358));
-const github_1 = __importDefault(__nccwpck_require__(9551));
-const fs_1 = __importDefault(__nccwpck_require__(7147));
+const github = __importStar(__nccwpck_require__(9551));
+const fs = __importStar(__nccwpck_require__(7147));
 const xml2js_1 = __importDefault(__nccwpck_require__(3374));
 const processors_1 = __nccwpck_require__(1406);
 const glob_1 = __importDefault(__nccwpck_require__(6562));
@@ -83,7 +83,7 @@ function action() {
             const passEmoji = core.getInput('pass-emoji');
             const failEmoji = core.getInput('fail-emoji');
             const debugMode = (0, processors_1.parseBooleans)(core.getInput('debug-mode'));
-            const event = github_1.default.context.eventName;
+            const event = github.context.eventName;
             core.info(`Event is ${event}`);
             if (debugMode) {
                 core.info(`passEmoji: ${passEmoji}`);
@@ -95,21 +95,21 @@ function action() {
             switch (event) {
                 case 'pull_request':
                 case 'pull_request_target':
-                    base = github_1.default.context.payload.pull_request.base.sha;
-                    head = github_1.default.context.payload.pull_request.head.sha;
-                    prNumber = github_1.default.context.payload.pull_request.number;
+                    base = github.context.payload.pull_request.base.sha;
+                    head = github.context.payload.pull_request.head.sha;
+                    prNumber = github.context.payload.pull_request.number;
                     break;
                 case 'push':
-                    base = github_1.default.context.payload.before;
-                    head = github_1.default.context.payload.after;
+                    base = github.context.payload.before;
+                    head = github.context.payload.after;
                     break;
                 default:
-                    core.setFailed(`Only pull requests and pushes are supported, ${github_1.default.context.eventName} not supported.`);
+                    core.setFailed(`Only pull requests and pushes are supported, ${github.context.eventName} not supported.`);
                     return;
             }
             core.info(`base sha: ${base}`);
             core.info(`head sha: ${head}`);
-            const client = github_1.default.getOctokit(token);
+            const client = github.getOctokit(token);
             if (debugMode)
                 core.info(`reportPaths: ${reportPaths}`);
             const reportsJsonAsync = getJsonReports(reportPaths, debugMode);
@@ -152,7 +152,7 @@ function getJsonReports(xmlPaths, debugMode) {
         if (debugMode)
             core.info(`Resolved files: ${files}`);
         return Promise.all(files.map((path) => __awaiter(this, void 0, void 0, function* () {
-            const reportXml = yield fs_1.default.promises.readFile(path.trim(), 'utf-8');
+            const reportXml = yield fs.promises.readFile(path.trim(), 'utf-8');
             return yield xml2js_1.default.parseStringPromise(reportXml);
         })));
     });
@@ -162,8 +162,8 @@ function getChangedFiles(base, head, client) {
         const response = yield client.rest.repos.compareCommits({
             base,
             head,
-            owner: github_1.default.context.repo.owner,
-            repo: github_1.default.context.repo.repo,
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
         });
         const changedFiles = [];
         response.data.files.forEach(file => {
@@ -189,19 +189,19 @@ function addComment(prNumber, update, title, body, client, debugMode) {
         if (update && title) {
             if (debugMode)
                 core.info('Listing all comments');
-            const comments = yield client.rest.issues.listComments(Object.assign({ issue_number: prNumber }, github_1.default.context.repo));
+            const comments = yield client.rest.issues.listComments(Object.assign({ issue_number: prNumber }, github.context.repo));
             const comment = comments.data.find(comment => comment.body.startsWith(title));
             if (comment) {
                 if (debugMode)
                     core.info(`Updating existing comment: id=${comment.id} \n body=${comment.body}`);
-                yield client.rest.issues.updateComment(Object.assign({ comment_id: comment.id, body }, github_1.default.context.repo));
+                yield client.rest.issues.updateComment(Object.assign({ comment_id: comment.id, body }, github.context.repo));
                 commentUpdated = true;
             }
         }
         if (!commentUpdated) {
             if (debugMode)
                 core.info('Creating a new comment');
-            yield client.rest.issues.createComment(Object.assign({ issue_number: prNumber, body }, github_1.default.context.repo));
+            yield client.rest.issues.createComment(Object.assign({ issue_number: prNumber, body }, github.context.repo));
         }
     });
 }
