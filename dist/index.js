@@ -19511,19 +19511,25 @@ function getModuleTable(modules, minCoverage, emoji) {
       module.overall,
       module.changed
     )
-    renderFileRow(
+    renderRow(
       module.name,
       module.overall.percentage,
       coverageDifference,
+      module.changed.percentage,
       emoji
     )
   })
   return table
 
-  function renderFileRow(name, coverage, coverageDiff, emoji) {
-    const changedModuleCoverage = 100 + coverageDiff
-    const status = getStatus(changedModuleCoverage, minCoverage.changed, emoji)
-    let coveragePercentage = `${formatCoverage(coverage)}`
+  function renderRow(
+    name,
+    overallCoverage,
+    coverageDiff,
+    changedCoverage,
+    emoji
+  ) {
+    const status = getStatus(changedCoverage, minCoverage.changed, emoji)
+    let coveragePercentage = `${formatCoverage(overallCoverage)}`
     if (shouldShow(coverageDiff)) {
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
     }
@@ -19550,11 +19556,12 @@ function getFileTable(project, minCoverage, emoji) {
         file.overall,
         file.changed
       )
-      renderFileRow(
+      renderRow(
         moduleName,
         `[${file.name}](${file.url})`,
         file.overall.percentage,
         coverageDifference,
+        file.changed.percentage,
         project.isMultiModule,
         emoji
       )
@@ -19564,17 +19571,17 @@ function getFileTable(project, minCoverage, emoji) {
     ? '<details>\n' + '<summary>Files</summary>\n\n' + table + '\n\n</details>'
     : table
 
-  function renderFileRow(
+  function renderRow(
     moduleName,
     fileName,
-    coverage,
+    overallCoverage,
     coverageDiff,
+    changedCoverage,
     isMultiModule,
     emoji
   ) {
-    const changedFilesCoverage = 100 + coverageDiff
-    const status = getStatus(changedFilesCoverage, minCoverage.changed, emoji)
-    let coveragePercentage = `${formatCoverage(coverage)}`
+    const status = getStatus(changedCoverage, minCoverage.changed, emoji)
+    let coveragePercentage = `${formatCoverage(overallCoverage)}`
     if (shouldShow(coverageDiff)) {
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
     }
@@ -19642,7 +19649,7 @@ function getTitle(title) {
 
 function getStatus(coverage, minCoverage, emoji) {
   let status = emoji.pass
-  if (coverage < minCoverage) {
+  if (coverage != null && coverage < minCoverage) {
     status = emoji.fail
   }
   return status
