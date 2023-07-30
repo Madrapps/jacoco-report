@@ -1,6 +1,6 @@
-const util = require('../src/util')
-const fs = require('fs')
-const parser = require('xml2js')
+import * as util from '../src/util'
+import * as fs from 'fs'
+import parser from 'xml2js'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -54,144 +54,144 @@ describe('Util', function () {
       const files = util.getFilesWithCoverage(packages)
       expect(files).toEqual([
         {
-          class: { covered: 1, missed: 0 },
-          complexity: { covered: 3, missed: 8 },
-          instruction: { covered: 11, missed: 50 },
-          line: { covered: 3, missed: 8 },
+          class: {covered: 1, missed: 0},
+          complexity: {covered: 3, missed: 8},
+          instruction: {covered: 11, missed: 50},
+          line: {covered: 3, missed: 8},
           lines: {
             3: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 3, missed: 0 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 3, missed: 0},
             },
             6: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 4 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 4},
             },
             10: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 4, missed: 0 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 4, missed: 0},
             },
             14: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 4, missed: 0 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 4, missed: 0},
             },
             18: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 4 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 4},
             },
             22: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 4 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 4},
             },
             26: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 4 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 4},
             },
             30: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 6 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 6},
             },
             34: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 8 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 8},
             },
             38: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 10 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 10},
             },
             42: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 10 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 10},
             },
           },
-          method: { covered: 3, missed: 8 },
+          method: {covered: 3, missed: 8},
           name: 'Utility.java',
           packageName: 'com/madrapps/jacoco',
         },
         {
-          branch: { covered: 2, missed: 4 },
-          class: { covered: 1, missed: 0 },
-          complexity: { covered: 4, missed: 7 },
-          instruction: { covered: 21, missed: 29 },
-          line: { covered: 6, missed: 7 },
+          branch: {covered: 2, missed: 4},
+          class: {covered: 1, missed: 0},
+          complexity: {covered: 4, missed: 7},
+          instruction: {covered: 21, missed: 29},
+          line: {covered: 6, missed: 7},
           lines: {
             3: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 3, missed: 0 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 3, missed: 0},
             },
             6: {
-              branch: { covered: 1, missed: 1 },
-              instruction: { covered: 3, missed: 0 },
+              branch: {covered: 1, missed: 1},
+              instruction: {covered: 3, missed: 0},
             },
             9: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 4, missed: 0 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 4, missed: 0},
             },
             13: {
-              branch: { covered: 0, missed: 2 },
-              instruction: { covered: 0, missed: 3 },
+              branch: {covered: 0, missed: 2},
+              instruction: {covered: 0, missed: 3},
             },
             14: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 4 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 4},
             },
             16: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 4 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 4},
             },
             22: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 4, missed: 0 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 4, missed: 0},
             },
             26: {
-              branch: { covered: 1, missed: 1 },
-              instruction: { covered: 3, missed: 0 },
+              branch: {covered: 1, missed: 1},
+              instruction: {covered: 3, missed: 0},
             },
             27: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 4, missed: 0 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 4, missed: 0},
             },
             29: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 4 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 4},
             },
             35: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 4 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 4},
             },
             39: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 4 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 4},
             },
             43: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 0, missed: 6 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 0, missed: 6},
             },
           },
-          method: { covered: 4, missed: 4 },
+          method: {covered: 4, missed: 4},
           name: 'Math.kt',
           packageName: 'com/madrapps/jacoco',
         },
         {
-          class: { covered: 1, missed: 0 },
-          complexity: { covered: 3, missed: 0 },
-          instruction: { covered: 11, missed: 0 },
-          line: { covered: 3, missed: 0 },
+          class: {covered: 1, missed: 0},
+          complexity: {covered: 3, missed: 0},
+          instruction: {covered: 11, missed: 0},
+          line: {covered: 3, missed: 0},
           lines: {
             3: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 3, missed: 0 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 3, missed: 0},
             },
             12: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 4, missed: 0 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 4, missed: 0},
             },
             17: {
-              branch: { covered: 0, missed: 0 },
-              instruction: { covered: 4, missed: 0 },
+              branch: {covered: 0, missed: 0},
+              instruction: {covered: 4, missed: 0},
             },
           },
-          method: { covered: 3, missed: 0 },
+          method: {covered: 3, missed: 0},
           name: 'StringOp.java',
           packageName: 'com/madrapps/jacoco/operation',
         },
@@ -206,7 +206,7 @@ async function getSingleReport() {
   return [report]
 }
 
-async function getReport(path) {
+async function getReport(path: string) {
   const reportXml = await fs.promises.readFile(path, 'utf-8')
   const json = await parser.parseStringPromise(reportXml)
   return json['report']
