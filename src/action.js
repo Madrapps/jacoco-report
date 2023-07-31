@@ -76,7 +76,7 @@ async function action() {
 
     if (debugMode) core.info(`reportPaths: ${reportPaths}`)
     const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
-    const changedFiles = await getChangedFiles(base, head, client)
+    const changedFiles = await getChangedFiles(base, head, client, debugMode)
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
     const reportsJson = await reportsJsonAsync
@@ -136,7 +136,7 @@ async function getJsonReports(xmlPaths, debugMode) {
   )
 }
 
-async function getChangedFiles(base, head, client) {
+async function getChangedFiles(base, head, client, debugMode) {
   const response = await client.rest.repos.compareCommits({
     base,
     head,
@@ -146,6 +146,7 @@ async function getChangedFiles(base, head, client) {
 
   const changedFiles = []
   response.data.files.forEach((file) => {
+    if (debugMode) core.info(`file: ${file}`)
     const changedFile = {
       filePath: file.filename,
       url: file.blob_url,
