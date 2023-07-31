@@ -123,7 +123,9 @@ export async function action(): Promise<void> {
       )
     }
   } catch (error) {
-    core.setFailed(error)
+    if (error instanceof Error || typeof error === 'string') {
+      core.setFailed(error)
+    }
   }
 }
 
@@ -143,7 +145,11 @@ async function getJsonReports(
   )
 }
 
-async function getChangedFiles(base, head, client): Promise<ChangedFile[]> {
+async function getChangedFiles(
+  base: string,
+  head: string,
+  client: any
+): Promise<ChangedFile[]> {
   const response = await client.rest.repos.compareCommits({
     base,
     head,
@@ -164,12 +170,12 @@ async function getChangedFiles(base, head, client): Promise<ChangedFile[]> {
 }
 
 async function addComment(
-  prNumber,
-  update,
-  title,
-  body,
-  client,
-  debugMode
+  prNumber: number,
+  update: boolean,
+  title: string,
+  body: string,
+  client: any,
+  debugMode: boolean
 ): Promise<void> {
   let commentUpdated = false
 
@@ -182,7 +188,7 @@ async function addComment(
       issue_number: prNumber,
       ...github.context.repo,
     })
-    const comment = comments.data.find(it => it.body.startsWith(title))
+    const comment = comments.data.find((it: any) => it.body.startsWith(title))
 
     if (comment) {
       if (debugMode)
