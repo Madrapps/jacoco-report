@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as fs from 'fs'
@@ -10,6 +10,7 @@ import {getProjectCoverage} from './process'
 import {getPRComment, getTitle} from './render'
 import {debug, getChangedLines} from './util'
 import {Project} from './models/project'
+import {ChangedFile} from './models/github'
 
 export async function action(): Promise<void> {
   try {
@@ -57,9 +58,9 @@ export async function action(): Promise<void> {
     switch (event) {
       case 'pull_request':
       case 'pull_request_target':
-        base = github.context.payload.pull_request.base.sha
-        head = github.context.payload.pull_request.head.sha
-        prNumber = github.context.payload.pull_request.number
+        base = github.context.payload.pull_request?.base.sha
+        head = github.context.payload.pull_request?.head.sha
+        prNumber = github.context.payload.pull_request?.number
         break
       case 'push':
         base = github.context.payload.before
@@ -89,7 +90,7 @@ export async function action(): Promise<void> {
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-overall',
-      parseFloat(project.overall.percentage.toFixed(2))
+      parseFloat((project.overall.percentage ?? 0).toFixed(2))
     )
     core.setOutput(
       'coverage-changed-files',
@@ -126,7 +127,10 @@ export async function action(): Promise<void> {
   }
 }
 
-async function getJsonReports(xmlPaths, debugMode) {
+async function getJsonReports(
+  xmlPaths: string[],
+  debugMode: boolean
+): Promise<any[]> {
   const globber = await glob.create(xmlPaths.join('\n'))
   const files = await globber.glob()
   if (debugMode) core.info(`Resolved files: ${files}`)
@@ -139,7 +143,7 @@ async function getJsonReports(xmlPaths, debugMode) {
   )
 }
 
-async function getChangedFiles(base, head, client) {
+async function getChangedFiles(base, head, client): Promise<ChangedFile[]> {
   const response = await client.rest.repos.compareCommits({
     base,
     head,
@@ -147,15 +151,15 @@ async function getChangedFiles(base, head, client) {
     repo: github.context.repo.repo,
   })
 
-  const changedFiles = []
-  response.data.files.forEach(file => {
-    const changedFile = {
+  const changedFiles: ChangedFile[] = []
+  for (const file of response.data.files) {
+    const changedFile: ChangedFile = {
       filePath: file.filename,
       url: file.blob_url,
       lines: getChangedLines(file.patch),
     }
     changedFiles.push(changedFile)
-  })
+  }
   return changedFiles
 }
 
@@ -178,9 +182,7 @@ async function addComment(
       issue_number: prNumber,
       ...github.context.repo,
     })
-    const comment = comments.data.find(comment =>
-      comment.body.startsWith(title)
-    )
+    const comment = comments.data.find(it => it.body.startsWith(title))
 
     if (comment) {
       if (debugMode)
