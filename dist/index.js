@@ -18772,7 +18772,7 @@ async function action() {
       )
     }
   } catch (error) {
-    core.setFailed(error)
+    core.info(error)
   }
 }
 
