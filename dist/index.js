@@ -18799,7 +18799,7 @@ async function getChangedFiles(base, head, client, debugMode) {
 
   const changedFiles = []
   response.data.files.forEach((file) => {
-    if (debugMode) core.info(`file: ${file}`)
+    if (debugMode) core.info(`file: ${debug(file)}`)
     const changedFile = {
       filePath: file.filename,
       url: file.blob_url,
