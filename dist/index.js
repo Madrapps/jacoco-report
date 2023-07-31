@@ -18662,6 +18662,7 @@ const { debug, getChangedLines } = __nccwpck_require__(6254)
 const glob = __nccwpck_require__(8090)
 
 async function action() {
+  let continueOnError = true
   try {
     const token = core.getInput('token')
     if (!token) {
@@ -18692,6 +18693,7 @@ async function action() {
     const passEmoji = core.getInput('pass-emoji')
     const failEmoji = core.getInput('fail-emoji')
 
+    continueOnError = parseBooleans(core.getInput('continue-on-error'))
     const debugMode = parseBooleans(core.getInput('debug-mode'))
 
     const event = github.context.eventName
@@ -18772,8 +18774,11 @@ async function action() {
       )
     }
   } catch (error) {
-    core.error(error)
-    core.info(error)
+    if (continueOnError) {
+      core.error(error)
+    } else {
+      core.setFailed(error)
+    }
   }
 }
 
