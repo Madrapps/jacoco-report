@@ -18662,6 +18662,7 @@ const { debug, getChangedLines } = __nccwpck_require__(683)
 const glob = __nccwpck_require__(6562)
 
 async function action() {
+  let continueOnError = true
   try {
     const token = core.getInput('token')
     if (!token) {
@@ -18692,6 +18693,7 @@ async function action() {
     const passEmoji = core.getInput('pass-emoji')
     const failEmoji = core.getInput('fail-emoji')
 
+    continueOnError = parseBooleans(core.getInput('continue-on-error'))
     const debugMode = parseBooleans(core.getInput('debug-mode'))
 
     const event = github.context.eventName
@@ -18729,7 +18731,7 @@ async function action() {
 
     if (debugMode) core.info(`reportPaths: ${reportPaths}`)
     const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
-    const changedFiles = await getChangedFiles(base, head, client)
+    const changedFiles = await getChangedFiles(base, head, client, debugMode)
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
     const reportsJson = await reportsJsonAsync
@@ -18772,7 +18774,11 @@ async function action() {
       )
     }
   } catch (error) {
-    core.setFailed(error)
+    if (continueOnError) {
+      core.error(error)
+    } else {
+      core.setFailed(error)
+    }
   }
 }
 
@@ -18789,7 +18795,7 @@ async function getJsonReports(xmlPaths, debugMode) {
   )
 }
 
-async function getChangedFiles(base, head, client) {
+async function getChangedFiles(base, head, client, debugMode) {
   const response = await client.rest.repos.compareCommits({
     base,
     head,
@@ -18799,6 +18805,7 @@ async function getChangedFiles(base, head, client) {
 
   const changedFiles = []
   response.data.files.forEach((file) => {
+    if (debugMode) core.info(`file: ${debug(file)}`)
     const changedFile = {
       filePath: file.filename,
       url: file.blob_url,
@@ -19306,28 +19313,30 @@ function debug(obj) {
 const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/
 
 function getChangedLines(patch) {
-  const lines = patch.split('\n')
-  const groups = getDiffGroups(lines)
   const lineNumbers = new Set()
-  groups.forEach((group) => {
-    const firstLine = group.shift()
-    if (firstLine) {
-      const diffGroup = firstLine.match(pattern)
-      if (diffGroup) {
-        let bX = parseInt(diffGroup[2])
+  if (patch) {
+    const lines = patch.split('\n')
+    const groups = getDiffGroups(lines)
+    groups.forEach((group) => {
+      const firstLine = group.shift()
+      if (firstLine) {
+        const diffGroup = firstLine.match(pattern)
+        if (diffGroup) {
+          let bX = parseInt(diffGroup[2])
 
-        group.forEach((line) => {
-          bX++
+          group.forEach((line) => {
+            bX++
 
-          if (line.startsWith('+')) {
-            lineNumbers.add(bX - 1)
-          } else if (line.startsWith('-')) {
-            bX--
-          }
-        })
+            if (line.startsWith('+')) {
+              lineNumbers.add(bX - 1)
+            } else if (line.startsWith('-')) {
+              bX--
+            }
+          })
+        }
       }
-    }
-  })
+    })
+  }
   return [...lineNumbers]
 }
 

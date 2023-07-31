@@ -9,6 +9,7 @@ const { debug, getChangedLines } = require('./util')
 const glob = require('@actions/glob')
 
 async function action() {
+  let continueOnError = true
   try {
     const token = core.getInput('token')
     if (!token) {
@@ -39,6 +40,7 @@ async function action() {
     const passEmoji = core.getInput('pass-emoji')
     const failEmoji = core.getInput('fail-emoji')
 
+    continueOnError = parseBooleans(core.getInput('continue-on-error'))
     const debugMode = parseBooleans(core.getInput('debug-mode'))
 
     const event = github.context.eventName
@@ -76,7 +78,7 @@ async function action() {
 
     if (debugMode) core.info(`reportPaths: ${reportPaths}`)
     const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
-    const changedFiles = await getChangedFiles(base, head, client)
+    const changedFiles = await getChangedFiles(base, head, client, debugMode)
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
     const reportsJson = await reportsJsonAsync
@@ -119,7 +121,11 @@ async function action() {
       )
     }
   } catch (error) {
-    core.setFailed(error)
+    if (continueOnError) {
+      core.error(error)
+    } else {
+      core.setFailed(error)
+    }
   }
 }
 
@@ -136,7 +142,7 @@ async function getJsonReports(xmlPaths, debugMode) {
   )
 }
 
-async function getChangedFiles(base, head, client) {
+async function getChangedFiles(base, head, client, debugMode) {
   const response = await client.rest.repos.compareCommits({
     base,
     head,
@@ -146,6 +152,7 @@ async function getChangedFiles(base, head, client) {
 
   const changedFiles = []
   response.data.files.forEach((file) => {
+    if (debugMode) core.info(`file: ${debug(file)}`)
     const changedFile = {
       filePath: file.filename,
       url: file.blob_url,

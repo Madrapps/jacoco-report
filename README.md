@@ -27,6 +27,7 @@ for [Creating a workflow file](https://help.github.com/en/articles/configuring-a
   the files changed
 - `pass-emoji` - [*optional* {default: :green_apple:}] Emoji to use for pass status shown when 'coverage >= min coverage' (should be a Github supported emoji).
 - `fail-emoji` - [*optional* {default: :x:}] Emoji to use for fail status shown when 'coverage < min coverage' (should be a Github supported emoji).
+- `continue-on-error` - [*optional* {default: true}] If true, then do not fail the action on error, but log a warning
 - `debug-mode` - [*optional* {default: false}] If true, run the action in debug mode and get debug logs printed in console
 
 ### Outputs
@@ -60,7 +61,7 @@ jobs:
 
       - name: Add coverage to PR
         id: jacoco
-        uses: madrapps/jacoco-report@v1.6
+        uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: |
             ${{ github.workspace }}/**/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,
@@ -110,7 +111,7 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
    ```yaml
    - name: Jacoco Report to PR
      id: jacoco
-     uses: madrapps/jacoco-report@v1.6
+     uses: madrapps/jacoco-report@v1.6.1
      with:
        paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
        token: ${{ secrets.GITHUB_TOKEN }}
@@ -131,7 +132,7 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
    ```yaml
    - name: Jacoco Report to PR
      id: jacoco
-     uses: madrapps/jacoco-report@v1.6
+     uses: madrapps/jacoco-report@v1.6.1
      with:
        paths: |
          ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,
@@ -151,7 +152,7 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
    ```yaml
    - name: Jacoco Report to PR
      id: jacoco
-     uses: madrapps/jacoco-report@v1.6
+     uses: madrapps/jacoco-report@v1.6.1
      with:
        paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
        token: ${{ secrets.GITHUB_TOKEN }}
