@@ -173,7 +173,7 @@ function shouldShow(value: number): boolean {
   return rounded !== 0 && rounded !== 100
 }
 
-export function getTitle(title: string): string {
+export function getTitle(title?: string): string {
   if (title != null && title.trim().length > 0) {
     const trimmed = title.trim()
     return trimmed.startsWith('#') ? `${trimmed}\n` : `### ${trimmed}\n`

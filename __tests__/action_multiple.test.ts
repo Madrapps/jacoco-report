@@ -1,4 +1,4 @@
-/* eslint-disable no-template-curly-in-string */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import * as action from '../src/action'
 import * as core from '@actions/core'
@@ -180,7 +180,7 @@ describe('Multiple reports', function () {
   })
 })
 
-function initContext(eventName, payload) {
+function initContext(eventName, payload): void {
   const context = github.context
   context.eventName = eventName
   context.payload = payload

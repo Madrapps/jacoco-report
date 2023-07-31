@@ -51,9 +51,9 @@ export async function action(): Promise<void> {
       core.info(`failEmoji: ${failEmoji}`)
     }
 
-    let base
-    let head
-    let prNumber
+    let base: string
+    let head: string
+    let prNumber: number | undefined
     switch (event) {
       case 'pull_request':
       case 'pull_request_target':

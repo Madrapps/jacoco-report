@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as action from '../src/action'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
@@ -7,7 +6,7 @@ jest.mock('@actions/core')
 jest.mock('@actions/github')
 
 describe('Input validation', function () {
-  function getInput(key) {
+  function getInput(key: string): string | undefined {
     switch (key) {
       case 'paths':
         return './__tests__/__fixtures__/report.xml'
@@ -20,7 +19,10 @@ describe('Input validation', function () {
   const listComments = jest.fn()
   const updateComment = jest.fn()
 
+  /* eslint-disable @typescript-eslint/ban-ts-comment */
+  // @ts-ignore
   core.getInput = jest.fn(getInput)
+  // @ts-ignore
   github.getOctokit = jest.fn(() => {
     return {
       repos: {
@@ -51,11 +53,13 @@ describe('Input validation', function () {
       },
     }
   })
+  // @ts-ignore
   core.setFailed = jest.fn(c => {
     fail(c)
   })
 
   it('Fail if paths is not present', async () => {
+    // @ts-ignore
     core.getInput = jest.fn(c => {
       switch (c) {
         case 'paths':
@@ -66,6 +70,7 @@ describe('Input validation', function () {
     })
     github.context.eventName = 'pull_request'
 
+    // @ts-ignore
     core.setFailed = jest.fn(c => {
       expect(c).toEqual("'paths' is missing")
     })
@@ -73,6 +78,7 @@ describe('Input validation', function () {
   })
 
   it('Fail if token is not present', async () => {
+    // @ts-ignore
     core.getInput = jest.fn(c => {
       switch (c) {
         case 'token':
@@ -82,7 +88,7 @@ describe('Input validation', function () {
       }
     })
     github.context.eventName = 'pull_request'
-
+    // @ts-ignore
     core.setFailed = jest.fn(c => {
       expect(c).toEqual("'token' is missing")
     })

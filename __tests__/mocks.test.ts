@@ -1,5 +1,4 @@
-/* eslint-disable no-template-curly-in-string */
-const PATCH = {
+export const PATCH = {
   SINGLE_MODULE: {
     COVERAGE:
       "@@ -10,10 +10,10 @@ jobs:\n     runs-on: ubuntu-latest\n     steps:\n     - uses: actions/checkout@v2\n-    - name: Set up JDK 1.8\n+    - name: Set up JDK 17\n       uses: actions/setup-java@v1\n       with:\n-        java-version: 1.8\n+        java-version: 17\n \n     - name: Grant execute permission for gradlew\n       run: chmod +x gradlew\n@@ -29,13 +29,15 @@ jobs:\n \n     - name: Jacoco Report to PR\n       id: jacoco\n-      uses: madrapps/jacoco-report@v1.1\n+      uses: madrapps/jacoco-report@coverage-diff\n       with:\n-        path: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml\n+        paths: ${{ github.workspace }}/build/reports/jacoco/**/testCoverage.xml\n         token: ${{ secrets.GITHUB_TOKEN }}\n         min-coverage-overall: 40\n         min-coverage-changed-files: 60\n-        debug-mode: false\n+        update-comment: true\n+        title: '`Coverage Report`'\n+        debug-mode: true\n \n     - name: Get the Coverage info\n       run: | ",
@@ -34,7 +33,7 @@ const PATCH = {
   },
 }
 
-const CHANGED_FILE = {
+export const CHANGED_FILE = {
   MULTI_MODULE: [
     {
       filePath: '.github/workflows/coverage.yml',
@@ -120,7 +119,7 @@ const CHANGED_FILE = {
   ],
 }
 
-const PROJECT = {
+export const PROJECT = {
   SINGLE_MODULE: {
     modules: [
       {
@@ -446,12 +445,6 @@ const PROJECT = {
       percentage: 7.32,
     },
   },
-}
-
-module.exports = {
-  PATCH,
-  CHANGED_FILE,
-  PROJECT,
 }
 
 it('Empty test', function () {

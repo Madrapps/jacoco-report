@@ -1,4 +1,4 @@
-/* eslint-disable no-template-curly-in-string */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import * as action from '../src/action'
 import * as core from '@actions/core'
@@ -14,7 +14,7 @@ describe('Single report', function () {
   let updateComment
   let output
 
-  function getInput(key) {
+  function getInput(key): string {
     switch (key) {
       case 'paths':
         return './__tests__/__fixtures__/report.xml'
@@ -136,7 +136,7 @@ describe('Single report', function () {
     describe('With update-comment ON', function () {
       const title = 'JaCoCo Report'
 
-      function mockInput(key) {
+      function mockInput(key): string {
         switch (key) {
           case 'title':
             return title
@@ -210,7 +210,7 @@ describe('Single report', function () {
     })
 
     describe('Skip if no changes set to true', function () {
-      function mockInput() {
+      function mockInput(): void {
         core.getInput = jest.fn(c => {
           switch (c) {
             case 'skip-if-no-changes':
@@ -233,24 +233,23 @@ describe('Single report', function () {
       it("Don't add comment when coverage absent for changes files", async () => {
         initContext(eventName, payload)
         mockInput()
-        const compareCommitsResponse = {
-          data: {
-            files: [
-              {
-                filename: '.github/workflows/coverage.yml',
-                blob_url:
-                  'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/.github/workflows/coverage.yml',
-                patch: PATCH.SINGLE_MODULE.COVERAGE,
-              },
-            ],
-          },
-        }
         github.getOctokit = jest.fn(() => {
           return {
             rest: {
               repos: {
                 compareCommits: jest.fn(() => {
-                  return compareCommitsResponse
+                  return {
+                    data: {
+                      files: [
+                        {
+                          filename: '.github/workflows/coverage.yml',
+                          blob_url:
+                            'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/.github/workflows/coverage.yml',
+                          patch: PATCH.SINGLE_MODULE.COVERAGE,
+                        },
+                      ],
+                    },
+                  }
                 }),
               },
               issues: {
@@ -364,7 +363,7 @@ describe('Single report', function () {
   })
 })
 
-function initContext(eventName, payload) {
+function initContext(eventName, payload): void {
   const context = github.context
   context.eventName = eventName
   context.payload = payload

@@ -1,4 +1,4 @@
-/* eslint-disable no-template-curly-in-string */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import * as action from '../src/action'
 import * as core from '@actions/core'
@@ -14,7 +14,7 @@ describe('Aggregate report', function () {
   let updateComment
   let output
 
-  function getInput(key) {
+  function getInput(key: string): string {
     switch (key) {
       case 'paths':
         return './__tests__/__fixtures__/aggregate-report.xml'
@@ -40,6 +40,7 @@ describe('Aggregate report', function () {
     output = jest.fn()
 
     core.getInput = jest.fn(getInput)
+    // @ts-ignore
     github.getOctokit = jest.fn(() => {
       return {
         rest: {
@@ -56,6 +57,7 @@ describe('Aggregate report', function () {
         },
       }
     })
+    // @ts-ignore
     core.setFailed = jest.fn(c => {
       fail(c)
     })
@@ -170,7 +172,7 @@ describe('Aggregate report', function () {
   })
 })
 
-function initContext(eventName, payload) {
+function initContext(eventName, payload): void {
   const context = github.context
   context.eventName = eventName
   context.payload = payload

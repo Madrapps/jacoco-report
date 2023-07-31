@@ -1,8 +1,8 @@
-// @ts-nocheck
 import fs from 'fs'
 import parser from 'xml2js'
 import * as process from '../src/process'
 import {CHANGED_FILE, PROJECT} from './mocks.test'
+import {ChangedFile} from '../src/models/github'
 
 describe('process', function () {
   describe('get file coverage', function () {
@@ -10,7 +10,7 @@ describe('process', function () {
       it('no files changed', async () => {
         const v = getSingleReport()
         const reports = await v
-        const changedFiles = []
+        const changedFiles: ChangedFile[] = []
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [],
@@ -135,7 +135,7 @@ describe('process', function () {
     describe('multiple reports', function () {
       it('no files changed', async () => {
         const reports = await getMultipleReports()
-        const changedFiles = []
+        const changedFiles: ChangedFile[] = []
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [],
@@ -230,7 +230,7 @@ describe('process', function () {
     describe('aggregate reports', function () {
       it('no files changed', async () => {
         const reports = await getAggregateReport()
-        const changedFiles = []
+        const changedFiles: ChangedFile[] = []
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [],
@@ -400,29 +400,30 @@ describe('process', function () {
   })
 })
 
-async function getAggregateReport() {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function getAggregateReport(): Promise<any[]> {
   const reportPath = './__tests__/__fixtures__/aggregate-report.xml'
   const report = await getReport(reportPath)
   return [report]
 }
 
-async function getMultipleReports() {
+async function getMultipleReports(): Promise<any[]> {
   const testFolder = './__tests__/__fixtures__/multi_module'
   return Promise.all(
     fs.readdirSync(testFolder).map(async file => {
-      const reportPath = testFolder + '/' + file
+      const reportPath = `${testFolder}/${file}`
       return await getReport(reportPath)
     })
   )
 }
 
-async function getSingleReport() {
+async function getSingleReport(): Promise<any[]> {
   const reportPath = './__tests__/__fixtures__/report.xml'
   const report = await getReport(reportPath)
   return [report]
 }
 
-async function getReport(path) {
+async function getReport(path: string): Promise<any[]> {
   const reportXml = await fs.promises.readFile(path, 'utf-8')
   const json = await parser.parseStringPromise(reportXml)
   return json['report']
