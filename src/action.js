@@ -119,6 +119,7 @@ async function action() {
       )
     }
   } catch (error) {
+    core.error(error)
     core.info(error)
   }
 }
