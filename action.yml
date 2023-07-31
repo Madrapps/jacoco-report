@@ -34,6 +34,10 @@ inputs:
     description: 'Github emoji to use for fail status shown when coverage lesser than min coverage (should be a Github supported emoji)'
     required: false
     default: ':x:'
+  continue-on-error:
+    description: 'When there is an error do not fail the action, but log a warning'
+    required: false
+    default: 'true'
   debug-mode:
     description: 'Run the action in debug mode and get debug logs printed in console'
     required: false

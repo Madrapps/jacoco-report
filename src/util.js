@@ -14,28 +14,30 @@ function debug(obj) {
 const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/
 
 function getChangedLines(patch) {
-  const lines = patch.split('\n')
-  const groups = getDiffGroups(lines)
   const lineNumbers = new Set()
-  groups.forEach((group) => {
-    const firstLine = group.shift()
-    if (firstLine) {
-      const diffGroup = firstLine.match(pattern)
-      if (diffGroup) {
-        let bX = parseInt(diffGroup[2])
+  if (patch) {
+    const lines = patch.split('\n')
+    const groups = getDiffGroups(lines)
+    groups.forEach((group) => {
+      const firstLine = group.shift()
+      if (firstLine) {
+        const diffGroup = firstLine.match(pattern)
+        if (diffGroup) {
+          let bX = parseInt(diffGroup[2])
 
-        group.forEach((line) => {
-          bX++
+          group.forEach((line) => {
+            bX++
 
-          if (line.startsWith('+')) {
-            lineNumbers.add(bX - 1)
-          } else if (line.startsWith('-')) {
-            bX--
-          }
-        })
+            if (line.startsWith('+')) {
+              lineNumbers.add(bX - 1)
+            } else if (line.startsWith('-')) {
+              bX--
+            }
+          })
+        }
       }
-    }
-  })
+    })
+  }
   return [...lineNumbers]
 }
 
