@@ -7,6 +7,16 @@ jest.mock('@actions/github')
 
 describe('Util', function () {
   describe('getChangedLines', function () {
+    it('when patch is null', async () => {
+      const changedLines = util.getChangedLines(undefined)
+      expect(changedLines).toEqual([])
+    })
+
+    it('when patch is invalid', async () => {
+      const changedLines = util.getChangedLines('invalid-patch')
+      expect(changedLines).toEqual([])
+    })
+
     it('multiple consecutive lines', async () => {
       const patch =
         '@@ -18,6 +18,10 @@ class Arithmetic : MathOperation {\n         return a / b\n     }\n \n+    override fun difference(a: Int, b: Int): Int {\n+        return subtract(a, b)\n+    }\n+\n     fun modulo(a: Int, b: Int): Int {\n         return a % b\n     }'

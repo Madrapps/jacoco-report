@@ -12,6 +12,7 @@ import {Project} from './models/project'
 import {ChangedFile} from './models/github'
 
 export async function action(): Promise<void> {
+  let continueOnError = true
   try {
     const token = core.getInput('token')
     if (!token) {
@@ -42,6 +43,7 @@ export async function action(): Promise<void> {
     const passEmoji = core.getInput('pass-emoji')
     const failEmoji = core.getInput('fail-emoji')
 
+    continueOnError = parseBooleans(core.getInput('continue-on-error'))
     const debugMode = parseBooleans(core.getInput('debug-mode'))
 
     const event = github.context.eventName
@@ -79,7 +81,7 @@ export async function action(): Promise<void> {
 
     if (debugMode) core.info(`reportPaths: ${reportPaths}`)
     const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
-    const changedFiles = await getChangedFiles(base, head, client)
+    const changedFiles = await getChangedFiles(base, head, client, debugMode)
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
     const reportsJson = await reportsJsonAsync
@@ -122,8 +124,12 @@ export async function action(): Promise<void> {
       )
     }
   } catch (error) {
-    if (error instanceof Error || typeof error === 'string') {
-      core.setFailed(error)
+    if (error instanceof Error) {
+      if (continueOnError) {
+        core.error(error)
+      } else {
+        core.setFailed(error)
+      }
     }
   }
 }
@@ -147,7 +153,8 @@ async function getJsonReports(
 async function getChangedFiles(
   base: string,
   head: string,
-  client: any
+  client: any,
+  debugMode: boolean
 ): Promise<ChangedFile[]> {
   const response = await client.rest.repos.compareCommits({
     base,
@@ -158,6 +165,7 @@ async function getChangedFiles(
 
   const changedFiles: ChangedFile[] = []
   for (const file of response.data.files) {
+    if (debugMode) core.info(`file: ${debug(file)}`)
     const changedFile: ChangedFile = {
       filePath: file.filename,
       url: file.blob_url,

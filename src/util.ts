@@ -15,24 +15,26 @@ export function debug(obj: Object): string {
 
 const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/
 
-export function getChangedLines(patch: string): number[] {
-  const lines = patch.split('\n')
-  const groups = getDiffGroups(lines)
+export function getChangedLines(patch: string | undefined): number[] {
   const lineNumbers = new Set<number>()
-  for (const group of groups) {
-    const firstLine = group.shift()
-    if (firstLine) {
-      const diffGroup = firstLine.match(pattern)
-      if (diffGroup) {
-        let bX = parseInt(diffGroup[2])
+  if (patch) {
+    const lines = patch.split('\n')
+    const groups = getDiffGroups(lines)
+    for (const group of groups) {
+      const firstLine = group.shift()
+      if (firstLine) {
+        const diffGroup = firstLine.match(pattern)
+        if (diffGroup) {
+          let bX = parseInt(diffGroup[2])
 
-        for (const line of group) {
-          bX++
+          for (const line of group) {
+            bX++
 
-          if (line.startsWith('+')) {
-            lineNumbers.add(bX - 1)
-          } else if (line.startsWith('-')) {
-            bX--
+            if (line.startsWith('+')) {
+              lineNumbers.add(bX - 1)
+            } else if (line.startsWith('-')) {
+              bX--
+            }
           }
         }
       }
