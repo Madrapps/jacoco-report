@@ -1,7 +1,7 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 9139:
+/***/ 3767:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -43,7 +43,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.action = void 0;
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
@@ -51,12 +50,13 @@ const fs = __importStar(__nccwpck_require__(7147));
 const xml2js_1 = __importDefault(__nccwpck_require__(6189));
 const processors_1 = __nccwpck_require__(9236);
 const glob = __importStar(__nccwpck_require__(8090));
-const process_1 = __nccwpck_require__(1647);
-const render_1 = __nccwpck_require__(9089);
-const util_1 = __nccwpck_require__(4024);
+const process_1 = __nccwpck_require__(8578);
+const render_1 = __nccwpck_require__(8523);
+const util_1 = __nccwpck_require__(1597);
 function action() {
     var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
+        let continueOnError = true;
         try {
             const token = core.getInput('token');
             if (!token) {
@@ -81,6 +81,7 @@ function action() {
             const skipIfNoChanges = (0, processors_1.parseBooleans)(core.getInput('skip-if-no-changes'));
             const passEmoji = core.getInput('pass-emoji');
             const failEmoji = core.getInput('fail-emoji');
+            continueOnError = (0, processors_1.parseBooleans)(core.getInput('continue-on-error'));
             const debugMode = (0, processors_1.parseBooleans)(core.getInput('debug-mode'));
             const event = github.context.eventName;
             core.info(`Event is ${event}`);
@@ -112,7 +113,7 @@ function action() {
             if (debugMode)
                 core.info(`reportPaths: ${reportPaths}`);
             const reportsJsonAsync = getJsonReports(reportPaths, debugMode);
-            const changedFiles = yield getChangedFiles(base, head, client);
+            const changedFiles = yield getChangedFiles(base, head, client, debugMode);
             if (debugMode)
                 core.info(`changedFiles: ${(0, util_1.debug)(changedFiles)}`);
             const reportsJson = yield reportsJsonAsync;
@@ -139,8 +140,13 @@ function action() {
             }
         }
         catch (error) {
-            if (error instanceof Error || typeof error === 'string') {
-                core.setFailed(error);
+            if (error instanceof Error) {
+                if (continueOnError) {
+                    core.error(error);
+                }
+                else {
+                    core.setFailed(error);
+                }
             }
         }
     });
@@ -158,7 +164,7 @@ function getJsonReports(xmlPaths, debugMode) {
         })));
     });
 }
-function getChangedFiles(base, head, client) {
+function getChangedFiles(base, head, client, debugMode) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield client.rest.repos.compareCommits({
             base,
@@ -168,6 +174,8 @@ function getChangedFiles(base, head, client) {
         });
         const changedFiles = [];
         for (const file of response.data.files) {
+            if (debugMode)
+                core.info(`file: ${(0, util_1.debug)(file)}`);
             const changedFile = {
                 filePath: file.filename,
                 url: file.blob_url,
@@ -210,52 +218,14 @@ function addComment(prNumber, update, title, body, client, debugMode) {
 
 /***/ }),
 
-/***/ 4822:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(2186));
-const action_1 = __nccwpck_require__(9139);
-(0, action_1.action)().catch(error => {
-    core.setFailed(error.message);
-});
-
-
-/***/ }),
-
-/***/ 1647:
+/***/ 8578:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getProjectCoverage = void 0;
-const util_1 = __nccwpck_require__(4024);
+const util_1 = __nccwpck_require__(1597);
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function getProjectCoverage(reports, changedFiles) {
     const moduleCoverages = [];
@@ -456,7 +426,7 @@ function getDetailedCoverage(counters, type) {
 
 /***/ }),
 
-/***/ 9089:
+/***/ 8523:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -593,7 +563,7 @@ function toFloat(value) {
 
 /***/ }),
 
-/***/ 4024:
+/***/ 1597:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -614,22 +584,24 @@ function debug(obj) {
 exports.debug = debug;
 const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/;
 function getChangedLines(patch) {
-    const lines = patch.split('\n');
-    const groups = getDiffGroups(lines);
     const lineNumbers = new Set();
-    for (const group of groups) {
-        const firstLine = group.shift();
-        if (firstLine) {
-            const diffGroup = firstLine.match(pattern);
-            if (diffGroup) {
-                let bX = parseInt(diffGroup[2]);
-                for (const line of group) {
-                    bX++;
-                    if (line.startsWith('+')) {
-                        lineNumbers.add(bX - 1);
-                    }
-                    else if (line.startsWith('-')) {
-                        bX--;
+    if (patch) {
+        const lines = patch.split('\n');
+        const groups = getDiffGroups(lines);
+        for (const group of groups) {
+            const firstLine = group.shift();
+            if (firstLine) {
+                const diffGroup = firstLine.match(pattern);
+                if (diffGroup) {
+                    let bX = parseInt(diffGroup[2]);
+                    for (const line of group) {
+                        bX++;
+                        if (line.startsWith('+')) {
+                            lineNumbers.add(bX - 1);
+                        }
+                        else if (line.startsWith('-')) {
+                            bX--;
+                        }
                     }
                 }
             }
@@ -19537,13 +19509,19 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(4822);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+var exports = __webpack_exports__;
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const action_1 = __nccwpck_require__(3767);
+(0, action_1.action)();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
