@@ -1,5 +1,4 @@
-/* eslint-disable no-template-curly-in-string */
-const PATCH = {
+export const PATCH = {
   SINGLE_MODULE: {
     COVERAGE:
       "@@ -10,10 +10,10 @@ jobs:\n     runs-on: ubuntu-latest\n     steps:\n     - uses: actions/checkout@v2\n-    - name: Set up JDK 1.8\n+    - name: Set up JDK 17\n       uses: actions/setup-java@v1\n       with:\n-        java-version: 1.8\n+        java-version: 17\n \n     - name: Grant execute permission for gradlew\n       run: chmod +x gradlew\n@@ -29,13 +29,15 @@ jobs:\n \n     - name: Jacoco Report to PR\n       id: jacoco\n-      uses: madrapps/jacoco-report@v1.1\n+      uses: madrapps/jacoco-report@coverage-diff\n       with:\n-        path: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml\n+        paths: ${{ github.workspace }}/build/reports/jacoco/**/testCoverage.xml\n         token: ${{ secrets.GITHUB_TOKEN }}\n         min-coverage-overall: 40\n         min-coverage-changed-files: 60\n-        debug-mode: false\n+        update-comment: true\n+        title: '`Coverage Report`'\n+        debug-mode: true\n \n     - name: Get the Coverage info\n       run: | ",
@@ -34,7 +33,7 @@ const PATCH = {
   },
 }
 
-const CHANGED_FILE = {
+export const CHANGED_FILE = {
   MULTI_MODULE: [
     {
       filePath: '.github/workflows/coverage.yml',
@@ -120,7 +119,7 @@ const CHANGED_FILE = {
   ],
 }
 
-const PROJECT = {
+export const PROJECT = {
   SINGLE_MODULE: {
     modules: [
       {
@@ -137,7 +136,7 @@ const PROJECT = {
             changed: {
               covered: 0,
               missed: 0,
-              percentage: null,
+              percentage: undefined,
             },
             lines: [],
           },
@@ -157,43 +156,43 @@ const PROJECT = {
             lines: [
               {
                 number: 6,
-                instruction: { missed: 0, covered: 3 },
-                branch: { missed: 1, covered: 1 },
+                instruction: {missed: 0, covered: 3},
+                branch: {missed: 1, covered: 1},
               },
               {
                 number: 13,
-                instruction: { missed: 3, covered: 0 },
-                branch: { missed: 2, covered: 0 },
+                instruction: {missed: 3, covered: 0},
+                branch: {missed: 2, covered: 0},
               },
               {
                 number: 14,
-                instruction: { missed: 4, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 4, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 16,
-                instruction: { missed: 4, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 4, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 26,
-                instruction: { missed: 0, covered: 3 },
-                branch: { missed: 1, covered: 1 },
+                instruction: {missed: 0, covered: 3},
+                branch: {missed: 1, covered: 1},
               },
               {
                 number: 27,
-                instruction: { missed: 0, covered: 4 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 0, covered: 4},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 29,
-                instruction: { missed: 4, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 4, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 43,
-                instruction: { missed: 6, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 6, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -213,8 +212,8 @@ const PROJECT = {
             lines: [
               {
                 number: 3,
-                instruction: { missed: 0, covered: 3 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 0, covered: 3},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -265,13 +264,13 @@ const PROJECT = {
             lines: [
               {
                 number: 6,
-                instruction: { missed: 0, covered: 3 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 0, covered: 3},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 20,
-                instruction: { missed: 2, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 2, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -306,8 +305,8 @@ const PROJECT = {
             lines: [
               {
                 number: 22,
-                instruction: { missed: 5, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 5, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -327,13 +326,13 @@ const PROJECT = {
             lines: [
               {
                 number: 5,
-                instruction: { missed: 3, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 3, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 8,
-                instruction: { missed: 2, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 2, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -368,8 +367,8 @@ const PROJECT = {
             lines: [
               {
                 number: 16,
-                instruction: { missed: 8, covered: 0 },
-                branch: { missed: 2, covered: 0 },
+                instruction: {missed: 8, covered: 0},
+                branch: {missed: 2, covered: 0},
               },
             ],
           },
@@ -389,8 +388,8 @@ const PROJECT = {
             lines: [
               {
                 number: 20,
-                instruction: { missed: 14, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 14, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -410,13 +409,13 @@ const PROJECT = {
             lines: [
               {
                 number: 3,
-                instruction: { missed: 3, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 3, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
               {
                 number: 7,
-                instruction: { missed: 1, covered: 0 },
-                branch: { missed: 0, covered: 0 },
+                instruction: {missed: 1, covered: 0},
+                branch: {missed: 0, covered: 0},
               },
             ],
           },
@@ -446,12 +445,6 @@ const PROJECT = {
       percentage: 7.32,
     },
   },
-}
-
-module.exports = {
-  PATCH,
-  CHANGED_FILE,
-  PROJECT,
 }
 
 it('Empty test', function () {

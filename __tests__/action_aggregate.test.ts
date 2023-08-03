@@ -1,8 +1,9 @@
-/* eslint-disable no-template-curly-in-string */
-const action = require('../src/action')
-const core = require('@actions/core')
-const github = require('@actions/github')
-const { PATCH } = require('./mocks.test')
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+import * as action from '../src/action'
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+import {PATCH} from './mocks.test'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -13,7 +14,7 @@ describe('Aggregate report', function () {
   let updateComment
   let output
 
-  function getInput(key) {
+  function getInput(key: string): string {
     switch (key) {
       case 'paths':
         return './__tests__/__fixtures__/aggregate-report.xml'
@@ -39,6 +40,7 @@ describe('Aggregate report', function () {
     output = jest.fn()
 
     core.getInput = jest.fn(getInput)
+    // @ts-ignore
     github.getOctokit = jest.fn(() => {
       return {
         rest: {
@@ -55,7 +57,8 @@ describe('Aggregate report', function () {
         },
       }
     })
-    core.setFailed = jest.fn((c) => {
+    // @ts-ignore
+    core.setFailed = jest.fn(c => {
       fail(c)
     })
   })
@@ -123,7 +126,7 @@ describe('Aggregate report', function () {
     it('updates a previous comment', async () => {
       initContext(eventName, payload)
       const title = 'JaCoCo Report'
-      core.getInput = jest.fn((c) => {
+      core.getInput = jest.fn(c => {
         switch (c) {
           case 'title':
             return title
@@ -136,8 +139,8 @@ describe('Aggregate report', function () {
 
       listComments.mockReturnValue({
         data: [
-          { id: 1, body: 'some comment' },
-          { id: 2, body: `### ${title}\n to update` },
+          {id: 1, body: 'some comment'},
+          {id: 2, body: `### ${title}\n to update`},
         ],
       })
 
@@ -169,7 +172,7 @@ describe('Aggregate report', function () {
   })
 })
 
-function initContext(eventName, payload) {
+function initContext(eventName, payload): void {
   const context = github.context
   context.eventName = eventName
   context.payload = payload

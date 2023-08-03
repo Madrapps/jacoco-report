@@ -1,7 +1,8 @@
-const fs = require('fs')
-const parser = require('xml2js')
-const process = require('../src/process')
-const { CHANGED_FILE, PROJECT } = require('./mocks.test')
+import fs from 'fs'
+import parser from 'xml2js'
+import * as process from '../src/process'
+import {CHANGED_FILE, PROJECT} from './mocks.test'
+import {ChangedFile} from '../src/models/github'
 
 describe('process', function () {
   describe('get file coverage', function () {
@@ -9,7 +10,7 @@ describe('process', function () {
       it('no files changed', async () => {
         const v = getSingleReport()
         const reports = await v
-        const changedFiles = []
+        const changedFiles: ChangedFile[] = []
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [],
@@ -23,14 +24,14 @@ describe('process', function () {
           changed: {
             covered: 0,
             missed: 0,
-            percentage: null,
+            percentage: undefined,
           },
         })
       })
 
       it('one file changed', async () => {
         const reports = await getSingleReport()
-        const changedFiles = CHANGED_FILE.SINGLE_MODULE.filter((file) => {
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE.filter(file => {
           return file.filePath.endsWith('Math.kt')
         })
         const actual = process.getProjectCoverage(reports, changedFiles)
@@ -43,43 +44,43 @@ describe('process', function () {
                 {
                   lines: [
                     {
-                      branch: { covered: 1, missed: 1 },
-                      instruction: { covered: 3, missed: 0 },
+                      branch: {covered: 1, missed: 1},
+                      instruction: {covered: 3, missed: 0},
                       number: 6,
                     },
                     {
-                      branch: { covered: 0, missed: 2 },
-                      instruction: { covered: 0, missed: 3 },
+                      branch: {covered: 0, missed: 2},
+                      instruction: {covered: 0, missed: 3},
                       number: 13,
                     },
                     {
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 0, missed: 4 },
+                      branch: {covered: 0, missed: 0},
+                      instruction: {covered: 0, missed: 4},
                       number: 14,
                     },
                     {
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 0, missed: 4 },
+                      branch: {covered: 0, missed: 0},
+                      instruction: {covered: 0, missed: 4},
                       number: 16,
                     },
                     {
-                      branch: { covered: 1, missed: 1 },
-                      instruction: { covered: 3, missed: 0 },
+                      branch: {covered: 1, missed: 1},
+                      instruction: {covered: 3, missed: 0},
                       number: 26,
                     },
                     {
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 4, missed: 0 },
+                      branch: {covered: 0, missed: 0},
+                      instruction: {covered: 4, missed: 0},
                       number: 27,
                     },
                     {
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 0, missed: 4 },
+                      branch: {covered: 0, missed: 0},
+                      instruction: {covered: 0, missed: 4},
                       number: 29,
                     },
                     {
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 0, missed: 6 },
+                      branch: {covered: 0, missed: 0},
+                      instruction: {covered: 0, missed: 6},
                       number: 43,
                     },
                   ],
@@ -134,7 +135,7 @@ describe('process', function () {
     describe('multiple reports', function () {
       it('no files changed', async () => {
         const reports = await getMultipleReports()
-        const changedFiles = []
+        const changedFiles: ChangedFile[] = []
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [],
@@ -148,14 +149,14 @@ describe('process', function () {
           changed: {
             covered: 0,
             missed: 0,
-            percentage: null,
+            percentage: undefined,
           },
         })
       })
 
       it('one file changed', async () => {
         const reports = await getMultipleReports()
-        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter((file) => {
+        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
           return file.filePath.endsWith('StringOp.java')
         })
         const actual = process.getProjectCoverage(reports, changedFiles)
@@ -168,13 +169,13 @@ describe('process', function () {
                 {
                   lines: [
                     {
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 3, missed: 0 },
+                      branch: {covered: 0, missed: 0},
+                      instruction: {covered: 3, missed: 0},
                       number: 6,
                     },
                     {
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 0, missed: 2 },
+                      branch: {covered: 0, missed: 0},
+                      instruction: {covered: 0, missed: 2},
                       number: 20,
                     },
                   ],
@@ -229,7 +230,7 @@ describe('process', function () {
     describe('aggregate reports', function () {
       it('no files changed', async () => {
         const reports = await getAggregateReport()
-        const changedFiles = []
+        const changedFiles: ChangedFile[] = []
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
           modules: [],
@@ -243,14 +244,14 @@ describe('process', function () {
           changed: {
             covered: 0,
             missed: 0,
-            percentage: null,
+            percentage: undefined,
           },
         })
       })
 
       it('one file changed', async () => {
         const reports = await getAggregateReport()
-        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter((file) => {
+        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
           return file.filePath.endsWith('MainViewModel.kt')
         })
         const actual = process.getProjectCoverage(reports, changedFiles)
@@ -269,7 +270,7 @@ describe('process', function () {
                   changed: {
                     covered: 0,
                     missed: 0,
-                    percentage: null,
+                    percentage: undefined,
                   },
                   lines: [],
                   name: 'MainViewModel.kt',
@@ -285,7 +286,7 @@ describe('process', function () {
               changed: {
                 covered: 0,
                 missed: 0,
-                percentage: null,
+                percentage: undefined,
               },
             },
           ],
@@ -297,14 +298,14 @@ describe('process', function () {
           changed: {
             covered: 0,
             missed: 0,
-            percentage: null,
+            percentage: undefined,
           },
         })
       })
 
       it('multiple files changed', async () => {
         const reports = await getAggregateReport()
-        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter((file) => {
+        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
           return (
             file.filePath.endsWith('MainViewModel.kt') ||
             file.filePath.endsWith('Math.kt') ||
@@ -321,8 +322,8 @@ describe('process', function () {
                 {
                   lines: [
                     {
-                      branch: { covered: 0, missed: 0 },
-                      instruction: { covered: 0, missed: 5 },
+                      branch: {covered: 0, missed: 0},
+                      instruction: {covered: 0, missed: 5},
                       number: 22,
                     },
                   ],
@@ -363,7 +364,7 @@ describe('process', function () {
                   changed: {
                     covered: 0,
                     missed: 0,
-                    percentage: null,
+                    percentage: undefined,
                   },
                   name: 'MainViewModel.kt',
                   lines: [],
@@ -379,7 +380,7 @@ describe('process', function () {
               changed: {
                 covered: 0,
                 missed: 0,
-                percentage: null,
+                percentage: undefined,
               },
             },
           ],
@@ -399,29 +400,30 @@ describe('process', function () {
   })
 })
 
-async function getAggregateReport() {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function getAggregateReport(): Promise<any[]> {
   const reportPath = './__tests__/__fixtures__/aggregate-report.xml'
   const report = await getReport(reportPath)
   return [report]
 }
 
-async function getMultipleReports() {
+async function getMultipleReports(): Promise<any[]> {
   const testFolder = './__tests__/__fixtures__/multi_module'
   return Promise.all(
-    fs.readdirSync(testFolder).map(async (file) => {
-      const reportPath = testFolder + '/' + file
+    fs.readdirSync(testFolder).map(async file => {
+      const reportPath = `${testFolder}/${file}`
       return await getReport(reportPath)
     })
   )
 }
 
-async function getSingleReport() {
+async function getSingleReport(): Promise<any[]> {
   const reportPath = './__tests__/__fixtures__/report.xml'
   const report = await getReport(reportPath)
   return [report]
 }
 
-async function getReport(path) {
+async function getReport(path: string): Promise<any[]> {
   const reportXml = await fs.promises.readFile(path, 'utf-8')
   const json = await parser.parseStringPromise(reportXml)
   return json['report']

@@ -1,14 +1,17 @@
-const core = require('@actions/core')
-const github = require('@actions/github')
-const fs = require('fs')
-const parser = require('xml2js')
-const { parseBooleans } = require('xml2js/lib/processors')
-const process = require('./process')
-const render = require('./render')
-const { debug, getChangedLines } = require('./util')
-const glob = require('@actions/glob')
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+import * as fs from 'fs'
+import parser from 'xml2js'
+import {parseBooleans} from 'xml2js/lib/processors'
+import * as glob from '@actions/glob'
+import {getProjectCoverage} from './process'
+import {getPRComment, getTitle} from './render'
+import {debug, getChangedLines} from './util'
+import {Project} from './models/project'
+import {ChangedFile} from './models/github'
 
-async function action() {
+export async function action(): Promise<void> {
   let continueOnError = true
   try {
     const token = core.getInput('token')
@@ -50,15 +53,15 @@ async function action() {
       core.info(`failEmoji: ${failEmoji}`)
     }
 
-    let base
-    let head
-    let prNumber
+    let base: string
+    let head: string
+    let prNumber: number | undefined
     switch (event) {
       case 'pull_request':
       case 'pull_request_target':
-        base = github.context.payload.pull_request.base.sha
-        head = github.context.payload.pull_request.head.sha
-        prNumber = github.context.payload.pull_request.number
+        base = github.context.payload.pull_request?.base.sha
+        head = github.context.payload.pull_request?.head.sha
+        prNumber = github.context.payload.pull_request?.number
         break
       case 'push':
         base = github.context.payload.before
@@ -82,13 +85,13 @@ async function action() {
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
     const reportsJson = await reportsJsonAsync
-    const reports = reportsJson.map((report) => report['report'])
+    const reports = reportsJson.map(report => report['report'])
 
-    const project = process.getProjectCoverage(reports, changedFiles)
+    const project: Project = getProjectCoverage(reports, changedFiles)
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-overall',
-      parseFloat(project.overall.percentage.toFixed(2))
+      parseFloat((project.overall.percentage ?? 0).toFixed(2))
     )
     core.setOutput(
       'coverage-changed-files',
@@ -106,8 +109,8 @@ async function action() {
       await addComment(
         prNumber,
         updateComment,
-        render.getTitle(title),
-        render.getPRComment(
+        getTitle(title),
+        getPRComment(
           project,
           {
             overall: minCoverageOverall,
@@ -121,28 +124,38 @@ async function action() {
       )
     }
   } catch (error) {
-    if (continueOnError) {
-      core.error(error)
-    } else {
-      core.setFailed(error)
+    if (error instanceof Error) {
+      if (continueOnError) {
+        core.error(error)
+      } else {
+        core.setFailed(error)
+      }
     }
   }
 }
 
-async function getJsonReports(xmlPaths, debugMode) {
+async function getJsonReports(
+  xmlPaths: string[],
+  debugMode: boolean
+): Promise<any[]> {
   const globber = await glob.create(xmlPaths.join('\n'))
   const files = await globber.glob()
   if (debugMode) core.info(`Resolved files: ${files}`)
 
   return Promise.all(
-    files.map(async (path) => {
+    files.map(async path => {
       const reportXml = await fs.promises.readFile(path.trim(), 'utf-8')
       return await parser.parseStringPromise(reportXml)
     })
   )
 }
 
-async function getChangedFiles(base, head, client, debugMode) {
+async function getChangedFiles(
+  base: string,
+  head: string,
+  client: any,
+  debugMode: boolean
+): Promise<ChangedFile[]> {
   const response = await client.rest.repos.compareCommits({
     base,
     head,
@@ -150,20 +163,27 @@ async function getChangedFiles(base, head, client, debugMode) {
     repo: github.context.repo.repo,
   })
 
-  const changedFiles = []
-  response.data.files.forEach((file) => {
+  const changedFiles: ChangedFile[] = []
+  for (const file of response.data.files) {
     if (debugMode) core.info(`file: ${debug(file)}`)
-    const changedFile = {
+    const changedFile: ChangedFile = {
       filePath: file.filename,
       url: file.blob_url,
       lines: getChangedLines(file.patch),
     }
     changedFiles.push(changedFile)
-  })
+  }
   return changedFiles
 }
 
-async function addComment(prNumber, update, title, body, client, debugMode) {
+async function addComment(
+  prNumber: number,
+  update: boolean,
+  title: string,
+  body: string,
+  client: any,
+  debugMode: boolean
+): Promise<void> {
   let commentUpdated = false
 
   if (debugMode) core.info(`update: ${update}`)
@@ -175,9 +195,7 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
       issue_number: prNumber,
       ...github.context.repo,
     })
-    const comment = comments.data.find((comment) =>
-      comment.body.startsWith(title)
-    )
+    const comment = comments.data.find((it: any) => it.body.startsWith(title))
 
     if (comment) {
       if (debugMode)
@@ -201,8 +219,4 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
       ...github.context.repo,
     })
   }
-}
-
-module.exports = {
-  action,
 }

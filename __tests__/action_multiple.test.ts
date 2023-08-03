@@ -1,8 +1,9 @@
-/* eslint-disable no-template-curly-in-string */
-const action = require('../src/action')
-const core = require('@actions/core')
-const github = require('@actions/github')
-const { PATCH } = require('./mocks.test')
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+import * as action from '../src/action'
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+import {PATCH} from './mocks.test'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -50,7 +51,7 @@ describe('Multiple reports', function () {
     },
   }
 
-  core.getInput = jest.fn((c) => {
+  core.getInput = jest.fn(c => {
     switch (c) {
       case 'paths':
         return './__tests__/__fixtures__/multi_module/appCoverage.xml,./__tests__/__fixtures__/multi_module/mathCoverage.xml,./__tests__/__fixtures__/multi_module/textCoverage.xml'
@@ -82,7 +83,7 @@ describe('Multiple reports', function () {
       },
     }
   })
-  core.setFailed = jest.fn((c) => {
+  core.setFailed = jest.fn(c => {
     fail(c)
   })
 
@@ -179,7 +180,7 @@ describe('Multiple reports', function () {
   })
 })
 
-function initContext(eventName, payload) {
+function initContext(eventName, payload): void {
   const context = github.context
   context.eventName = eventName
   context.payload = payload

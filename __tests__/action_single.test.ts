@@ -1,8 +1,9 @@
-/* eslint-disable no-template-curly-in-string */
-const action = require('../src/action')
-const core = require('@actions/core')
-const github = require('@actions/github')
-const { PATCH } = require('./mocks.test')
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+import * as action from '../src/action'
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+import {PATCH} from './mocks.test'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -13,7 +14,7 @@ describe('Single report', function () {
   let updateComment
   let output
 
-  function getInput(key) {
+  function getInput(key): string {
     switch (key) {
       case 'paths':
         return './__tests__/__fixtures__/report.xml'
@@ -55,7 +56,7 @@ describe('Single report', function () {
         },
       }
     })
-    core.setFailed = jest.fn((c) => {
+    core.setFailed = jest.fn(c => {
       fail(c)
     })
   })
@@ -135,7 +136,7 @@ describe('Single report', function () {
     describe('With update-comment ON', function () {
       const title = 'JaCoCo Report'
 
-      function mockInput(key) {
+      function mockInput(key): string {
         switch (key) {
           case 'title':
             return title
@@ -148,14 +149,14 @@ describe('Single report', function () {
 
       it('if comment exists, update it', async () => {
         initContext(eventName, payload)
-        core.getInput = jest.fn((key) => {
+        core.getInput = jest.fn(key => {
           return mockInput(key)
         })
 
         listComments.mockReturnValue({
           data: [
-            { id: 1, body: 'some comment' },
-            { id: 2, body: `### ${title}\n to update` },
+            {id: 1, body: 'some comment'},
+            {id: 2, body: `### ${title}\n to update`},
           ],
         })
 
@@ -167,11 +168,11 @@ describe('Single report', function () {
 
       it('if comment does not exist, create new comment', async () => {
         initContext(eventName, payload)
-        core.getInput = jest.fn((key) => {
+        core.getInput = jest.fn(key => {
           return mockInput(key)
         })
         listComments.mockReturnValue({
-          data: [{ id: 1, body: 'some comment' }],
+          data: [{id: 1, body: 'some comment'}],
         })
 
         await action.action()
@@ -182,7 +183,7 @@ describe('Single report', function () {
 
       it('if title not set, warn user and create new comment', async () => {
         initContext(eventName, payload)
-        core.getInput = jest.fn((c) => {
+        core.getInput = jest.fn(c => {
           switch (c) {
             case 'title':
               return ''
@@ -193,8 +194,8 @@ describe('Single report', function () {
 
         listComments.mockReturnValue({
           data: [
-            { id: 1, body: 'some comment' },
-            { id: 2, body: `### ${title}\n to update` },
+            {id: 1, body: 'some comment'},
+            {id: 2, body: `### ${title}\n to update`},
           ],
         })
 
@@ -209,8 +210,8 @@ describe('Single report', function () {
     })
 
     describe('Skip if no changes set to true', function () {
-      function mockInput() {
-        core.getInput = jest.fn((c) => {
+      function mockInput(): void {
+        core.getInput = jest.fn(c => {
           switch (c) {
             case 'skip-if-no-changes':
               return 'true'
@@ -232,24 +233,23 @@ describe('Single report', function () {
       it("Don't add comment when coverage absent for changes files", async () => {
         initContext(eventName, payload)
         mockInput()
-        const compareCommitsResponse = {
-          data: {
-            files: [
-              {
-                filename: '.github/workflows/coverage.yml',
-                blob_url:
-                  'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/.github/workflows/coverage.yml',
-                patch: PATCH.SINGLE_MODULE.COVERAGE,
-              },
-            ],
-          },
-        }
         github.getOctokit = jest.fn(() => {
           return {
             rest: {
               repos: {
                 compareCommits: jest.fn(() => {
-                  return compareCommitsResponse
+                  return {
+                    data: {
+                      files: [
+                        {
+                          filename: '.github/workflows/coverage.yml',
+                          blob_url:
+                            'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/.github/workflows/coverage.yml',
+                          patch: PATCH.SINGLE_MODULE.COVERAGE,
+                        },
+                      ],
+                    },
+                  }
                 }),
               },
               issues: {
@@ -270,7 +270,7 @@ describe('Single report', function () {
     describe('With custom emoji', function () {
       it('publish proper comment', async () => {
         initContext(eventName, payload)
-        core.getInput = jest.fn((key) => {
+        core.getInput = jest.fn(key => {
           switch (key) {
             case 'pass-emoji':
               return ':green_circle:'
@@ -351,7 +351,7 @@ describe('Single report', function () {
   describe('Other than push or pull_request or pull_request_target event', function () {
     it('Fail by throwing appropriate error', async () => {
       initContext('pr_review', {})
-      core.setFailed = jest.fn((c) => {
+      core.setFailed = jest.fn(c => {
         expect(c).toEqual(
           'Only pull requests and pushes are supported, pr_review not supported.'
         )
@@ -363,7 +363,7 @@ describe('Single report', function () {
   })
 })
 
-function initContext(eventName, payload) {
+function initContext(eventName, payload): void {
   const context = github.context
   context.eventName = eventName
   context.payload = payload

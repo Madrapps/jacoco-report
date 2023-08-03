@@ -1,24 +1,30 @@
-const { TAG, getFilesWithCoverage } = require('./util')
+import {getFilesWithCoverage, TAG} from './util'
+import {ChangedFile} from './models/github'
+import {Coverage, File, Module, Project} from './models/project'
 
-function getProjectCoverage(reports, files) {
-  const moduleCoverages = []
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function getProjectCoverage(
+  reports: any[],
+  changedFiles: ChangedFile[]
+): Project {
+  const moduleCoverages: Module[] = []
   const modules = getModulesFromReports(reports)
-  modules.forEach((module) => {
-    const filesCoverage = getFileCoverageFromPackages(
+  for (const module of modules) {
+    const files = getFileCoverageFromPackages(
       [].concat(...module.packages),
-      files
+      changedFiles
     )
-    if (filesCoverage.files.length !== 0) {
+    if (files.length !== 0) {
       const moduleCoverage = getModuleCoverage(module.root)
-      const changedMissed = filesCoverage.files
-        .map((file) => file.changed.missed)
+      const changedMissed = files
+        .map(file => file.changed.missed)
         .reduce(sumReducer, 0.0)
-      const changedCovered = filesCoverage.files
-        .map((file) => file.changed.covered)
+      const changedCovered = files
+        .map(file => file.changed.covered)
         .reduce(sumReducer, 0.0)
       moduleCoverages.push({
         name: module.name,
-        files: filesCoverage.files,
+        files,
         overall: {
           percentage: moduleCoverage.percentage,
           covered: moduleCoverage.covered,
@@ -31,21 +37,24 @@ function getProjectCoverage(reports, files) {
         },
       })
     }
-  })
-  moduleCoverages.sort((a, b) => b.overall.percentage - a.overall.percentage)
-  const totalFiles = moduleCoverages.flatMap((module) => {
+  }
+  moduleCoverages.sort(
+    (a, b) => (b.overall.percentage ?? 0) - (a.overall.percentage ?? 0)
+  )
+  const totalFiles = moduleCoverages.flatMap(module => {
     return module.files
   })
 
   const changedMissed = moduleCoverages
-    .map((module) => module.changed.missed)
+    .map(module => module.changed.missed)
     .reduce(sumReducer, 0.0)
   const changedCovered = moduleCoverages
-    .map((module) => module.changed.covered)
+    .map(module => module.changed.covered)
     .reduce(sumReducer, 0.0)
 
   const projectCoverage = getOverallProjectCoverage(reports)
-  const project = {
+  const totalPercentage = getTotalPercentage(totalFiles)
+  return {
     modules: moduleCoverages,
     isMultiModule: reports.length > 1 || modules.length > 1,
     overall: {
@@ -58,47 +67,41 @@ function getProjectCoverage(reports, files) {
       missed: changedMissed,
       percentage: calculatePercentage(changedCovered, changedMissed),
     },
+    'coverage-changed-files': totalPercentage ?? 100,
   }
-  const totalPercentage = getTotalPercentage(totalFiles)
-  if (totalPercentage) {
-    project['coverage-changed-files'] = totalPercentage
-  } else {
-    project['coverage-changed-files'] = 100
-  }
-  return project
 }
 
-const sumReducer = (total, value) => {
+function sumReducer(total: number, value: number): number {
   return total + value
 }
 
-function toFloat(value) {
+function toFloat(value: number): number {
   return parseFloat(value.toFixed(2))
 }
 
-function getModulesFromReports(reports) {
+function getModulesFromReports(reports: any[]): any[] {
   const modules = []
-  reports.forEach((report) => {
+  for (const report of reports) {
     const groupTag = report[TAG.GROUP]
     if (groupTag) {
-      const groups = groupTag.filter((group) => group !== undefined)
-      groups.forEach((group) => {
+      const groups = groupTag.filter((group: any) => group !== undefined)
+      for (const group of groups) {
         const module = getModuleFromParent(group)
         modules.push(module)
-      })
+      }
     }
     const module = getModuleFromParent(report)
     if (module) {
       modules.push(module)
     }
-  })
+  }
   return modules
 }
 
-function getModuleFromParent(parent) {
+function getModuleFromParent(parent: any): any | null {
   const packageTag = parent[TAG.PACKAGE]
   if (packageTag) {
-    const packages = packageTag.filter((pacage) => pacage !== undefined)
+    const packages = packageTag.filter((pacage: any) => pacage !== undefined)
     if (packages.length !== 0) {
       return {
         name: parent['$'].name,
@@ -110,36 +113,41 @@ function getModuleFromParent(parent) {
   return null
 }
 
-function getFileCoverageFromPackages(packages, files) {
-  const result = {}
-  const resultFiles = []
+function getFileCoverageFromPackages(
+  packages: any[],
+  files: ChangedFile[]
+): File[] {
+  const resultFiles: File[] = []
   const jacocoFiles = getFilesWithCoverage(packages)
-  jacocoFiles.forEach((jacocoFile) => {
+  for (const jacocoFile of jacocoFiles) {
     const name = jacocoFile.name
     const packageName = jacocoFile.packageName
     const githubFile = files.find(function (f) {
       return f.filePath.endsWith(`${packageName}/${name}`)
     })
     if (githubFile) {
-      const instruction = jacocoFile.instruction
+      const instruction = jacocoFile.counters.find(
+        counter => counter.name === 'instruction'
+      )
       if (instruction) {
-        const missed = parseFloat(instruction.missed)
-        const covered = parseFloat(instruction.covered)
+        const missed = instruction.missed
+        const covered = instruction.covered
         const lines = []
-        githubFile.lines.forEach((lineNumber) => {
-          const jacocoLine = jacocoFile.lines[lineNumber]
+        for (const lineNumber of githubFile.lines) {
+          const jacocoLine = jacocoFile.lines.find(
+            line => line.number === lineNumber
+          )
           if (jacocoLine) {
             lines.push({
-              number: lineNumber,
               ...jacocoLine,
             })
           }
-        })
+        }
         const changedMissed = lines
-          .map((line) => toFloat(line.instruction.missed))
+          .map(line => toFloat(line.instruction.missed))
           .reduce(sumReducer, 0.0)
         const changedCovered = lines
-          .map((line) => toFloat(line.instruction.covered))
+          .map(line => toFloat(line.instruction.covered))
           .reduce(sumReducer, 0.0)
         resultFiles.push({
           name,
@@ -158,48 +166,47 @@ function getFileCoverageFromPackages(packages, files) {
         })
       }
     }
-  })
-  resultFiles.sort((a, b) => b.overall.percentage - a.overall.percentage)
-
-  result.files = resultFiles
-  if (resultFiles.length !== 0) {
-    result.percentage = getTotalPercentage(resultFiles)
-  } else {
-    result.percentage = 100
   }
-  return result
+  resultFiles.sort(
+    (a, b) => (b.overall.percentage ?? 0) - (a.overall.percentage ?? 0)
+  )
+
+  return resultFiles
 }
 
-function calculatePercentage(covered, missed) {
+function calculatePercentage(
+  covered: number,
+  missed: number
+): number | undefined {
   const total = covered + missed
   if (total !== 0) {
     return parseFloat(((covered / total) * 100).toFixed(2))
   } else {
-    return null
+    return undefined
   }
 }
 
-function getTotalPercentage(files) {
+function getTotalPercentage(files: File[]): number | null {
   let missed = 0
   let covered = 0
   if (files.length !== 0) {
-    files.forEach((file) => {
+    for (const file of files) {
       missed += file.overall.missed
       covered += file.overall.covered
-    })
+    }
     return parseFloat(((covered / (covered + missed)) * 100).toFixed(2))
   } else {
     return null
   }
 }
 
-function getModuleCoverage(report) {
+function getModuleCoverage(report: any): Coverage {
   const counters = report['counter']
   return getDetailedCoverage(counters, 'INSTRUCTION')
 }
 
-function getOverallProjectCoverage(reports) {
-  const coverages = reports.map((report) =>
+function getOverallProjectCoverage(reports: any[]): Coverage {
+  const coverages = reports.map(report =>
     getDetailedCoverage(report['counter'], 'INSTRUCTION')
   )
   const covered = coverages.reduce((acc, coverage) => acc + coverage.covered, 0)
@@ -211,10 +218,10 @@ function getOverallProjectCoverage(reports) {
   }
 }
 
-function getDetailedCoverage(counters, type) {
-  const counter = counters.find((counter) => counter[TAG.SELF].type === type)
-  if (counter) {
-    const attr = counter[TAG.SELF]
+function getDetailedCoverage(counters: any[], type: string): Coverage {
+  const counterTag = counters.find(counter => counter[TAG.SELF].type === type)
+  if (counterTag) {
+    const attr = counterTag[TAG.SELF]
     const missed = parseFloat(attr.missed)
     const covered = parseFloat(attr.covered)
     return {
@@ -223,9 +230,5 @@ function getDetailedCoverage(counters, type) {
       percentage: parseFloat(((covered / (covered + missed)) * 100).toFixed(2)),
     }
   }
-  return { missed: 0, covered: 0, percentage: 100 }
-}
-
-module.exports = {
-  getProjectCoverage,
+  return {missed: 0, covered: 0, percentage: 100}
 }
