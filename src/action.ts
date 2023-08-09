@@ -53,6 +53,8 @@ export async function action(): Promise<void> {
       core.info(`failEmoji: ${failEmoji}`)
     }
 
+    const client: any = github.getOctokit(token);
+
     let base: string
     let head: string
     let prNumber: number | undefined
@@ -66,6 +68,17 @@ export async function action(): Promise<void> {
       case 'push':
         base = github.context.payload.before
         head = github.context.payload.after
+
+        const prs: any[] = (await client.rest.repos.listPullRequestsAssociatedWithCommit({
+          commit_sha: github.context.sha,
+          owner: github.context.repo.owner,
+          repo: github.context.repo.repo,
+        })).data
+
+        if(prs.length > 0){
+          prNumber = prs[0].number
+        }
+
         break
       default:
         core.setFailed(
@@ -76,8 +89,6 @@ export async function action(): Promise<void> {
 
     core.info(`base sha: ${base}`)
     core.info(`head sha: ${head}`)
-
-    const client = github.getOctokit(token)
 
     if (debugMode) core.info(`reportPaths: ${reportPaths}`)
     const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
