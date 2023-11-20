@@ -85,7 +85,7 @@ function getFileTable(
       renderRow(
         moduleName,
         `[${file.name}](${file.url})`,
-        file.overall.percentage,
+        file.changed.percentage,
         coverageDifference,
         file.changed.percentage,
         project.isMultiModule
