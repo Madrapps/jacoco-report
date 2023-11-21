@@ -41,19 +41,10 @@ export function getProjectCoverage(
   moduleCoverages.sort(
     (a, b) => (b.overall.percentage ?? 0) - (a.overall.percentage ?? 0)
   )
-  const totalFiles = moduleCoverages.flatMap(module => {
-    return module.files
-  })
-
-  const changedMissed = moduleCoverages
-    .map(module => module.changed.missed)
-    .reduce(sumReducer, 0.0)
-  const changedCovered = moduleCoverages
-    .map(module => module.changed.covered)
-    .reduce(sumReducer, 0.0)
+  
 
   const projectCoverage = getOverallProjectCoverage(reports)
-  const totalPercentage = getTotalPercentage(totalFiles)
+  const totalChangedPercentage = getChangedLinesPercentage(totalFiles)
   return {
     modules: moduleCoverages,
     isMultiModule: reports.length > 1 || modules.length > 1,
@@ -63,11 +54,11 @@ export function getProjectCoverage(
       percentage: projectCoverage.percentage,
     },
     changed: {
-      covered: changedCovered,
-      missed: changedMissed,
-      percentage: calculatePercentage(changedCovered, changedMissed),
+      covered: totalFiles.map(file => file.changed.covered).reduce(sumReducer, 0.0),
+      missed: totalFiles.map(file => file.changed.missed).reduce(sumReducer, 0.0),
+      percentage: totalChangedPercentage ?? 0,
     },
-    'coverage-changed-files': totalPercentage ?? 100,
+    'coverage-changed-files': totalChangedPercentage ?? 0,
   }
 }
 
@@ -231,4 +222,22 @@ function getDetailedCoverage(counters: any[], type: string): Coverage {
     }
   }
   return {missed: 0, covered: 0, percentage: 100}
+}
+
+function getChangedLinesPercentage(files: File[]): number | null {
+  let changedMissed = 0;
+  let changedCovered = 0;
+  files.forEach(
+    file => {
+        file.lines.forEach(
+            line => {
+                changedMissed += line.instruction.missed
+                changedCovered += line.instruction.covered;
+            }
+        )
+  }
+  );
+
+  const totalChanged = changedCovered + changedMissed;
+  return totalChanged > 0 ? parseFloat(((changedCovered / totalChanged) * 100).toFixed(2)) : null;
 }
