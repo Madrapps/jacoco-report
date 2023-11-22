@@ -54,8 +54,8 @@ export function getProjectCoverage(
       percentage: projectCoverage.percentage,
     },
     changed: {
-      covered: totalFiles.map(file => file.changed.covered).reduce(sumReducer, 0.0),
-      missed: totalFiles.map(file => file.changed.missed).reduce(sumReducer, 0.0),
+      covered: totalFiles.map(file => getChangedLinesCovered(file)).reduce(sumReducer, 0.0),
+      missed: totalFiles.map(file => getChangedLinesMissed(file)).reduce(sumReducer, 0.0),
       percentage: totalChangedPercentage ?? 0,
     },
     'coverage-changed-files': totalChangedPercentage ?? 0,
@@ -240,4 +240,25 @@ function getChangedLinesPercentage(files: File[]): number | null {
 
   const totalChanged = changedCovered + changedMissed;
   return totalChanged > 0 ? parseFloat(((changedCovered / totalChanged) * 100).toFixed(2)) : null;
+}
+
+function getChangedLinesCovered(file: File): number | null {
+  let changedCovered = 0;
+  file.lines.forEach(
+    line => {
+        changedCovered += line.instruction.covered;
+        }
+        )
+  return changedCovered
+}
+
+function getChangedLinesMissed(file: File): number | null {
+  let changedMissed = 0;
+  file.lines.forEach(
+    line => {
+        changedMissed += line.instruction.missed
+        }
+        )
+
+  return changedMissed 
 }
