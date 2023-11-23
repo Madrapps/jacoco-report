@@ -95,7 +95,7 @@ export async function action(): Promise<void> {
     )
     core.setOutput(
       'coverage-changed-files',
-      80.56
+      90.56
     )
 
     const skip = skipIfNoChanges && project.modules.length === 0
