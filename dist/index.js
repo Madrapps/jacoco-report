@@ -83,6 +83,7 @@ function action() {
             const failEmoji = core.getInput('fail-emoji');
             continueOnError = (0, processors_1.parseBooleans)(core.getInput('continue-on-error'));
             const debugMode = (0, processors_1.parseBooleans)(core.getInput('debug-mode'));
+            const summaryMode = (0, processors_1.parseBooleans)(core.getInput('summary-mode'));
             const event = github.context.eventName;
             core.info(`Event is ${event}`);
             if (debugMode) {
@@ -133,10 +134,17 @@ function action() {
                     pass: passEmoji,
                     fail: failEmoji,
                 };
-                yield addComment(prNumber, updateComment, (0, render_1.getTitle)(title), (0, render_1.getPRComment)(project, {
+                const comment = (0, render_1.getPRComment)(project, {
                     overall: minCoverageOverall,
                     changed: minCoverageChangedFiles,
-                }, title, emoji), client, debugMode);
+                }, title, emoji);
+                if (summaryMode) {
+                  core.summary.addRaw(comment);
+                  core.summary.write({overwrite: updateComment});
+                }
+                else {
+                  yield addComment(prNumber, updateComment, (0, render_1.getTitle)(title), comment, client, debugMode);
+                }
             }
         }
         catch (error) {

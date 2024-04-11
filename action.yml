@@ -42,6 +42,10 @@ inputs:
     description: 'Run the action in debug mode and get debug logs printed in console'
     required: false
     default: 'false'
+  summary-mode:
+    description: 'Report to workflow summary'
+    required: false
+    default: 'false'
 
 outputs:
   coverage-overall:

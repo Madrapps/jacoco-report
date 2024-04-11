@@ -29,6 +29,7 @@ for [Creating a workflow file](https://help.github.com/en/articles/configuring-a
 - `fail-emoji` - [*optional* {default: :x:}] Emoji to use for fail status shown when 'coverage < min coverage' (should be a Github supported emoji).
 - `continue-on-error` - [*optional* {default: true}] If true, then do not fail the action on error, but log a warning
 - `debug-mode` - [*optional* {default: false}] If true, run the action in debug mode and get debug logs printed in console
+- `summary-mode` - [*optional* {default: false}] If true, report the result to workflow summary
 
 ### Outputs
 
