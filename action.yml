@@ -6,7 +6,8 @@ inputs:
     required: true
   token:
     description: 'Github personal token to add commits to Pull Request'
-    required: true
+    required: false
+    default: ${{ github.token }}
   min-coverage-overall:
     description: 'The minimum code coverage that is required to pass for overall project'
     required: false
