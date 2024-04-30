@@ -17,7 +17,7 @@ for [Creating a workflow file](https://help.github.com/en/articles/configuring-a
 ### Inputs
 
 - `paths` - [**required**] Comma separated paths of the generated jacoco xml files (supports wildcard glob pattern)
-- `token` - [**required**] Github personal token to add commits to Pull Request
+- `token` - [*optional* {default: github.token}] Github personal token to add commits to Pull Request
 - `min-coverage-overall` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for overall project
 - `min-coverage-changed-files` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for changed files
 - `update-comment` - [*optional* {default: false}] If true, updates the previous coverage report comment instead of creating new one.
@@ -29,6 +29,7 @@ for [Creating a workflow file](https://help.github.com/en/articles/configuring-a
 - `fail-emoji` - [*optional* {default: :x:}] Emoji to use for fail status shown when 'coverage < min coverage' (should be a Github supported emoji).
 - `continue-on-error` - [*optional* {default: true}] If true, then do not fail the action on error, but log a warning
 - `debug-mode` - [*optional* {default: false}] If true, run the action in debug mode and get debug logs printed in console
+- `summary-mode` - [*optional* {default: false}] If true, report the result to workflow summary
 
 ### Outputs
 
