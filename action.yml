@@ -6,7 +6,8 @@ inputs:
     required: true
   token:
     description: 'Github personal token to add commits to Pull Request'
-    required: true
+    required: false
+    default: ${{ github.token }}
   min-coverage-overall:
     description: 'The minimum code coverage that is required to pass for overall project'
     required: false
@@ -40,6 +41,10 @@ inputs:
     default: 'true'
   debug-mode:
     description: 'Run the action in debug mode and get debug logs printed in console'
+    required: false
+    default: 'false'
+  summary-mode:
+    description: 'Report to workflow summary'
     required: false
     default: 'false'
 
