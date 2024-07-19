@@ -1,676 +1,5 @@
-require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
+/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
-
-/***/ 2966:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.action = void 0;
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const core = __importStar(__nccwpck_require__(6024));
-const github = __importStar(__nccwpck_require__(5016));
-const fs = __importStar(__nccwpck_require__(7147));
-const xml2js_1 = __importDefault(__nccwpck_require__(9253));
-const processors_1 = __nccwpck_require__(6434);
-const glob = __importStar(__nccwpck_require__(2723));
-const process_1 = __nccwpck_require__(4355);
-const render_1 = __nccwpck_require__(6015);
-const util_1 = __nccwpck_require__(9410);
-function action() {
-    var _a, _b, _c, _d;
-    return __awaiter(this, void 0, void 0, function* () {
-        let continueOnError = true;
-        try {
-            const token = core.getInput('token');
-            if (!token) {
-                core.setFailed("'token' is missing");
-                return;
-            }
-            const pathsString = core.getInput('paths');
-            if (!pathsString) {
-                core.setFailed("'paths' is missing");
-                return;
-            }
-            const reportPaths = pathsString.split(',');
-            const minCoverageOverall = parseFloat(core.getInput('min-coverage-overall'));
-            const minCoverageChangedFiles = parseFloat(core.getInput('min-coverage-changed-files'));
-            const title = core.getInput('title');
-            const updateComment = (0, processors_1.parseBooleans)(core.getInput('update-comment'));
-            if (updateComment) {
-                if (!title) {
-                    core.info("'title' is not set. 'update-comment' does not work without 'title'");
-                }
-            }
-            const skipIfNoChanges = (0, processors_1.parseBooleans)(core.getInput('skip-if-no-changes'));
-            const passEmoji = core.getInput('pass-emoji');
-            const failEmoji = core.getInput('fail-emoji');
-            continueOnError = (0, processors_1.parseBooleans)(core.getInput('continue-on-error'));
-            const debugMode = (0, processors_1.parseBooleans)(core.getInput('debug-mode'));
-            const event = github.context.eventName;
-            core.info(`Event is ${event}`);
-            if (debugMode) {
-                core.info(`passEmoji: ${passEmoji}`);
-                core.info(`failEmoji: ${failEmoji}`);
-            }
-            let base;
-            let head;
-            let prNumber;
-            switch (event) {
-                case 'pull_request':
-                case 'pull_request_target':
-                    base = (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.base.sha;
-                    head = (_b = github.context.payload.pull_request) === null || _b === void 0 ? void 0 : _b.head.sha;
-                    prNumber = (_c = github.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.number;
-                    break;
-                case 'push':
-                    base = github.context.payload.before;
-                    head = github.context.payload.after;
-                    break;
-                default:
-                    core.setFailed(`Only pull requests and pushes are supported, ${github.context.eventName} not supported.`);
-                    return;
-            }
-            core.info(`base sha: ${base}`);
-            core.info(`head sha: ${head}`);
-            const client = github.getOctokit(token);
-            if (debugMode)
-                core.info(`reportPaths: ${reportPaths}`);
-            const reportsJsonAsync = getJsonReports(reportPaths, debugMode);
-            const changedFiles = yield getChangedFiles(base, head, client, debugMode);
-            if (debugMode)
-                core.info(`changedFiles: ${(0, util_1.debug)(changedFiles)}`);
-            const reportsJson = yield reportsJsonAsync;
-            const reports = reportsJson.map(report => report['report']);
-            const project = (0, process_1.getProjectCoverage)(reports, changedFiles);
-            if (debugMode)
-                core.info(`project: ${(0, util_1.debug)(project)}`);
-            core.setOutput('coverage-overall', parseFloat(((_d = project.overall.percentage) !== null && _d !== void 0 ? _d : 0).toFixed(2)));
-            core.setOutput('coverage-changed-files', parseFloat(project['coverage-changed-files'].toFixed(2)));
-            const skip = skipIfNoChanges && project.modules.length === 0;
-            if (debugMode)
-                core.info(`skip: ${skip}`);
-            if (debugMode)
-                core.info(`prNumber: ${prNumber}`);
-            if (prNumber != null && !skip) {
-                const emoji = {
-                    pass: passEmoji,
-                    fail: failEmoji,
-                };
-                yield addComment(prNumber, updateComment, (0, render_1.getTitle)(title), (0, render_1.getPRComment)(project, {
-                    overall: minCoverageOverall,
-                    changed: minCoverageChangedFiles,
-                }, title, emoji), client, debugMode);
-            }
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                if (continueOnError) {
-                    core.error(error);
-                }
-                else {
-                    core.setFailed(error);
-                }
-            }
-        }
-    });
-}
-exports.action = action;
-function getJsonReports(xmlPaths, debugMode) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const globber = yield glob.create(xmlPaths.join('\n'));
-        const files = yield globber.glob();
-        if (debugMode)
-            core.info(`Resolved files: ${files}`);
-        return Promise.all(files.map((path) => __awaiter(this, void 0, void 0, function* () {
-            const reportXml = yield fs.promises.readFile(path.trim(), 'utf-8');
-            return yield xml2js_1.default.parseStringPromise(reportXml);
-        })));
-    });
-}
-function getChangedFiles(base, head, client, debugMode) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield client.rest.repos.compareCommits({
-            base,
-            head,
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-        });
-        const changedFiles = [];
-        for (const file of response.data.files) {
-            if (debugMode)
-                core.info(`file: ${(0, util_1.debug)(file)}`);
-            const changedFile = {
-                filePath: file.filename,
-                url: file.blob_url,
-                lines: (0, util_1.getChangedLines)(file.patch),
-            };
-            changedFiles.push(changedFile);
-        }
-        return changedFiles;
-    });
-}
-function addComment(prNumber, update, title, body, client, debugMode) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let commentUpdated = false;
-        if (debugMode)
-            core.info(`update: ${update}`);
-        if (debugMode)
-            core.info(`title: ${title}`);
-        if (debugMode)
-            core.info(`JaCoCo Comment: ${body}`);
-        if (update && title) {
-            if (debugMode)
-                core.info('Listing all comments');
-            const comments = yield client.rest.issues.listComments(Object.assign({ issue_number: prNumber }, github.context.repo));
-            const comment = comments.data.find((it) => it.body.startsWith(title));
-            if (comment) {
-                if (debugMode)
-                    core.info(`Updating existing comment: id=${comment.id} \n body=${comment.body}`);
-                yield client.rest.issues.updateComment(Object.assign({ comment_id: comment.id, body }, github.context.repo));
-                commentUpdated = true;
-            }
-        }
-        if (!commentUpdated) {
-            if (debugMode)
-                core.info('Creating a new comment');
-            yield client.rest.issues.createComment(Object.assign({ issue_number: prNumber, body }, github.context.repo));
-        }
-    });
-}
-
-
-/***/ }),
-
-/***/ 4355:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getProjectCoverage = void 0;
-const util_1 = __nccwpck_require__(9410);
-/* eslint-disable @typescript-eslint/no-explicit-any */
-function getProjectCoverage(reports, changedFiles) {
-    const moduleCoverages = [];
-    const modules = getModulesFromReports(reports);
-    for (const module of modules) {
-        const files = getFileCoverageFromPackages([].concat(...module.packages), changedFiles);
-        if (files.length !== 0) {
-            const moduleCoverage = getModuleCoverage(module.root);
-            const changedMissed = files
-                .map(file => file.changed.missed)
-                .reduce(sumReducer, 0.0);
-            const changedCovered = files
-                .map(file => file.changed.covered)
-                .reduce(sumReducer, 0.0);
-            moduleCoverages.push({
-                name: module.name,
-                files,
-                overall: {
-                    percentage: moduleCoverage.percentage,
-                    covered: moduleCoverage.covered,
-                    missed: moduleCoverage.missed,
-                },
-                changed: {
-                    covered: changedCovered,
-                    missed: changedMissed,
-                    percentage: calculatePercentage(changedCovered, changedMissed),
-                },
-            });
-        }
-    }
-    moduleCoverages.sort((a, b) => { var _a, _b; return ((_a = b.overall.percentage) !== null && _a !== void 0 ? _a : 0) - ((_b = a.overall.percentage) !== null && _b !== void 0 ? _b : 0); });
-    const totalFiles = moduleCoverages.flatMap(module => {
-        return module.files;
-    });
-    const changedMissed = moduleCoverages
-        .map(module => module.changed.missed)
-        .reduce(sumReducer, 0.0);
-    const changedCovered = moduleCoverages
-        .map(module => module.changed.covered)
-        .reduce(sumReducer, 0.0);
-    const projectCoverage = getOverallProjectCoverage(reports);
-    const totalPercentage = getTotalPercentage(totalFiles);
-    return {
-        modules: moduleCoverages,
-        isMultiModule: reports.length > 1 || modules.length > 1,
-        overall: {
-            covered: projectCoverage.covered,
-            missed: projectCoverage.missed,
-            percentage: projectCoverage.percentage,
-        },
-        changed: {
-            covered: changedCovered,
-            missed: changedMissed,
-            percentage: calculatePercentage(changedCovered, changedMissed),
-        },
-        'coverage-changed-files': totalPercentage !== null && totalPercentage !== void 0 ? totalPercentage : 100,
-    };
-}
-exports.getProjectCoverage = getProjectCoverage;
-function sumReducer(total, value) {
-    return total + value;
-}
-function toFloat(value) {
-    return parseFloat(value.toFixed(2));
-}
-function getModulesFromReports(reports) {
-    const modules = [];
-    for (const report of reports) {
-        const groupTag = report[util_1.TAG.GROUP];
-        if (groupTag) {
-            const groups = groupTag.filter((group) => group !== undefined);
-            for (const group of groups) {
-                const module = getModuleFromParent(group);
-                modules.push(module);
-            }
-        }
-        const module = getModuleFromParent(report);
-        if (module) {
-            modules.push(module);
-        }
-    }
-    return modules;
-}
-function getModuleFromParent(parent) {
-    const packageTag = parent[util_1.TAG.PACKAGE];
-    if (packageTag) {
-        const packages = packageTag.filter((pacage) => pacage !== undefined);
-        if (packages.length !== 0) {
-            return {
-                name: parent['$'].name,
-                packages,
-                root: parent, // TODO just pass array of 'counters'
-            };
-        }
-    }
-    return null;
-}
-function getFileCoverageFromPackages(packages, files) {
-    const resultFiles = [];
-    const jacocoFiles = (0, util_1.getFilesWithCoverage)(packages);
-    for (const jacocoFile of jacocoFiles) {
-        const name = jacocoFile.name;
-        const packageName = jacocoFile.packageName;
-        const githubFile = files.find(function (f) {
-            return f.filePath.endsWith(`${packageName}/${name}`);
-        });
-        if (githubFile) {
-            const instruction = jacocoFile.counters.find(counter => counter.name === 'instruction');
-            if (instruction) {
-                const missed = instruction.missed;
-                const covered = instruction.covered;
-                const lines = [];
-                for (const lineNumber of githubFile.lines) {
-                    const jacocoLine = jacocoFile.lines.find(line => line.number === lineNumber);
-                    if (jacocoLine) {
-                        lines.push(Object.assign({}, jacocoLine));
-                    }
-                }
-                const changedMissed = lines
-                    .map(line => toFloat(line.instruction.missed))
-                    .reduce(sumReducer, 0.0);
-                const changedCovered = lines
-                    .map(line => toFloat(line.instruction.covered))
-                    .reduce(sumReducer, 0.0);
-                resultFiles.push({
-                    name,
-                    url: githubFile.url,
-                    overall: {
-                        missed,
-                        covered,
-                        percentage: calculatePercentage(covered, missed),
-                    },
-                    changed: {
-                        missed: changedMissed,
-                        covered: changedCovered,
-                        percentage: calculatePercentage(changedCovered, changedMissed),
-                    },
-                    lines,
-                });
-            }
-        }
-    }
-    resultFiles.sort((a, b) => { var _a, _b; return ((_a = b.overall.percentage) !== null && _a !== void 0 ? _a : 0) - ((_b = a.overall.percentage) !== null && _b !== void 0 ? _b : 0); });
-    return resultFiles;
-}
-function calculatePercentage(covered, missed) {
-    const total = covered + missed;
-    if (total !== 0) {
-        return parseFloat(((covered / total) * 100).toFixed(2));
-    }
-    else {
-        return undefined;
-    }
-}
-function getTotalPercentage(files) {
-    let missed = 0;
-    let covered = 0;
-    if (files.length !== 0) {
-        for (const file of files) {
-            missed += file.overall.missed;
-            covered += file.overall.covered;
-        }
-        return parseFloat(((covered / (covered + missed)) * 100).toFixed(2));
-    }
-    else {
-        return null;
-    }
-}
-function getModuleCoverage(report) {
-    const counters = report['counter'];
-    return getDetailedCoverage(counters, 'INSTRUCTION');
-}
-function getOverallProjectCoverage(reports) {
-    const coverages = reports.map(report => getDetailedCoverage(report['counter'], 'INSTRUCTION'));
-    const covered = coverages.reduce((acc, coverage) => acc + coverage.covered, 0);
-    const missed = coverages.reduce((acc, coverage) => acc + coverage.missed, 0);
-    return {
-        covered,
-        missed,
-        percentage: parseFloat(((covered / (covered + missed)) * 100).toFixed(2)),
-    };
-}
-function getDetailedCoverage(counters, type) {
-    const counterTag = counters.find(counter => counter[util_1.TAG.SELF].type === type);
-    if (counterTag) {
-        const attr = counterTag[util_1.TAG.SELF];
-        const missed = parseFloat(attr.missed);
-        const covered = parseFloat(attr.covered);
-        return {
-            missed,
-            covered,
-            percentage: parseFloat(((covered / (covered + missed)) * 100).toFixed(2)),
-        };
-    }
-    return { missed: 0, covered: 0, percentage: 100 };
-}
-
-
-/***/ }),
-
-/***/ 6015:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTitle = exports.getPRComment = void 0;
-function getPRComment(project, minCoverage, title, emoji) {
-    const heading = getTitle(title);
-    const overallTable = getOverallTable(project, minCoverage, emoji);
-    const moduleTable = getModuleTable(project.modules, minCoverage, emoji);
-    const filesTable = getFileTable(project, minCoverage, emoji);
-    const tables = project.modules.length === 0
-        ? '> There is no coverage information present for the Files changed'
-        : project.isMultiModule
-            ? `${moduleTable}\n\n${filesTable}`
-            : filesTable;
-    return `${heading + overallTable}\n\n${tables}`;
-}
-exports.getPRComment = getPRComment;
-function getModuleTable(modules, minCoverage, emoji) {
-    const tableHeader = '|Module|Coverage||';
-    const tableStructure = '|:-|:-|:-:|';
-    let table = `${tableHeader}\n${tableStructure}`;
-    for (const module of modules) {
-        const coverageDifference = getCoverageDifference(module.overall, module.changed);
-        renderRow(module.name, module.overall.percentage, coverageDifference, module.changed.percentage);
-    }
-    return table;
-    function renderRow(name, overallCoverage, coverageDiff, changedCoverage) {
-        const status = getStatus(changedCoverage, minCoverage.changed, emoji);
-        let coveragePercentage = `${formatCoverage(overallCoverage)}`;
-        if (shouldShow(coverageDiff)) {
-            coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`;
-        }
-        const row = `|${name}|${coveragePercentage}|${status}|`;
-        table = `${table}\n${row}`;
-    }
-}
-function getFileTable(project, minCoverage, emoji) {
-    const tableHeader = project.isMultiModule
-        ? '|Module|File|Coverage||'
-        : '|File|Coverage||';
-    const tableStructure = project.isMultiModule
-        ? '|:-|:-|:-|:-:|'
-        : '|:-|:-|:-:|';
-    let table = `${tableHeader}\n${tableStructure}`;
-    for (const module of project.modules) {
-        for (let index = 0; index < module.files.length; index++) {
-            const file = module.files[index];
-            let moduleName = module.name;
-            if (index !== 0) {
-                moduleName = '';
-            }
-            const coverageDifference = getCoverageDifference(file.overall, file.changed);
-            renderRow(moduleName, `[${file.name}](${file.url})`, file.overall.percentage, coverageDifference, file.changed.percentage, project.isMultiModule);
-        }
-    }
-    return project.isMultiModule
-        ? `<details>\n<summary>Files</summary>\n\n${table}\n\n</details>`
-        : table;
-    function renderRow(moduleName, fileName, overallCoverage, coverageDiff, changedCoverage, isMultiModule) {
-        const status = getStatus(changedCoverage, minCoverage.changed, emoji);
-        let coveragePercentage = `${formatCoverage(overallCoverage)}`;
-        if (shouldShow(coverageDiff)) {
-            coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`;
-        }
-        const row = isMultiModule
-            ? `|${moduleName}|${fileName}|${coveragePercentage}|${status}|`
-            : `|${fileName}|${coveragePercentage}|${status}|`;
-        table = `${table}\n${row}`;
-    }
-}
-function getCoverageDifference(overall, changed) {
-    const totalInstructions = overall.covered + overall.missed;
-    const missed = changed.missed;
-    return -(missed / totalInstructions) * 100;
-}
-function getOverallTable(project, minCoverage, emoji) {
-    const overallStatus = getStatus(project.overall.percentage, minCoverage.overall, emoji);
-    const coverageDifference = getCoverageDifference(project.overall, project.changed);
-    let coveragePercentage = `${formatCoverage(project.overall.percentage)}`;
-    if (shouldShow(coverageDifference)) {
-        coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`;
-    }
-    const tableHeader = `|Overall Project|${coveragePercentage}|${overallStatus}|`;
-    const tableStructure = '|:-|:-|:-:|';
-    const missedLines = project.changed.missed;
-    const coveredLines = project.changed.covered;
-    const totalChangedLines = missedLines + coveredLines;
-    let changedCoverageRow = '';
-    if (totalChangedLines !== 0) {
-        const changedLinesPercentage = (coveredLines / totalChangedLines) * 100;
-        const filesChangedStatus = getStatus(changedLinesPercentage, minCoverage.changed, emoji);
-        changedCoverageRow =
-            '\n' +
-                `|Files changed|${formatCoverage(changedLinesPercentage)}|${filesChangedStatus}|` +
-                '\n<br>';
-    }
-    return `${tableHeader}\n${tableStructure}${changedCoverageRow}`;
-}
-function round(value) {
-    return Math.round((value + Number.EPSILON) * 100) / 100;
-}
-function shouldShow(value) {
-    const rounded = Math.abs(round(value));
-    return rounded !== 0 && rounded !== 100;
-}
-function getTitle(title) {
-    if (title != null && title.trim().length > 0) {
-        const trimmed = title.trim();
-        return trimmed.startsWith('#') ? `${trimmed}\n` : `### ${trimmed}\n`;
-    }
-    else {
-        return '';
-    }
-}
-exports.getTitle = getTitle;
-function getStatus(coverage, minCoverage, emoji) {
-    let status = emoji.pass;
-    if (coverage != null && coverage < minCoverage) {
-        status = emoji.fail;
-    }
-    return status;
-}
-function formatCoverage(coverage) {
-    if (coverage == null)
-        return 'NaN%';
-    return `${toFloat(coverage)}%`;
-}
-function toFloat(value) {
-    return parseFloat(value.toFixed(2));
-}
-
-
-/***/ }),
-
-/***/ 9410:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getFilesWithCoverage = exports.getChangedLines = exports.debug = exports.TAG = void 0;
-exports.TAG = {
-    SELF: '$',
-    SOURCE_FILE: 'sourcefile',
-    LINE: 'line',
-    COUNTER: 'counter',
-    PACKAGE: 'package',
-    GROUP: 'group',
-};
-function debug(obj) {
-    return JSON.stringify(obj, null, 4);
-}
-exports.debug = debug;
-const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/;
-function getChangedLines(patch) {
-    const lineNumbers = new Set();
-    if (patch) {
-        const lines = patch.split('\n');
-        const groups = getDiffGroups(lines);
-        for (const group of groups) {
-            const firstLine = group.shift();
-            if (firstLine) {
-                const diffGroup = firstLine.match(pattern);
-                if (diffGroup) {
-                    let bX = parseInt(diffGroup[2]);
-                    for (const line of group) {
-                        bX++;
-                        if (line.startsWith('+')) {
-                            lineNumbers.add(bX - 1);
-                        }
-                        else if (line.startsWith('-')) {
-                            bX--;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return [...lineNumbers];
-}
-exports.getChangedLines = getChangedLines;
-function getDiffGroups(lines) {
-    const groups = [];
-    let group = [];
-    for (const line of lines) {
-        if (line.startsWith('@@')) {
-            group = [];
-            groups.push(group);
-        }
-        group.push(line);
-    }
-    return groups;
-}
-/* eslint-disable @typescript-eslint/no-explicit-any */
-function getFilesWithCoverage(packages) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
-    const files = [];
-    for (const item of packages) {
-        const packageName = item[exports.TAG.SELF].name;
-        const sourceFiles = (_a = item[exports.TAG.SOURCE_FILE]) !== null && _a !== void 0 ? _a : [];
-        for (const sourceFile of sourceFiles) {
-            const sourceFileName = sourceFile[exports.TAG.SELF].name;
-            const file = {
-                name: sourceFileName,
-                packageName,
-                lines: [],
-                counters: [],
-            };
-            const counters = (_b = sourceFile[exports.TAG.COUNTER]) !== null && _b !== void 0 ? _b : [];
-            for (const counter of counters) {
-                const counterSelf = counter[exports.TAG.SELF];
-                const type = counterSelf.type;
-                file.counters.push({
-                    name: type.toLowerCase(),
-                    missed: (_c = parseInt(counterSelf.missed)) !== null && _c !== void 0 ? _c : 0,
-                    covered: (_d = parseInt(counterSelf.covered)) !== null && _d !== void 0 ? _d : 0,
-                });
-            }
-            const lines = (_e = sourceFile[exports.TAG.LINE]) !== null && _e !== void 0 ? _e : [];
-            for (const line of lines) {
-                const lineSelf = line[exports.TAG.SELF];
-                file.lines.push({
-                    number: (_f = parseInt(lineSelf.nr)) !== null && _f !== void 0 ? _f : 0,
-                    instruction: {
-                        missed: (_g = parseInt(lineSelf.mi)) !== null && _g !== void 0 ? _g : 0,
-                        covered: (_h = parseInt(lineSelf.ci)) !== null && _h !== void 0 ? _h : 0,
-                    },
-                    branch: {
-                        missed: (_j = parseInt(lineSelf.mb)) !== null && _j !== void 0 ? _j : 0,
-                        covered: (_k = parseInt(lineSelf.cb)) !== null && _k !== void 0 ? _k : 0,
-                    },
-                });
-            }
-            files.push(file);
-        }
-    }
-    return files;
-}
-exports.getFilesWithCoverage = getFilesWithCoverage;
-
-
-/***/ }),
 
 /***/ 5350:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
@@ -17396,7 +16725,7 @@ function wrappy (fn, cb) {
         XMLProcessingInstruction = __nccwpck_require__(8951);
         XMLDummy = __nccwpck_require__(9230);
         NodeType = __nccwpck_require__(7777);
-        XMLNodeList = __nccwpck_require__(7289);
+        XMLNodeList = __nccwpck_require__(8902);
         XMLNamedNodeMap = __nccwpck_require__(4533);
         DocumentPosition = __nccwpck_require__(2273);
       }
@@ -18131,7 +17460,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 7289:
+/***/ 8902:
 /***/ (function(module) {
 
 // Generated by CoffeeScript 1.12.7
@@ -19319,6 +18648,671 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 7289:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.action = void 0;
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const core = __importStar(__nccwpck_require__(6024));
+const github = __importStar(__nccwpck_require__(5016));
+const fs = __importStar(__nccwpck_require__(7147));
+const xml2js_1 = __importDefault(__nccwpck_require__(9253));
+const processors_1 = __nccwpck_require__(6434);
+const glob = __importStar(__nccwpck_require__(2723));
+const process_1 = __nccwpck_require__(3709);
+const render_1 = __nccwpck_require__(6197);
+const util_1 = __nccwpck_require__(2090);
+async function action() {
+    let continueOnError = true;
+    try {
+        const token = core.getInput('token');
+        if (!token) {
+            core.setFailed("'token' is missing");
+            return;
+        }
+        const pathsString = core.getInput('paths');
+        if (!pathsString) {
+            core.setFailed("'paths' is missing");
+            return;
+        }
+        const reportPaths = pathsString.split(',');
+        const minCoverageOverall = parseFloat(core.getInput('min-coverage-overall'));
+        const minCoverageChangedFiles = parseFloat(core.getInput('min-coverage-changed-files'));
+        const title = core.getInput('title');
+        const updateComment = (0, processors_1.parseBooleans)(core.getInput('update-comment'));
+        if (updateComment) {
+            if (!title) {
+                core.info("'title' is not set. 'update-comment' does not work without 'title'");
+            }
+        }
+        const skipIfNoChanges = (0, processors_1.parseBooleans)(core.getInput('skip-if-no-changes'));
+        const passEmoji = core.getInput('pass-emoji');
+        const failEmoji = core.getInput('fail-emoji');
+        continueOnError = (0, processors_1.parseBooleans)(core.getInput('continue-on-error'));
+        const debugMode = (0, processors_1.parseBooleans)(core.getInput('debug-mode'));
+        const event = github.context.eventName;
+        core.info(`Event is ${event}`);
+        if (debugMode) {
+            core.info(`passEmoji: ${passEmoji}`);
+            core.info(`failEmoji: ${failEmoji}`);
+        }
+        let base;
+        let head;
+        let prNumber;
+        switch (event) {
+            case 'pull_request':
+            case 'pull_request_target':
+                base = github.context.payload.pull_request?.base.sha;
+                head = github.context.payload.pull_request?.head.sha;
+                prNumber = github.context.payload.pull_request?.number;
+                break;
+            case 'push':
+                base = github.context.payload.before;
+                head = github.context.payload.after;
+                break;
+            default:
+                core.setFailed(`Only pull requests and pushes are supported, ${github.context.eventName} not supported.`);
+                return;
+        }
+        core.info(`base sha: ${base}`);
+        core.info(`head sha: ${head}`);
+        const client = github.getOctokit(token);
+        if (debugMode)
+            core.info(`reportPaths: ${reportPaths}`);
+        const reportsJsonAsync = getJsonReports(reportPaths, debugMode);
+        const changedFiles = await getChangedFiles(base, head, client, debugMode);
+        if (debugMode)
+            core.info(`changedFiles: ${(0, util_1.debug)(changedFiles)}`);
+        const reportsJson = await reportsJsonAsync;
+        const reports = reportsJson.map(report => report['report']);
+        const project = (0, process_1.getProjectCoverage)(reports, changedFiles);
+        if (debugMode)
+            core.info(`project: ${(0, util_1.debug)(project)}`);
+        core.setOutput('coverage-overall', parseFloat((project.overall.percentage ?? 0).toFixed(2)));
+        core.setOutput('coverage-changed-files', parseFloat(project['coverage-changed-files'].toFixed(2)));
+        const skip = skipIfNoChanges && project.modules.length === 0;
+        if (debugMode)
+            core.info(`skip: ${skip}`);
+        if (debugMode)
+            core.info(`prNumber: ${prNumber}`);
+        if (prNumber != null && !skip) {
+            const emoji = {
+                pass: passEmoji,
+                fail: failEmoji,
+            };
+            await addComment(prNumber, updateComment, (0, render_1.getTitle)(title), (0, render_1.getPRComment)(project, {
+                overall: minCoverageOverall,
+                changed: minCoverageChangedFiles,
+            }, title, emoji), client, debugMode);
+        }
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            if (continueOnError) {
+                core.error(error);
+            }
+            else {
+                core.setFailed(error);
+            }
+        }
+    }
+}
+exports.action = action;
+async function getJsonReports(xmlPaths, debugMode) {
+    const globber = await glob.create(xmlPaths.join('\n'));
+    const files = await globber.glob();
+    if (debugMode)
+        core.info(`Resolved files: ${files}`);
+    return Promise.all(files.map(async (path) => {
+        const reportXml = await fs.promises.readFile(path.trim(), 'utf-8');
+        return await xml2js_1.default.parseStringPromise(reportXml);
+    }));
+}
+async function getChangedFiles(base, head, client, debugMode) {
+    const response = await client.rest.repos.compareCommits({
+        base,
+        head,
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+    });
+    const changedFiles = [];
+    for (const file of response.data.files) {
+        if (debugMode)
+            core.info(`file: ${(0, util_1.debug)(file)}`);
+        const changedFile = {
+            filePath: file.filename,
+            url: file.blob_url,
+            lines: (0, util_1.getChangedLines)(file.patch),
+        };
+        changedFiles.push(changedFile);
+    }
+    return changedFiles;
+}
+async function addComment(prNumber, update, title, body, client, debugMode) {
+    let commentUpdated = false;
+    if (debugMode)
+        core.info(`update: ${update}`);
+    if (debugMode)
+        core.info(`title: ${title}`);
+    if (debugMode)
+        core.info(`JaCoCo Comment: ${body}`);
+    if (update && title) {
+        if (debugMode)
+            core.info('Listing all comments');
+        const comments = await client.rest.issues.listComments({
+            issue_number: prNumber,
+            ...github.context.repo,
+        });
+        const comment = comments.data.find((it) => it.body.startsWith(title));
+        if (comment) {
+            if (debugMode)
+                core.info(`Updating existing comment: id=${comment.id} \n body=${comment.body}`);
+            await client.rest.issues.updateComment({
+                comment_id: comment.id,
+                body,
+                ...github.context.repo,
+            });
+            commentUpdated = true;
+        }
+    }
+    if (!commentUpdated) {
+        if (debugMode)
+            core.info('Creating a new comment');
+        await client.rest.issues.createComment({
+            issue_number: prNumber,
+            body,
+            ...github.context.repo,
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ 3709:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getProjectCoverage = void 0;
+const util_1 = __nccwpck_require__(2090);
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function getProjectCoverage(reports, changedFiles) {
+    const moduleCoverages = [];
+    const modules = getModulesFromReports(reports);
+    for (const module of modules) {
+        const files = getFileCoverageFromPackages([].concat(...module.packages), changedFiles);
+        if (files.length !== 0) {
+            const moduleCoverage = getModuleCoverage(module.root);
+            const changedMissed = files
+                .map(file => file.changed.missed)
+                .reduce(sumReducer, 0.0);
+            const changedCovered = files
+                .map(file => file.changed.covered)
+                .reduce(sumReducer, 0.0);
+            moduleCoverages.push({
+                name: module.name,
+                files,
+                overall: {
+                    percentage: moduleCoverage.percentage,
+                    covered: moduleCoverage.covered,
+                    missed: moduleCoverage.missed,
+                },
+                changed: {
+                    covered: changedCovered,
+                    missed: changedMissed,
+                    percentage: calculatePercentage(changedCovered, changedMissed),
+                },
+            });
+        }
+    }
+    moduleCoverages.sort((a, b) => (b.overall.percentage ?? 0) - (a.overall.percentage ?? 0));
+    const totalFiles = moduleCoverages.flatMap(module => {
+        return module.files;
+    });
+    const changedMissed = moduleCoverages
+        .map(module => module.changed.missed)
+        .reduce(sumReducer, 0.0);
+    const changedCovered = moduleCoverages
+        .map(module => module.changed.covered)
+        .reduce(sumReducer, 0.0);
+    const projectCoverage = getOverallProjectCoverage(reports);
+    const totalPercentage = getTotalPercentage(totalFiles);
+    return {
+        modules: moduleCoverages,
+        isMultiModule: reports.length > 1 || modules.length > 1,
+        overall: {
+            covered: projectCoverage.covered,
+            missed: projectCoverage.missed,
+            percentage: projectCoverage.percentage,
+        },
+        changed: {
+            covered: changedCovered,
+            missed: changedMissed,
+            percentage: calculatePercentage(changedCovered, changedMissed),
+        },
+        'coverage-changed-files': totalPercentage ?? 100,
+    };
+}
+exports.getProjectCoverage = getProjectCoverage;
+function sumReducer(total, value) {
+    return total + value;
+}
+function toFloat(value) {
+    return parseFloat(value.toFixed(2));
+}
+function getModulesFromReports(reports) {
+    const modules = [];
+    for (const report of reports) {
+        const groupTag = report[util_1.TAG.GROUP];
+        if (groupTag) {
+            const groups = groupTag.filter((group) => group !== undefined);
+            for (const group of groups) {
+                const module = getModuleFromParent(group);
+                modules.push(module);
+            }
+        }
+        const module = getModuleFromParent(report);
+        if (module) {
+            modules.push(module);
+        }
+    }
+    return modules;
+}
+function getModuleFromParent(parent) {
+    const packageTag = parent[util_1.TAG.PACKAGE];
+    if (packageTag) {
+        const packages = packageTag.filter((pacage) => pacage !== undefined);
+        if (packages.length !== 0) {
+            return {
+                name: parent['$'].name,
+                packages,
+                root: parent, // TODO just pass array of 'counters'
+            };
+        }
+    }
+    return null;
+}
+function getFileCoverageFromPackages(packages, files) {
+    const resultFiles = [];
+    const jacocoFiles = (0, util_1.getFilesWithCoverage)(packages);
+    for (const jacocoFile of jacocoFiles) {
+        const name = jacocoFile.name;
+        const packageName = jacocoFile.packageName;
+        const githubFile = files.find(function (f) {
+            return f.filePath.endsWith(`${packageName}/${name}`);
+        });
+        if (githubFile) {
+            const instruction = jacocoFile.counters.find(counter => counter.name === 'instruction');
+            if (instruction) {
+                const missed = instruction.missed;
+                const covered = instruction.covered;
+                const lines = [];
+                for (const lineNumber of githubFile.lines) {
+                    const jacocoLine = jacocoFile.lines.find(line => line.number === lineNumber);
+                    if (jacocoLine) {
+                        lines.push({
+                            ...jacocoLine,
+                        });
+                    }
+                }
+                const changedMissed = lines
+                    .map(line => toFloat(line.instruction.missed))
+                    .reduce(sumReducer, 0.0);
+                const changedCovered = lines
+                    .map(line => toFloat(line.instruction.covered))
+                    .reduce(sumReducer, 0.0);
+                resultFiles.push({
+                    name,
+                    url: githubFile.url,
+                    overall: {
+                        missed,
+                        covered,
+                        percentage: calculatePercentage(covered, missed),
+                    },
+                    changed: {
+                        missed: changedMissed,
+                        covered: changedCovered,
+                        percentage: calculatePercentage(changedCovered, changedMissed),
+                    },
+                    lines,
+                });
+            }
+        }
+    }
+    resultFiles.sort((a, b) => (b.overall.percentage ?? 0) - (a.overall.percentage ?? 0));
+    return resultFiles;
+}
+function calculatePercentage(covered, missed) {
+    const total = covered + missed;
+    if (total !== 0) {
+        return parseFloat(((covered / total) * 100).toFixed(2));
+    }
+    else {
+        return undefined;
+    }
+}
+function getTotalPercentage(files) {
+    let missed = 0;
+    let covered = 0;
+    if (files.length !== 0) {
+        for (const file of files) {
+            missed += file.overall.missed;
+            covered += file.overall.covered;
+        }
+        return parseFloat(((covered / (covered + missed)) * 100).toFixed(2));
+    }
+    else {
+        return null;
+    }
+}
+function getModuleCoverage(report) {
+    const counters = report['counter'];
+    return getDetailedCoverage(counters, 'INSTRUCTION');
+}
+function getOverallProjectCoverage(reports) {
+    const coverages = reports.map(report => getDetailedCoverage(report['counter'], 'INSTRUCTION'));
+    const covered = coverages.reduce((acc, coverage) => acc + coverage.covered, 0);
+    const missed = coverages.reduce((acc, coverage) => acc + coverage.missed, 0);
+    return {
+        covered,
+        missed,
+        percentage: parseFloat(((covered / (covered + missed)) * 100).toFixed(2)),
+    };
+}
+function getDetailedCoverage(counters, type) {
+    const counterTag = counters.find(counter => counter[util_1.TAG.SELF].type === type);
+    if (counterTag) {
+        const attr = counterTag[util_1.TAG.SELF];
+        const missed = parseFloat(attr.missed);
+        const covered = parseFloat(attr.covered);
+        return {
+            missed,
+            covered,
+            percentage: parseFloat(((covered / (covered + missed)) * 100).toFixed(2)),
+        };
+    }
+    return { missed: 0, covered: 0, percentage: 100 };
+}
+
+
+/***/ }),
+
+/***/ 6197:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getTitle = exports.getPRComment = void 0;
+function getPRComment(project, minCoverage, title, emoji) {
+    const heading = getTitle(title);
+    const overallTable = getOverallTable(project, minCoverage, emoji);
+    const moduleTable = getModuleTable(project.modules, minCoverage, emoji);
+    const filesTable = getFileTable(project, minCoverage, emoji);
+    const tables = project.modules.length === 0
+        ? '> There is no coverage information present for the Files changed'
+        : project.isMultiModule
+            ? `${moduleTable}\n\n${filesTable}`
+            : filesTable;
+    return `${heading + overallTable}\n\n${tables}`;
+}
+exports.getPRComment = getPRComment;
+function getModuleTable(modules, minCoverage, emoji) {
+    const tableHeader = '|Module|Coverage||';
+    const tableStructure = '|:-|:-|:-:|';
+    let table = `${tableHeader}\n${tableStructure}`;
+    for (const module of modules) {
+        const coverageDifference = getCoverageDifference(module.overall, module.changed);
+        renderRow(module.name, module.overall.percentage, coverageDifference, module.changed.percentage);
+    }
+    return table;
+    function renderRow(name, overallCoverage, coverageDiff, changedCoverage) {
+        const status = getStatus(changedCoverage, minCoverage.changed, emoji);
+        let coveragePercentage = `${formatCoverage(overallCoverage)}`;
+        if (shouldShow(coverageDiff)) {
+            coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`;
+        }
+        const row = `|${name}|${coveragePercentage}|${status}|`;
+        table = `${table}\n${row}`;
+    }
+}
+function getFileTable(project, minCoverage, emoji) {
+    const tableHeader = project.isMultiModule
+        ? '|Module|File|Coverage||'
+        : '|File|Coverage||';
+    const tableStructure = project.isMultiModule
+        ? '|:-|:-|:-|:-:|'
+        : '|:-|:-|:-:|';
+    let table = `${tableHeader}\n${tableStructure}`;
+    for (const module of project.modules) {
+        for (let index = 0; index < module.files.length; index++) {
+            const file = module.files[index];
+            let moduleName = module.name;
+            if (index !== 0) {
+                moduleName = '';
+            }
+            const coverageDifference = getCoverageDifference(file.overall, file.changed);
+            renderRow(moduleName, `[${file.name}](${file.url})`, file.overall.percentage, coverageDifference, file.changed.percentage, project.isMultiModule);
+        }
+    }
+    return project.isMultiModule
+        ? `<details>\n<summary>Files</summary>\n\n${table}\n\n</details>`
+        : table;
+    function renderRow(moduleName, fileName, overallCoverage, coverageDiff, changedCoverage, isMultiModule) {
+        const status = getStatus(changedCoverage, minCoverage.changed, emoji);
+        let coveragePercentage = `${formatCoverage(overallCoverage)}`;
+        if (shouldShow(coverageDiff)) {
+            coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`;
+        }
+        const row = isMultiModule
+            ? `|${moduleName}|${fileName}|${coveragePercentage}|${status}|`
+            : `|${fileName}|${coveragePercentage}|${status}|`;
+        table = `${table}\n${row}`;
+    }
+}
+function getCoverageDifference(overall, changed) {
+    const totalInstructions = overall.covered + overall.missed;
+    const missed = changed.missed;
+    return -(missed / totalInstructions) * 100;
+}
+function getOverallTable(project, minCoverage, emoji) {
+    const overallStatus = getStatus(project.overall.percentage, minCoverage.overall, emoji);
+    const coverageDifference = getCoverageDifference(project.overall, project.changed);
+    let coveragePercentage = `${formatCoverage(project.overall.percentage)}`;
+    if (shouldShow(coverageDifference)) {
+        coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`;
+    }
+    const tableHeader = `|Overall Project|${coveragePercentage}|${overallStatus}|`;
+    const tableStructure = '|:-|:-|:-:|';
+    const missedLines = project.changed.missed;
+    const coveredLines = project.changed.covered;
+    const totalChangedLines = missedLines + coveredLines;
+    let changedCoverageRow = '';
+    if (totalChangedLines !== 0) {
+        const changedLinesPercentage = (coveredLines / totalChangedLines) * 100;
+        const filesChangedStatus = getStatus(changedLinesPercentage, minCoverage.changed, emoji);
+        changedCoverageRow =
+            '\n' +
+                `|Files changed|${formatCoverage(changedLinesPercentage)}|${filesChangedStatus}|` +
+                '\n<br>';
+    }
+    return `${tableHeader}\n${tableStructure}${changedCoverageRow}`;
+}
+function round(value) {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+function shouldShow(value) {
+    const rounded = Math.abs(round(value));
+    return rounded !== 0 && rounded !== 100;
+}
+function getTitle(title) {
+    if (title != null && title.trim().length > 0) {
+        const trimmed = title.trim();
+        return trimmed.startsWith('#') ? `${trimmed}\n` : `### ${trimmed}\n`;
+    }
+    else {
+        return '';
+    }
+}
+exports.getTitle = getTitle;
+function getStatus(coverage, minCoverage, emoji) {
+    let status = emoji.pass;
+    if (coverage != null && coverage < minCoverage) {
+        status = emoji.fail;
+    }
+    return status;
+}
+function formatCoverage(coverage) {
+    if (coverage == null)
+        return 'NaN%';
+    return `${toFloat(coverage)}%`;
+}
+function toFloat(value) {
+    return parseFloat(value.toFixed(2));
+}
+
+
+/***/ }),
+
+/***/ 2090:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getFilesWithCoverage = exports.getChangedLines = exports.debug = exports.TAG = void 0;
+exports.TAG = {
+    SELF: '$',
+    SOURCE_FILE: 'sourcefile',
+    LINE: 'line',
+    COUNTER: 'counter',
+    PACKAGE: 'package',
+    GROUP: 'group',
+};
+function debug(obj) {
+    return JSON.stringify(obj, null, 4);
+}
+exports.debug = debug;
+const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/;
+function getChangedLines(patch) {
+    const lineNumbers = new Set();
+    if (patch) {
+        const lines = patch.split('\n');
+        const groups = getDiffGroups(lines);
+        for (const group of groups) {
+            const firstLine = group.shift();
+            if (firstLine) {
+                const diffGroup = firstLine.match(pattern);
+                if (diffGroup) {
+                    let bX = parseInt(diffGroup[2]);
+                    for (const line of group) {
+                        bX++;
+                        if (line.startsWith('+')) {
+                            lineNumbers.add(bX - 1);
+                        }
+                        else if (line.startsWith('-')) {
+                            bX--;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return [...lineNumbers];
+}
+exports.getChangedLines = getChangedLines;
+function getDiffGroups(lines) {
+    const groups = [];
+    let group = [];
+    for (const line of lines) {
+        if (line.startsWith('@@')) {
+            group = [];
+            groups.push(group);
+        }
+        group.push(line);
+    }
+    return groups;
+}
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function getFilesWithCoverage(packages) {
+    const files = [];
+    for (const item of packages) {
+        const packageName = item[exports.TAG.SELF].name;
+        const sourceFiles = item[exports.TAG.SOURCE_FILE] ?? [];
+        for (const sourceFile of sourceFiles) {
+            const sourceFileName = sourceFile[exports.TAG.SELF].name;
+            const file = {
+                name: sourceFileName,
+                packageName,
+                lines: [],
+                counters: [],
+            };
+            const counters = sourceFile[exports.TAG.COUNTER] ?? [];
+            for (const counter of counters) {
+                const counterSelf = counter[exports.TAG.SELF];
+                const type = counterSelf.type;
+                file.counters.push({
+                    name: type.toLowerCase(),
+                    missed: parseInt(counterSelf.missed) ?? 0,
+                    covered: parseInt(counterSelf.covered) ?? 0,
+                });
+            }
+            const lines = sourceFile[exports.TAG.LINE] ?? [];
+            for (const line of lines) {
+                const lineSelf = line[exports.TAG.SELF];
+                file.lines.push({
+                    number: parseInt(lineSelf.nr) ?? 0,
+                    instruction: {
+                        missed: parseInt(lineSelf.mi) ?? 0,
+                        covered: parseInt(lineSelf.ci) ?? 0,
+                    },
+                    branch: {
+                        missed: parseInt(lineSelf.mb) ?? 0,
+                        covered: parseInt(lineSelf.cb) ?? 0,
+                    },
+                });
+            }
+            files.push(file);
+        }
+    }
+    return files;
+}
+exports.getFilesWithCoverage = getFilesWithCoverage;
+
+
+/***/ }),
+
 /***/ 5347:
 /***/ ((module) => {
 
@@ -19516,7 +19510,7 @@ var __webpack_exports__ = {};
 var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const action_1 = __nccwpck_require__(2966);
+const action_1 = __nccwpck_require__(7289);
 (0, action_1.action)();
 
 })();
@@ -19524,4 +19518,3 @@ const action_1 = __nccwpck_require__(2966);
 module.exports = __webpack_exports__;
 /******/ })()
 ;
-//# sourceMappingURL=index.js.map

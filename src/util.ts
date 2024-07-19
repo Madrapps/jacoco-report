@@ -9,7 +9,7 @@ export const TAG = {
   GROUP: 'group',
 }
 
-export function debug(obj: Object): string {
+export function debug(obj: object): string {
   return JSON.stringify(obj, null, 4)
 }
 
