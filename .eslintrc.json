@@ -3,7 +3,8 @@
   "extends": [
     "plugin:github/recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/stylistic"
+    "plugin:@typescript-eslint/stylistic",
+    "plugin:@typescript-eslint/strict"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -57,7 +58,8 @@
     "@typescript-eslint/semi": ["error", "never"],
     "@typescript-eslint/type-annotation-spacing": "error",
     "@typescript-eslint/unbound-method": "error",
-    "@typescript-eslint/prefer-nullish-coalescing": "error"
+    "@typescript-eslint/prefer-nullish-coalescing": "error",
+    "@typescript-eslint/prefer-ts-expect-error": "off"
   },
   "env": {
     "node": true,
