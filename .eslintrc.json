@@ -2,7 +2,8 @@
   "plugins": ["jest", "@typescript-eslint"],
   "extends": [
     "plugin:github/recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/stylistic"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -55,7 +56,8 @@
     "semi": "off",
     "@typescript-eslint/semi": ["error", "never"],
     "@typescript-eslint/type-annotation-spacing": "error",
-    "@typescript-eslint/unbound-method": "error"
+    "@typescript-eslint/unbound-method": "error",
+    "@typescript-eslint/prefer-nullish-coalescing": "error"
   },
   "env": {
     "node": true,
