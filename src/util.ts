@@ -96,16 +96,15 @@ export function getFilesWithCoverage(packages: Package[]): JacocoFile[] {
   return files
 }
 
-export function notNull<T>(val: T | null | undefined): val is T {
-  return val !== null && val !== undefined
-}
-
 export async function parseToReport(
   reportXml: string
 ): Promise<Report> | never {
   const json = await parser.parseStringPromise(reportXml)
   if (json && typeof json === 'object' && 'report' in json) {
-    return convertObjToReport(json['report'])
+    const reportObj = json['report']
+    if (reportObj) {
+      return convertObjToReport(reportObj)
+    }
   }
   throw new Error('Invalid report')
 }

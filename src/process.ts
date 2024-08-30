@@ -1,4 +1,4 @@
-import {getFilesWithCoverage, notNull} from './util'
+import {getFilesWithCoverage} from './util'
 import {ChangedFile} from './models/github'
 import {Coverage, File, Module, Project} from './models/project'
 import {Counter, Group, Package, Report} from './models/jacoco-types'
@@ -104,15 +104,12 @@ interface LocalModule {
 }
 
 function getModuleFromParent(parent: Report | Group): LocalModule | null {
-  const packageTag = parent.package
-  if (packageTag) {
-    const packages = packageTag.filter(notNull)
-    if (packages.length !== 0) {
-      return {
-        name: parent.name,
-        packages,
-        root: parent, // TODO just pass array of 'counters'
-      }
+  const packages = parent.package
+  if (packages && packages.length !== 0) {
+    return {
+      name: parent.name,
+      packages,
+      root: parent, // TODO just pass array of 'counters'
     }
   }
   return null

@@ -299,16 +299,13 @@ function getModulesFromReports(reports) {
     return modules;
 }
 function getModuleFromParent(parent) {
-    const packageTag = parent.package;
-    if (packageTag) {
-        const packages = packageTag.filter(util_1.notNull);
-        if (packages.length !== 0) {
-            return {
-                name: parent.name,
-                packages,
-                root: parent, // TODO just pass array of 'counters'
-            };
-        }
+    const packages = parent.package;
+    if (packages && packages.length !== 0) {
+        return {
+            name: parent.name,
+            packages,
+            root: parent, // TODO just pass array of 'counters'
+        };
     }
     return null;
 }
@@ -566,7 +563,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseToReport = exports.notNull = exports.getFilesWithCoverage = exports.getChangedLines = exports.debug = void 0;
+exports.parseToReport = exports.getFilesWithCoverage = exports.getChangedLines = exports.debug = void 0;
 const xml2js_1 = __importDefault(__nccwpck_require__(6189));
 function debug(obj) {
     return JSON.stringify(obj, null, 4);
@@ -656,14 +653,13 @@ function getFilesWithCoverage(packages) {
     return files;
 }
 exports.getFilesWithCoverage = getFilesWithCoverage;
-function notNull(val) {
-    return val !== null && val !== undefined;
-}
-exports.notNull = notNull;
 async function parseToReport(reportXml) {
     const json = await xml2js_1.default.parseStringPromise(reportXml);
     if (json && typeof json === 'object' && 'report' in json) {
-        return convertObjToReport(json['report']);
+        const reportObj = json['report'];
+        if (reportObj) {
+            return convertObjToReport(reportObj);
+        }
     }
     throw new Error('Invalid report');
 }
