@@ -17,7 +17,7 @@ for [Creating a workflow file](https://help.github.com/en/articles/configuring-a
 ### Inputs
 
 - `paths` - [**required**] Comma separated paths of the generated jacoco xml files (supports wildcard glob pattern)
-- `token` - [**required**] Github personal token to add commits to Pull Request
+- `token` - [**required**] Github personal token to add comments to Pull Request
 - `min-coverage-overall` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for overall project
 - `min-coverage-changed-files` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for changed files
 - `update-comment` - [*optional* {default: false}] If true, updates the previous coverage report comment instead of creating new one.
