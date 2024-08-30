@@ -2,7 +2,7 @@ import fs from 'fs'
 import * as process from '../src/process'
 import {CHANGED_FILE, PROJECT} from './mocks.test'
 import {ChangedFile} from '../src/models/github'
-import {Report} from '../src/models/jacoco-types.js'
+import {Report} from '../src/models/jacoco-types'
 import {parseToReport} from '../src/util'
 
 describe('process', function () {

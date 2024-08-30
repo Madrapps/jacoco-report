@@ -9,7 +9,7 @@ import {getPRComment, getTitle} from './render'
 import {debug, getChangedLines, parseToReport} from './util'
 import {Project} from './models/project'
 import {ChangedFile} from './models/github'
-import {Report} from './models/jacoco-types.js'
+import {Report} from './models/jacoco-types'
 
 export async function action(): Promise<void> {
   let continueOnError = true
