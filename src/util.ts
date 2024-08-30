@@ -1,6 +1,6 @@
 import {JacocoFile} from './models/jacoco'
 import parser from 'xml2js'
-import {Package, Report} from './models/jacoco-types.js'
+import {Counter, Package, Report} from './models/jacoco-types.js'
 
 export function debug(obj: object): string {
   return JSON.stringify(obj, null, 4)
@@ -111,6 +111,43 @@ export async function parseToReport(
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+function getPackage(obj: any): Package[] {
+  return obj.package?.map((pkg: any) => ({
+    name: pkg['$'].name,
+    class: pkg.class?.map((cls: any) => ({
+      name: cls['$'].name,
+      sourcefilename: cls['$'].sourcefilename,
+      method: cls.method?.map((m: any) => ({
+        name: m['$'].name,
+        desc: m['$'].desc,
+        line: Number(m['$'].line),
+        counter: getCounter(m),
+      })),
+      counter: getCounter(cls),
+    })),
+    sourcefile: pkg.sourcefile?.map((sf: any) => ({
+      name: sf['$'].name,
+      line: sf.line?.map((ln: any) => ({
+        nr: Number(ln['$'].nr),
+        mi: Number(ln['$'].mi),
+        ci: Number(ln['$'].ci),
+        mb: Number(ln['$'].mb),
+        cb: Number(ln['$'].cb),
+      })),
+      counter: getCounter(sf),
+    })),
+    counter: getCounter(pkg),
+  }))
+}
+
+function getCounter(obj: any): Counter[] {
+  return obj.counter?.map((c: any) => ({
+    type: c['$'].type,
+    missed: Number(c['$'].missed),
+    covered: Number(c['$'].covered),
+  }))
+}
+
 function convertObjToReport(obj: any): Report {
   return {
     name: obj['$'].name,
@@ -123,106 +160,12 @@ function convertObjToReport(obj: any): Report {
       name: grp['$'].name,
       group: grp.group?.map((g: any) => ({
         name: g['$'].name,
-        counter: g.counter?.map((c: any) => ({
-          type: c['$'].type,
-          missed: Number(c['$'].missed),
-          covered: Number(c['$'].covered),
-        })),
+        counter: getCounter(g),
       })),
-      package: grp.package?.map((pkg: any) => ({
-        name: pkg['$'].name,
-        class: pkg.class?.map((cls: any) => ({
-          name: cls['$'].name,
-          sourcefilename: cls['$'].sourcefilename,
-          method: cls.method?.map((m: any) => ({
-            name: m['$'].name,
-            desc: m['$'].desc,
-            line: Number(m['$'].line),
-            counter: m.counter?.map((c: any) => ({
-              type: c['$'].type,
-              missed: Number(c['$'].missed),
-              covered: Number(c['$'].covered),
-            })),
-          })),
-          counter: cls.counter?.map((c: any) => ({
-            type: c['$'].type,
-            missed: Number(c['$'].missed),
-            covered: Number(c['$'].covered),
-          })),
-        })),
-        sourcefile: pkg.sourcefile?.map((sf: any) => ({
-          name: sf['$'].name,
-          line: sf.line?.map((ln: any) => ({
-            nr: Number(ln['$'].nr),
-            mi: Number(ln['$'].mi),
-            ci: Number(ln['$'].ci),
-            mb: Number(ln['$'].mb),
-            cb: Number(ln['$'].cb),
-          })),
-          counter: sf.counter?.map((c: any) => ({
-            type: c['$'].type,
-            missed: Number(c['$'].missed),
-            covered: Number(c['$'].covered),
-          })),
-        })),
-        counter: pkg.counter?.map((c: any) => ({
-          type: c['$'].type,
-          missed: Number(c['$'].missed),
-          covered: Number(c['$'].covered),
-        })),
-      })),
-      counter: grp.counter?.map((c: any) => ({
-        type: c['$'].type,
-        missed: Number(c['$'].missed),
-        covered: Number(c['$'].covered),
-      })),
+      package: getPackage(grp),
+      counter: getCounter(grp),
     })),
-    package: obj.package?.map((pkg: any) => ({
-      name: pkg['$'].name,
-      class: pkg.class?.map((cls: any) => ({
-        name: cls['$'].name,
-        sourcefilename: cls['$'].sourcefilename,
-        method: cls.method?.map((m: any) => ({
-          name: m['$'].name,
-          desc: m['$'].desc,
-          line: Number(m['$'].line),
-          counter: m.counter?.map((c: any) => ({
-            type: c['$'].type,
-            missed: Number(c['$'].missed),
-            covered: Number(c['$'].covered),
-          })),
-        })),
-        counter: cls.counter?.map((c: any) => ({
-          type: c['$'].type,
-          missed: Number(c['$'].missed),
-          covered: Number(c['$'].covered),
-        })),
-      })),
-      sourcefile: pkg.sourcefile?.map((sf: any) => ({
-        name: sf['$'].name,
-        line: sf.line?.map((ln: any) => ({
-          nr: Number(ln['$'].nr),
-          mi: Number(ln['$'].mi),
-          ci: Number(ln['$'].ci),
-          mb: Number(ln['$'].mb),
-          cb: Number(ln['$'].cb),
-        })),
-        counter: sf.counter?.map((c: any) => ({
-          type: c['$'].type,
-          missed: Number(c['$'].missed),
-          covered: Number(c['$'].covered),
-        })),
-      })),
-      counter: pkg.counter?.map((c: any) => ({
-        type: c['$'].type,
-        missed: Number(c['$'].missed),
-        covered: Number(c['$'].covered),
-      })),
-    })),
-    counter: obj.counter?.map((c: any) => ({
-      type: c['$'].type,
-      missed: Number(c['$'].missed),
-      covered: Number(c['$'].covered),
-    })),
+    package: getPackage(obj),
+    counter: getCounter(obj),
   }
 }
