@@ -1,19 +1,16 @@
-import {getFilesWithCoverage, TAG} from './util'
+import {getFilesWithCoverage, notNull} from './util'
 import {ChangedFile} from './models/github'
 import {Coverage, File, Module, Project} from './models/project'
+import {Counter, Group, Package, Report} from './models/jacoco-types.js'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export function getProjectCoverage(
-  reports: any[],
+  reports: Report[],
   changedFiles: ChangedFile[]
 ): Project {
   const moduleCoverages: Module[] = []
   const modules = getModulesFromReports(reports)
   for (const module of modules) {
-    const files = getFileCoverageFromPackages(
-      [].concat(...module.packages),
-      changedFiles
-    )
+    const files = getFileCoverageFromPackages(module.packages, changedFiles)
     if (files.length !== 0) {
       const moduleCoverage = getModuleCoverage(module.root)
       const changedMissed = files
@@ -79,15 +76,17 @@ function toFloat(value: number): number {
   return parseFloat(value.toFixed(2))
 }
 
-function getModulesFromReports(reports: any[]): any[] {
+function getModulesFromReports(reports: Report[]): LocalModule[] {
   const modules = []
   for (const report of reports) {
-    const groupTag = report[TAG.GROUP]
+    const groupTag = report.group
     if (groupTag) {
-      const groups = groupTag.filter((group: any) => group !== undefined)
+      const groups = groupTag.filter(group => group !== undefined)
       for (const group of groups) {
         const module = getModuleFromParent(group)
-        modules.push(module)
+        if (module) {
+          modules.push(module)
+        }
       }
     }
     const module = getModuleFromParent(report)
@@ -98,13 +97,19 @@ function getModulesFromReports(reports: any[]): any[] {
   return modules
 }
 
-function getModuleFromParent(parent: any): any | null {
-  const packageTag = parent[TAG.PACKAGE]
+interface LocalModule {
+  name: string
+  packages: Package[]
+  root: Report | Group
+}
+
+function getModuleFromParent(parent: Report | Group): LocalModule | null {
+  const packageTag = parent.package
   if (packageTag) {
-    const packages = packageTag.filter((pacage: any) => pacage !== undefined)
+    const packages = packageTag.filter(notNull)
     if (packages.length !== 0) {
       return {
-        name: parent['$'].name,
+        name: parent.name,
         packages,
         root: parent, // TODO just pass array of 'counters'
       }
@@ -114,7 +119,7 @@ function getModuleFromParent(parent: any): any | null {
 }
 
 function getFileCoverageFromPackages(
-  packages: any[],
+  packages: Package[],
   files: ChangedFile[]
 ): File[] {
   const resultFiles: File[] = []
@@ -200,15 +205,16 @@ function getTotalPercentage(files: File[]): number | null {
   }
 }
 
-function getModuleCoverage(report: any): Coverage {
-  const counters = report['counter']
+function getModuleCoverage(report: Report | Group): Coverage {
+  const counters = report.counter ?? []
   return getDetailedCoverage(counters, 'INSTRUCTION')
 }
 
-function getOverallProjectCoverage(reports: any[]): Coverage {
-  const coverages = reports.map(report =>
-    getDetailedCoverage(report['counter'], 'INSTRUCTION')
-  )
+function getOverallProjectCoverage(reports: Report[]): Coverage {
+  const coverages = reports.map(report => {
+    const counters = report.counter ?? []
+    return getDetailedCoverage(counters, 'INSTRUCTION')
+  })
   const covered = coverages.reduce((acc, coverage) => acc + coverage.covered, 0)
   const missed = coverages.reduce((acc, coverage) => acc + coverage.missed, 0)
   return {
@@ -218,12 +224,12 @@ function getOverallProjectCoverage(reports: any[]): Coverage {
   }
 }
 
-function getDetailedCoverage(counters: any[], type: string): Coverage {
-  const counterTag = counters.find(counter => counter[TAG.SELF].type === type)
+function getDetailedCoverage(counters: Counter[], type: string): Coverage {
+  const counterTag = counters.find(counter => counter.type === type)
   if (counterTag) {
-    const attr = counterTag[TAG.SELF]
-    const missed = parseFloat(attr.missed)
-    const covered = parseFloat(attr.covered)
+    const attr = counterTag
+    const missed = parseFloat(`${attr.missed}`)
+    const covered = parseFloat(`${attr.covered}`)
     return {
       missed,
       covered,

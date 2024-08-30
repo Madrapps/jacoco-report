@@ -1,6 +1,7 @@
 import * as util from '../src/util'
 import * as fs from 'fs'
-import parser from 'xml2js'
+import {Report} from '../src/models/jacoco-types.js'
+import {parseToReport} from '../src/util'
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -56,7 +57,7 @@ describe('Util', function () {
   describe('getFilesWithCoverage', function () {
     it('should return valid output', async function () {
       const reports = await getSingleReport()
-      const packages = reports[0]['package']
+      const packages = reports[0]['package'] ?? []
       const files = util.getFilesWithCoverage(packages)
       expect(files).toEqual([
         {
@@ -239,15 +240,13 @@ describe('Util', function () {
   })
 })
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-async function getSingleReport(): Promise<any[]> {
+async function getSingleReport(): Promise<Report[]> {
   const reportPath = './__tests__/__fixtures__/report.xml'
   const report = await getReport(reportPath)
   return [report]
 }
 
-async function getReport(path: string): Promise<any[]> {
+async function getReport(path: string): Promise<Report> {
   const reportXml = await fs.promises.readFile(path, 'utf-8')
-  const json = await parser.parseStringPromise(reportXml)
-  return json['report']
+  return parseToReport(reportXml)
 }

@@ -2,14 +2,14 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as fs from 'fs'
-import parser from 'xml2js'
 import {parseBooleans} from 'xml2js/lib/processors'
 import * as glob from '@actions/glob'
 import {getProjectCoverage} from './process'
 import {getPRComment, getTitle} from './render'
-import {debug, getChangedLines} from './util'
+import {debug, getChangedLines, parseToReport} from './util'
 import {Project} from './models/project'
 import {ChangedFile} from './models/github'
+import {Report} from './models/jacoco-types.js'
 
 export async function action(): Promise<void> {
   let continueOnError = true
@@ -80,12 +80,11 @@ export async function action(): Promise<void> {
     const client = github.getOctokit(token)
 
     if (debugMode) core.info(`reportPaths: ${reportPaths}`)
-    const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
     const changedFiles = await getChangedFiles(base, head, client, debugMode)
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
-    const reportsJson = await reportsJsonAsync
-    const reports = reportsJson.map(report => report['report'])
+    const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
+    const reports = await reportsJsonAsync
 
     const project: Project = getProjectCoverage(reports, changedFiles)
     if (debugMode) core.info(`project: ${debug(project)}`)
@@ -137,7 +136,7 @@ export async function action(): Promise<void> {
 async function getJsonReports(
   xmlPaths: string[],
   debugMode: boolean
-): Promise<any[]> {
+): Promise<Report[]> {
   const globber = await glob.create(xmlPaths.join('\n'))
   const files = await globber.glob()
   if (debugMode) core.info(`Resolved files: ${files}`)
@@ -145,7 +144,7 @@ async function getJsonReports(
   return Promise.all(
     files.map(async path => {
       const reportXml = await fs.promises.readFile(path.trim(), 'utf-8')
-      return await parser.parseStringPromise(reportXml)
+      return await parseToReport(reportXml)
     })
   )
 }
