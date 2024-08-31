@@ -30,7 +30,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.action = void 0;
+exports.action = action;
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
@@ -134,7 +134,6 @@ async function action() {
         }
     }
 }
-exports.action = action;
 async function getJsonReports(xmlPaths, debugMode) {
     const globber = await glob.create(xmlPaths.join('\n'));
     const files = await globber.glob();
@@ -212,7 +211,7 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getProjectCoverage = void 0;
+exports.getProjectCoverage = getProjectCoverage;
 const util_1 = __nccwpck_require__(1597);
 function getProjectCoverage(reports, changedFiles) {
     const moduleCoverages = [];
@@ -271,7 +270,6 @@ function getProjectCoverage(reports, changedFiles) {
         'coverage-changed-files': totalPercentage ?? 100,
     };
 }
-exports.getProjectCoverage = getProjectCoverage;
 function sumReducer(total, value) {
     return total + value;
 }
@@ -422,7 +420,8 @@ function getDetailedCoverage(counters, type) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTitle = exports.getPRComment = void 0;
+exports.getPRComment = getPRComment;
+exports.getTitle = getTitle;
 function getPRComment(project, minCoverage, title, emoji) {
     const heading = getTitle(title);
     const overallTable = getOverallTable(project, minCoverage, emoji);
@@ -435,7 +434,6 @@ function getPRComment(project, minCoverage, title, emoji) {
             : filesTable;
     return `${heading + overallTable}\n\n${tables}`;
 }
-exports.getPRComment = getPRComment;
 function getModuleTable(modules, minCoverage, emoji) {
     const tableHeader = '|Module|Coverage||';
     const tableStructure = '|:-|:-|:-:|';
@@ -533,7 +531,6 @@ function getTitle(title) {
         return '';
     }
 }
-exports.getTitle = getTitle;
 function getStatus(coverage, minCoverage, emoji) {
     let status = emoji.pass;
     if (coverage != null && coverage < minCoverage) {
@@ -562,12 +559,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseToReport = exports.getFilesWithCoverage = exports.getChangedLines = exports.debug = void 0;
+exports.debug = debug;
+exports.getChangedLines = getChangedLines;
+exports.getFilesWithCoverage = getFilesWithCoverage;
+exports.parseToReport = parseToReport;
 const xml2js_1 = __importDefault(__nccwpck_require__(6189));
 function debug(obj) {
     return JSON.stringify(obj, null, 4);
 }
-exports.debug = debug;
 const pattern = /^@@ -([0-9]*),?\S* \+([0-9]*),?/;
 function getChangedLines(patch) {
     const lineNumbers = new Set();
@@ -595,7 +594,6 @@ function getChangedLines(patch) {
     }
     return [...lineNumbers];
 }
-exports.getChangedLines = getChangedLines;
 function getDiffGroups(lines) {
     const groups = [];
     let group = [];
@@ -650,7 +648,6 @@ function getFilesWithCoverage(packages) {
     }
     return files;
 }
-exports.getFilesWithCoverage = getFilesWithCoverage;
 async function parseToReport(reportXml) {
     const json = await xml2js_1.default.parseStringPromise(reportXml);
     if (json && typeof json === 'object' && 'report' in json) {
@@ -661,7 +658,6 @@ async function parseToReport(reportXml) {
     }
     throw new Error('Invalid report');
 }
-exports.parseToReport = parseToReport;
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function getPackage(obj) {
     return obj.package?.map((pkg) => ({
