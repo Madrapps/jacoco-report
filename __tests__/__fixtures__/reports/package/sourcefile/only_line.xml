@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.0//EN"
+        "report.dtd">
+<report name="Only Line">
+    <package name="com.example.package1">
+        <sourcefile name="ExampleFile1.java">
+            <line nr="10"/>
+            <line nr="18" mi="1"/>
+            <line nr="18" mi="1" ci="2"/>
+            <line nr="18" mi="1" ci="2" mb="3"/>
+            <line nr="18" mi="1" ci="2" mb="3" cb="4"/>
+        </sourcefile>
+    </package>
+</report>

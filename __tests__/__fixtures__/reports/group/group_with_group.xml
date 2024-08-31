@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.0//EN"
+        "report.dtd">
+<report name="Only Group with Group">
+    <group name="Group1">
+        <group name="Group2">
+            <counter type="INSTRUCTION" missed="1" covered="2"/>
+        </group>
+    </group>
+</report>
