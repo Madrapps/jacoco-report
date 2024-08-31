@@ -15,8 +15,8 @@ export function getPRComment(
     project.modules.length === 0
       ? '> There is no coverage information present for the Files changed'
       : project.isMultiModule
-      ? `${moduleTable}\n\n${filesTable}`
-      : filesTable
+        ? `${moduleTable}\n\n${filesTable}`
+        : filesTable
 
   return `${heading + overallTable}\n\n${tables}`
 }
