@@ -400,11 +400,10 @@ function getOverallProjectCoverage(reports) {
     };
 }
 function getDetailedCoverage(counters, type) {
-    const counterTag = counters.find(counter => counter.type === type);
-    if (counterTag) {
-        const attr = counterTag;
-        const missed = parseFloat(`${attr.missed}`);
-        const covered = parseFloat(`${attr.covered}`);
+    const counter = counters.find(ctr => ctr.type === type);
+    if (counter) {
+        const missed = counter.missed;
+        const covered = counter.covered;
         return {
             missed,
             covered,
@@ -628,22 +627,21 @@ function getFilesWithCoverage(packages) {
                 const type = counterSelf.type;
                 file.counters.push({
                     name: type.toLowerCase(),
-                    missed: parseInt(`${counterSelf.missed}`) ?? 0,
-                    covered: parseInt(`${counterSelf.covered}`) ?? 0,
+                    missed: counterSelf.missed,
+                    covered: counterSelf.covered,
                 });
             }
             const lines = sourceFile.line ?? [];
             for (const line of lines) {
-                const lineSelf = line;
                 file.lines.push({
-                    number: parseInt(`${lineSelf.nr}`) ?? 0,
+                    number: line.nr,
                     instruction: {
-                        missed: parseInt(`${lineSelf.mi}`) ?? 0,
-                        covered: parseInt(`${lineSelf.ci}`) ?? 0,
+                        missed: line.mi ?? 0,
+                        covered: line.ci ?? 0,
                     },
                     branch: {
-                        missed: parseInt(`${lineSelf.mb}`) ?? 0,
-                        covered: parseInt(`${lineSelf.cb}`) ?? 0,
+                        missed: line.mb ?? 0,
+                        covered: line.cb ?? 0,
                     },
                 });
             }

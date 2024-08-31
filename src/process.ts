@@ -222,11 +222,10 @@ function getOverallProjectCoverage(reports: Report[]): Coverage {
 }
 
 function getDetailedCoverage(counters: Counter[], type: string): Coverage {
-  const counterTag = counters.find(counter => counter.type === type)
-  if (counterTag) {
-    const attr = counterTag
-    const missed = parseFloat(`${attr.missed}`)
-    const covered = parseFloat(`${attr.covered}`)
+  const counter = counters.find(ctr => ctr.type === type)
+  if (counter) {
+    const missed = counter.missed
+    const covered = counter.covered
     return {
       missed,
       covered,
