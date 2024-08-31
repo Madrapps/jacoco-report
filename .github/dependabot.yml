@@ -4,6 +4,4 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
-    registries:
-      - npm-codeartifact
     open-pull-requests-limit: 10
