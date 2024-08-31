@@ -1,8 +1,9 @@
 import fs from 'fs'
-import parser from 'xml2js'
 import * as process from '../src/process'
 import {CHANGED_FILE, PROJECT} from './mocks.test'
 import {ChangedFile} from '../src/models/github'
+import {Report} from '../src/models/jacoco-types'
+import {parseToReport} from '../src/util'
 
 describe('process', function () {
   describe('get file coverage', function () {
@@ -400,14 +401,13 @@ describe('process', function () {
   })
 })
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-async function getAggregateReport(): Promise<any[]> {
+async function getAggregateReport(): Promise<Report[]> {
   const reportPath = './__tests__/__fixtures__/aggregate-report.xml'
   const report = await getReport(reportPath)
   return [report]
 }
 
-async function getMultipleReports(): Promise<any[]> {
+async function getMultipleReports(): Promise<Report[]> {
   const testFolder = './__tests__/__fixtures__/multi_module'
   return Promise.all(
     fs.readdirSync(testFolder).map(async file => {
@@ -417,14 +417,13 @@ async function getMultipleReports(): Promise<any[]> {
   )
 }
 
-async function getSingleReport(): Promise<any[]> {
+async function getSingleReport(): Promise<Report[]> {
   const reportPath = './__tests__/__fixtures__/report.xml'
   const report = await getReport(reportPath)
   return [report]
 }
 
-async function getReport(path: string): Promise<any[]> {
+async function getReport(path: string): Promise<Report> {
   const reportXml = await fs.promises.readFile(path, 'utf-8')
-  const json = await parser.parseStringPromise(reportXml)
-  return json['report']
+  return parseToReport(reportXml)
 }

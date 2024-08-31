@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.0//EN"
+        "report.dtd">
+<report name="Only SourceFile with Counter">
+    <package name="com.example.package1">
+        <sourcefile name="ExampleFile1.java">
+            <counter type="INSTRUCTION" missed="1" covered="2"/>
+        </sourcefile>
+    </package>
+</report>
