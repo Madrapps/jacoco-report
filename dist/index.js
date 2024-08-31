@@ -674,7 +674,7 @@ function getPackage(obj) {
             method: cls.method?.map((m) => ({
                 name: m['$'].name,
                 desc: m['$'].desc,
-                line: Number(m['$'].line),
+                line: m['$'].line ? Number(m['$'].line) : undefined,
                 counter: getCounter(m),
             })),
             counter: getCounter(cls),
@@ -683,10 +683,10 @@ function getPackage(obj) {
             name: sf['$'].name,
             line: sf.line?.map((ln) => ({
                 nr: Number(ln['$'].nr),
-                mi: Number(ln['$'].mi),
-                ci: Number(ln['$'].ci),
-                mb: Number(ln['$'].mb),
-                cb: Number(ln['$'].cb),
+                mi: ln['$'].mi ? Number(ln['$'].mi) : undefined,
+                ci: ln['$'].ci ? Number(ln['$'].ci) : undefined,
+                mb: ln['$'].mb ? Number(ln['$'].mb) : undefined,
+                cb: ln['$'].cb ? Number(ln['$'].cb) : undefined,
             })),
             counter: getCounter(sf),
         })),
