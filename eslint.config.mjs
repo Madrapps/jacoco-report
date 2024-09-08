@@ -1,29 +1,9 @@
 import jest from 'eslint-plugin-jest'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
-import globals from 'globals'
 import tsParser from '@typescript-eslint/parser'
-import path from 'node:path'
-import {fileURLToPath} from 'node:url'
-import js from '@eslint/js'
-import {FlatCompat} from '@eslint/eslintrc'
-import tseslint from 'typescript-eslint';
-import eslint from '@eslint/js'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-})
+import tseslint from 'typescript-eslint'
 
 const languageOptions = {
-  globals: {
-    ...globals.node,
-    ...jest.environments.globals.globals,
-    ...globals.jasmine,
-    ...globals.jest,
-  },
   ecmaVersion: 9,
   sourceType: 'module',
   parser: tsParser,
@@ -32,7 +12,7 @@ const languageOptions = {
   },
 }
 
-const customTypescriptConfig = {
+const typescriptConfig = {
   plugins: {jest, '@typescript-eslint': typescriptEslint},
   languageOptions,
   rules: {
@@ -54,8 +34,13 @@ const customTypescriptConfig = {
     '@typescript-eslint/await-thenable': 'error',
     '@typescript-eslint/ban-ts-comment': 'error',
     camelcase: 'off',
-    '@typescript-eslint/consistent-type-assertions': 'error',
-
+    '@typescript-eslint/consistent-type-assertions': [
+      'error',
+      {
+        assertionStyle: 'as',
+        objectLiteralTypeAssertions: 'never',
+      },
+    ],
     '@typescript-eslint/explicit-function-return-type': [
       'error',
       {
@@ -90,6 +75,7 @@ const customTypescriptConfig = {
   },
 }
 
+// noinspection JSUnusedGlobalSymbols
 export default [
   {
     ignores: [
@@ -100,9 +86,8 @@ export default [
       '**/coverage/',
     ],
   },
-  customTypescriptConfig,
-  tseslint.config(
-    ...tseslint.configs.strict,
-    ...tseslint.configs.stylistic,
-  )
+  ...tseslint.configs.recommended,
+  ...tseslint.configs.strict,
+  ...tseslint.configs.stylistic,
+  typescriptConfig,
 ]

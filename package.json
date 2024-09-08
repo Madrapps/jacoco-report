@@ -7,7 +7,7 @@
     "test": "jest --coverage",
     "build": "tsc && ncc build --source-map --license licenses.txt",
     "lint:eslint": "eslint '**/*.{js,ts}' --max-warnings=0",
-    "lint:prettier": "prettier --check '**/*.{js,md,json,yml}'",
+    "lint:prettier": "prettier --check '**/*.{js,md,json,yml,mjs}'",
     "lint": "npm run lint:prettier && npm run lint:eslint",
     "lint:fix": "npm run lint:prettier -- --write && npm run lint:eslint -- --fix"
   },
@@ -31,10 +31,13 @@
     "@types/xml2js": "^0.4.14",
     "@typescript-eslint/eslint-plugin": "^8.4.0",
     "octokit": "^4.0.2",
+    "typescript-eslint": "^8.4.0",
     "xml2js": "^0.6.2",
     "xml2json": "^0.12.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.10.0",
     "@tsconfig/node20": "20.1.4",
     "@types/node": "^22.5.2",
     "@typescript-eslint/parser": "^8.4.0",
@@ -46,6 +49,7 @@
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-n": "^17.10.2",
     "eslint-plugin-promise": "^7.1.0",
+    "globals": "^15.9.0",
     "jest": "^29.7.0",
     "prettier": "^3.3.3",
     "ts-jest": "^29.2.5",
