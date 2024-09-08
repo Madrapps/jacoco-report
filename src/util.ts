@@ -66,12 +66,11 @@ export function getFilesWithCoverage(packages: Package[]): JacocoFile[] {
       }
       const counters = sourceFile.counter ?? []
       for (const counter of counters) {
-        const counterSelf = counter
-        const type = counterSelf.type
+        const type = counter.type
         file.counters.push({
           name: type.toLowerCase(),
-          missed: counterSelf.missed,
-          covered: counterSelf.covered,
+          missed: counter.missed,
+          covered: counter.covered,
         })
       }
 

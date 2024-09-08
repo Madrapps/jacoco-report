@@ -105,7 +105,7 @@ async function action() {
         const project = (0, process_1.getProjectCoverage)(reports, changedFiles);
         if (debugMode)
             core.info(`project: ${(0, util_1.debug)(project)}`);
-        core.setOutput('coverage-overall', parseFloat((project.overall.percentage ?? 0).toFixed(2)));
+        core.setOutput('coverage-overall', project.overall ? parseFloat(project.overall.percentage.toFixed(2)) : 100);
         core.setOutput('coverage-changed-files', parseFloat(project['coverage-changed-files'].toFixed(2)));
         const skip = skipIfNoChanges && project.modules.length === 0;
         if (debugMode)
@@ -220,12 +220,7 @@ function getProjectCoverage(reports, changedFiles) {
         const files = getFileCoverageFromPackages(module.packages, changedFiles);
         if (files.length !== 0) {
             const moduleCoverage = getModuleCoverage(module.root);
-            const changedMissed = files
-                .map(file => file.changed.missed)
-                .reduce(sumReducer, 0.0);
-            const changedCovered = files
-                .map(file => file.changed.covered)
-                .reduce(sumReducer, 0.0);
+            const changedCoverage = getCoverage(files);
             moduleCoverages.push({
                 name: module.name,
                 files,
@@ -234,44 +229,24 @@ function getProjectCoverage(reports, changedFiles) {
                     covered: moduleCoverage.covered,
                     missed: moduleCoverage.missed,
                 },
-                changed: {
-                    covered: changedCovered,
-                    missed: changedMissed,
-                    percentage: calculatePercentage(changedCovered, changedMissed),
-                },
+                changed: changedCoverage,
             });
         }
     }
-    moduleCoverages.sort((a, b) => (b.overall.percentage ?? 0) - (a.overall.percentage ?? 0));
+    moduleCoverages.sort((a, b) => b.overall.percentage - a.overall.percentage);
     const totalFiles = moduleCoverages.flatMap(module => {
         return module.files;
     });
-    const changedMissed = moduleCoverages
-        .map(module => module.changed.missed)
-        .reduce(sumReducer, 0.0);
-    const changedCovered = moduleCoverages
-        .map(module => module.changed.covered)
-        .reduce(sumReducer, 0.0);
+    const changedCoverage = getCoverage(moduleCoverages);
     const projectCoverage = getOverallProjectCoverage(reports);
     const totalPercentage = getTotalPercentage(totalFiles);
     return {
         modules: moduleCoverages,
         isMultiModule: reports.length > 1 || modules.length > 1,
-        overall: {
-            covered: projectCoverage.covered,
-            missed: projectCoverage.missed,
-            percentage: projectCoverage.percentage,
-        },
-        changed: {
-            covered: changedCovered,
-            missed: changedMissed,
-            percentage: calculatePercentage(changedCovered, changedMissed),
-        },
+        overall: projectCoverage,
+        changed: changedCoverage,
         'coverage-changed-files': totalPercentage ?? 100,
     };
-}
-function sumReducer(total, value) {
-    return total + value;
 }
 function toFloat(value) {
     return parseFloat(value.toFixed(2));
@@ -325,9 +300,20 @@ function getFileCoverageFromPackages(packages, files) {
                 for (const lineNumber of githubFile.lines) {
                     const jacocoLine = jacocoFile.lines.find(line => line.number === lineNumber);
                     if (jacocoLine) {
-                        lines.push({
-                            ...jacocoLine,
-                        });
+                        const line = {
+                            number: lineNumber,
+                            instruction: {
+                                missed: jacocoLine.instruction.missed,
+                                covered: jacocoLine.instruction.covered,
+                                percentage: calculatePercentage(jacocoLine.instruction.covered, jacocoLine.instruction.missed) ?? 0,
+                            },
+                            branch: {
+                                missed: jacocoLine.branch.missed,
+                                covered: jacocoLine.branch.covered,
+                                percentage: calculatePercentage(jacocoLine.branch.covered, jacocoLine.branch.missed) ?? 0,
+                            },
+                        };
+                        lines.push(line);
                     }
                 }
                 const changedMissed = lines
@@ -336,25 +322,31 @@ function getFileCoverageFromPackages(packages, files) {
                 const changedCovered = lines
                     .map(line => toFloat(line.instruction.covered))
                     .reduce(sumReducer, 0.0);
-                resultFiles.push({
-                    name,
-                    url: githubFile.url,
-                    overall: {
-                        missed,
-                        covered,
-                        percentage: calculatePercentage(covered, missed),
-                    },
-                    changed: {
+                const changedPercentage = calculatePercentage(changedCovered, changedMissed);
+                const changedCoverage = changedPercentage !== null
+                    ? {
                         missed: changedMissed,
                         covered: changedCovered,
-                        percentage: calculatePercentage(changedCovered, changedMissed),
-                    },
-                    lines,
-                });
+                        percentage: changedPercentage,
+                    }
+                    : null;
+                const overallPercentage = calculatePercentage(covered, missed);
+                const overallCoverage = overallPercentage !== null
+                    ? { missed, covered, percentage: overallPercentage }
+                    : null;
+                if (overallCoverage) {
+                    resultFiles.push({
+                        name,
+                        url: githubFile.url,
+                        overall: overallCoverage,
+                        changed: changedCoverage,
+                        lines,
+                    });
+                }
             }
         }
     }
-    resultFiles.sort((a, b) => (b.overall.percentage ?? 0) - (a.overall.percentage ?? 0));
+    resultFiles.sort((a, b) => b.overall.percentage - a.overall.percentage);
     return resultFiles;
 }
 function calculatePercentage(covered, missed) {
@@ -363,7 +355,7 @@ function calculatePercentage(covered, missed) {
         return parseFloat(((covered / total) * 100).toFixed(2));
     }
     else {
-        return undefined;
+        return null;
     }
 }
 function getTotalPercentage(files) {
@@ -389,12 +381,17 @@ function getOverallProjectCoverage(reports) {
         const counters = report.counter ?? [];
         return getDetailedCoverage(counters, 'INSTRUCTION');
     });
+    if (coverages.length === 0)
+        return null;
     const covered = coverages.reduce((acc, coverage) => acc + coverage.covered, 0);
     const missed = coverages.reduce((acc, coverage) => acc + coverage.missed, 0);
+    const percentage = parseFloat(((covered / (covered + missed)) * 100).toFixed(2));
+    if (isNaN(percentage))
+        return null;
     return {
         covered,
         missed,
-        percentage: parseFloat(((covered / (covered + missed)) * 100).toFixed(2)),
+        percentage,
     };
 }
 function getDetailedCoverage(counters, type) {
@@ -410,6 +407,28 @@ function getDetailedCoverage(counters, type) {
     }
     return { missed: 0, covered: 0, percentage: 100 };
 }
+function getCoverage(entity) {
+    if (entity.length === 0)
+        return null;
+    const changedMissed = entity
+        .map(item => toFloat(item.changed?.missed ?? 0))
+        .reduce(sumReducer, 0.0);
+    const changedCovered = entity
+        .map(line => toFloat(line.changed?.covered ?? 0))
+        .reduce(sumReducer, 0.0);
+    const changedPercentage = calculatePercentage(changedCovered, changedMissed);
+    if (changedPercentage === null || isNaN(changedPercentage)) {
+        return null;
+    }
+    return {
+        missed: changedMissed,
+        covered: changedCovered,
+        percentage: changedPercentage,
+    };
+}
+function sumReducer(total, value) {
+    return total + value;
+}
 
 
 /***/ }),
@@ -422,13 +441,17 @@ function getDetailedCoverage(counters, type) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getPRComment = getPRComment;
 exports.getTitle = getTitle;
+const coverageAbsent = '> There is no coverage information present for the Files changed';
 function getPRComment(project, minCoverage, title, emoji) {
     const heading = getTitle(title);
-    const overallTable = getOverallTable(project, minCoverage, emoji);
+    if (!project.overall) {
+        return `${heading + coverageAbsent}`;
+    }
+    const overallTable = getOverallTable(project.overall, project.changed, minCoverage, emoji);
     const moduleTable = getModuleTable(project.modules, minCoverage, emoji);
     const filesTable = getFileTable(project, minCoverage, emoji);
     const tables = project.modules.length === 0
-        ? '> There is no coverage information present for the Files changed'
+        ? coverageAbsent
         : project.isMultiModule
             ? `${moduleTable}\n\n${filesTable}`
             : filesTable;
@@ -440,7 +463,7 @@ function getModuleTable(modules, minCoverage, emoji) {
     let table = `${tableHeader}\n${tableStructure}`;
     for (const module of modules) {
         const coverageDifference = getCoverageDifference(module.overall, module.changed);
-        renderRow(module.name, module.overall.percentage, coverageDifference, module.changed.percentage);
+        renderRow(module.name, module.overall.percentage, coverageDifference, module.changed?.percentage ?? null);
     }
     return table;
     function renderRow(name, overallCoverage, coverageDiff, changedCoverage) {
@@ -469,7 +492,7 @@ function getFileTable(project, minCoverage, emoji) {
                 moduleName = '';
             }
             const coverageDifference = getCoverageDifference(file.overall, file.changed);
-            renderRow(moduleName, `[${file.name}](${file.url})`, file.overall.percentage, coverageDifference, file.changed.percentage, project.isMultiModule);
+            renderRow(moduleName, `[${file.name}](${file.url})`, file.overall.percentage, coverageDifference, file.changed?.percentage ?? null, project.isMultiModule);
         }
     }
     return project.isMultiModule
@@ -488,21 +511,28 @@ function getFileTable(project, minCoverage, emoji) {
     }
 }
 function getCoverageDifference(overall, changed) {
+    if (!changed)
+        return null;
     const totalInstructions = overall.covered + overall.missed;
     const missed = changed.missed;
-    return -(missed / totalInstructions) * 100;
+    const changedPercentage = (missed / totalInstructions) * 100;
+    if (changedPercentage > 0 && changedPercentage < 100) {
+        return -changedPercentage;
+    }
+    else
+        return null;
 }
-function getOverallTable(project, minCoverage, emoji) {
-    const overallStatus = getStatus(project.overall.percentage, minCoverage.overall, emoji);
-    const coverageDifference = getCoverageDifference(project.overall, project.changed);
-    let coveragePercentage = `${formatCoverage(project.overall.percentage)}`;
+function getOverallTable(overall, changed, minCoverage, emoji) {
+    const overallStatus = getStatus(overall.percentage, minCoverage.overall, emoji);
+    const coverageDifference = getCoverageDifference(overall, changed);
+    let coveragePercentage = `${formatCoverage(overall.percentage)}`;
     if (shouldShow(coverageDifference)) {
         coveragePercentage += ` **\`${formatCoverage(coverageDifference)}\`**`;
     }
     const tableHeader = `|Overall Project|${coveragePercentage}|${overallStatus}|`;
     const tableStructure = '|:-|:-|:-:|';
-    const missedLines = project.changed.missed;
-    const coveredLines = project.changed.covered;
+    const missedLines = changed?.missed ?? 0;
+    const coveredLines = changed?.covered ?? 0;
     const totalChangedLines = missedLines + coveredLines;
     let changedCoverageRow = '';
     if (totalChangedLines !== 0) {
@@ -519,6 +549,8 @@ function round(value) {
     return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 function shouldShow(value) {
+    if (value === null)
+        return false;
     const rounded = Math.abs(round(value));
     return rounded !== 0 && rounded !== 100;
 }
@@ -533,7 +565,7 @@ function getTitle(title) {
 }
 function getStatus(coverage, minCoverage, emoji) {
     let status = emoji.pass;
-    if (coverage != null && coverage < minCoverage) {
+    if (coverage !== null && coverage < minCoverage) {
         status = emoji.fail;
     }
     return status;
@@ -621,12 +653,11 @@ function getFilesWithCoverage(packages) {
             };
             const counters = sourceFile.counter ?? [];
             for (const counter of counters) {
-                const counterSelf = counter;
-                const type = counterSelf.type;
+                const type = counter.type;
                 file.counters.push({
                     name: type.toLowerCase(),
-                    missed: counterSelf.missed,
-                    covered: counterSelf.covered,
+                    missed: counter.missed,
+                    covered: counter.covered,
                 });
             }
             const lines = sourceFile.line ?? [];

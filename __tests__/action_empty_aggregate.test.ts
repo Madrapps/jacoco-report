@@ -8,7 +8,7 @@ import {PATCH} from './mocks.test'
 jest.mock('@actions/core')
 jest.mock('@actions/github')
 
-describe('Aggregate report', function () {
+describe('Aggregate Empty report', function () {
   let createComment
   let listComments
   let updateComment
@@ -17,7 +17,7 @@ describe('Aggregate report', function () {
   function getInput(key: string): string {
     switch (key) {
       case 'paths':
-        return './__tests__/__fixtures__/aggregate-report.xml'
+        return './__tests__/__fixtures__/empty-aggregate-report.xml'
       case 'token':
         return 'SMPLEHDjasdf876a987'
       case 'min-coverage-overall':
@@ -100,14 +100,11 @@ describe('Aggregate report', function () {
       await action.action()
 
       expect(createComment.mock.calls[0][0].body)
-        .toEqual(`|Overall Project|76.32% **\`-0.01%\`**|:green_apple:|
+        .toEqual(`|Overall Project|76.32%|:green_apple:|
 |:-|:-|:-:|
-|Files changed|0%|:x:|
-<br>
 
 |Module|Coverage||
 |:-|:-|:-:|
-|module-2|70.37% **\`-18.52%\`**|:x:|
 |module-3|8.33%|:green_apple:|
 
 <details>
@@ -115,7 +112,6 @@ describe('Aggregate report', function () {
 
 |Module|File|Coverage||
 |:-|:-|:-|:-:|
-|module-2|[Math.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/math/src/main/java/com/madrapps/math/Math.kt)|70.37% **\`-18.52%\`**|:x:|
 |module-3|[MainViewModel.kt](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt)|58.82%|:green_apple:|
 
 </details>`)
@@ -165,7 +161,7 @@ describe('Aggregate report', function () {
       await action.action()
 
       const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 65.91])
+      expect(out).toEqual(['coverage-changed-files', 58.82])
     })
   })
 })

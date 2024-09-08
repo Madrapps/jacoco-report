@@ -1,5 +1,6 @@
 import * as render from '../src/render'
 import {PROJECT} from './mocks.test'
+import {Project} from '../src/models/project'
 
 describe('Render', function () {
   describe('getTitle', function () {
@@ -50,15 +51,11 @@ describe('Render', function () {
       fail: ':x:',
     }
     describe('no modules', function () {
-      const project = {
+      const project: Project = {
         ...PROJECT.SINGLE_MODULE,
         modules: [],
         'coverage-changed-files': 100,
-        changed: {
-          covered: 0,
-          missed: 0,
-          percentage: undefined,
-        },
+        changed: null,
       }
       it('coverage greater than min coverage', function () {
         const comment = render.getPRComment(

@@ -2,14 +2,14 @@ export interface Project {
   modules: Module[]
   isMultiModule: boolean
   'coverage-changed-files': number
-  overall: Coverage
-  changed: Coverage
+  overall: Coverage | null
+  changed: Coverage | null
 }
 
 export interface Module {
   name: string
   overall: Coverage
-  changed: Coverage
+  changed: Coverage | null
   files: File[]
 }
 
@@ -17,14 +17,14 @@ export interface File {
   name: string
   url: string
   overall: Coverage
-  changed: Coverage
+  changed: Coverage | null
   lines: Line[]
 }
 
 export interface Coverage {
   missed: number
   covered: number
-  percentage?: number
+  percentage: number
 }
 
 export interface Line {
