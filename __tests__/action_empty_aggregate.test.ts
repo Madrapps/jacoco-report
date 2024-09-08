@@ -40,7 +40,6 @@ describe('Aggregate Empty report', function () {
     output = jest.fn()
 
     core.getInput = jest.fn(getInput)
-    // @ts-ignore
     github.getOctokit = jest.fn(() => {
       return {
         rest: {
@@ -57,7 +56,6 @@ describe('Aggregate Empty report', function () {
         },
       }
     })
-    // @ts-ignore
     core.setFailed = jest.fn(c => {
       fail(c)
     })
