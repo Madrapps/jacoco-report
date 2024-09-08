@@ -78,14 +78,13 @@ jobs:
 
 ### Understanding the Coverage Report
 
-- The "delta" (the negative value next to the coverage) represents the percentage of newly added or modified lines of code that are not covered by unit tests. 
-It calculates the difference in test coverage based solely on the changes made in the current commit or pull request. 
-For example, if 10 lines of code are modified or added, and 8 of those lines are covered by unit tests, the "delta" 
-would be -20%, indicating 20% of the newly changed code is untested. However, the "delta" has limitations. It can never 
-be positive, meaning if you add more unit tests to cover existing, unmodified code, this additional coverage is 
-not reflected in the delta. The metric only considers lines directly changed in the current set of modifications, 
-as there is no mechanism to track improvements in coverage for pre-existing code that hasn't been altered.
-
+- The "delta" (the negative value next to the coverage) represents the percentage of newly added or modified lines of code that are not covered by unit tests.
+  It calculates the difference in test coverage based solely on the changes made in the current commit or pull request.
+  For example, if 10 lines of code are modified or added, and 8 of those lines are covered by unit tests, the "delta"
+  would be -20%, indicating 20% of the newly changed code is untested. However, the "delta" has limitations. It can never
+  be positive, meaning if you add more unit tests to cover existing, unmodified code, this additional coverage is
+  not reflected in the delta. The metric only considers lines directly changed in the current set of modifications,
+  as there is no mechanism to track improvements in coverage for pre-existing code that hasn't been altered.
 
 ### Example Project
 
@@ -173,8 +172,6 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
        pass-emoji: ':green_circle:'
        fail-emoji: ':red_circle:'
    ```
-   
-
 
 ## Troubleshooting
 
