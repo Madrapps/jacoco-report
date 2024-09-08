@@ -6,7 +6,7 @@ export interface Report {
   counter?: Counter[]
 }
 
-export interface SessionInfo {
+interface SessionInfo {
   id: string
   start: number
   dump: number
@@ -26,27 +26,27 @@ export interface Package {
   counter?: Counter[]
 }
 
-export interface Class {
+interface Class {
   name: string
   sourcefilename?: string
   method?: Method[]
   counter?: Counter[]
 }
 
-export interface Method {
+interface Method {
   name: string
   desc: string
   line?: number
   counter?: Counter[]
 }
 
-export interface SourceFile {
+interface SourceFile {
   name: string
   line?: Line[]
   counter?: Counter[]
 }
 
-export interface Line {
+interface Line {
   nr: number
   mi?: number
   ci?: number

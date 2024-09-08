@@ -7,9 +7,53 @@ import {parseToReport} from '../src/util'
 
 describe('process', function () {
   describe('get file coverage', function () {
+    describe('empty report', function () {
+      it('no files changed', async () => {
+        const v = getEmptyReports()
+        const reports = await v
+        const changedFiles: ChangedFile[] = []
+        const actual = process.getProjectCoverage(reports, changedFiles)
+        expect(actual).toEqual({
+          modules: [],
+          isMultiModule: false,
+          'coverage-changed-files': 100,
+          overall: null,
+          changed: null,
+        })
+      })
+
+      it('one file changed', async () => {
+        const reports = await getEmptyReports()
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE.filter(file => {
+          return file.filePath.endsWith('Math.kt')
+        })
+        const actual = process.getProjectCoverage(reports, changedFiles)
+        expect(actual).toEqual({
+          modules: [],
+          isMultiModule: false,
+          'coverage-changed-files': 100,
+          overall: null,
+          changed: null,
+        })
+      })
+
+      it('multiple files changed', async () => {
+        const reports = await getEmptyReports()
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE
+        const actual = process.getProjectCoverage(reports, changedFiles)
+        expect(actual).toEqual({
+          modules: [],
+          isMultiModule: false,
+          'coverage-changed-files': 100,
+          overall: null,
+          changed: null,
+        })
+      })
+    })
+
     describe('single report', function () {
       it('no files changed', async () => {
-        const v = getSingleReport()
+        const v = getSingleReports()
         const reports = await v
         const changedFiles: ChangedFile[] = []
         const actual = process.getProjectCoverage(reports, changedFiles)
@@ -22,16 +66,12 @@ describe('process', function () {
             missed: 79,
             percentage: 35.25,
           },
-          changed: {
-            covered: 0,
-            missed: 0,
-            percentage: undefined,
-          },
+          changed: null,
         })
       })
 
       it('one file changed', async () => {
-        const reports = await getSingleReport()
+        const reports = await getSingleReports()
         const changedFiles = CHANGED_FILE.SINGLE_MODULE.filter(file => {
           return file.filePath.endsWith('Math.kt')
         })
@@ -45,43 +85,43 @@ describe('process', function () {
                 {
                   lines: [
                     {
-                      branch: {covered: 1, missed: 1},
-                      instruction: {covered: 3, missed: 0},
+                      branch: {covered: 1, missed: 1, percentage: 50},
+                      instruction: {covered: 3, missed: 0, percentage: 100},
                       number: 6,
                     },
                     {
-                      branch: {covered: 0, missed: 2},
-                      instruction: {covered: 0, missed: 3},
+                      branch: {covered: 0, missed: 2, percentage: 0},
+                      instruction: {covered: 0, missed: 3, percentage: 0},
                       number: 13,
                     },
                     {
-                      branch: {covered: 0, missed: 0},
-                      instruction: {covered: 0, missed: 4},
+                      branch: {covered: 0, missed: 0, percentage: 0},
+                      instruction: {covered: 0, missed: 4, percentage: 0},
                       number: 14,
                     },
                     {
-                      branch: {covered: 0, missed: 0},
-                      instruction: {covered: 0, missed: 4},
+                      branch: {covered: 0, missed: 0, percentage: 0},
+                      instruction: {covered: 0, missed: 4, percentage: 0},
                       number: 16,
                     },
                     {
-                      branch: {covered: 1, missed: 1},
-                      instruction: {covered: 3, missed: 0},
+                      branch: {covered: 1, missed: 1, percentage: 50},
+                      instruction: {covered: 3, missed: 0, percentage: 100},
                       number: 26,
                     },
                     {
-                      branch: {covered: 0, missed: 0},
-                      instruction: {covered: 4, missed: 0},
+                      branch: {covered: 0, missed: 0, percentage: 0},
+                      instruction: {covered: 4, missed: 0, percentage: 100},
                       number: 27,
                     },
                     {
-                      branch: {covered: 0, missed: 0},
-                      instruction: {covered: 0, missed: 4},
+                      branch: {covered: 0, missed: 0, percentage: 0},
+                      instruction: {covered: 0, missed: 4, percentage: 0},
                       number: 29,
                     },
                     {
-                      branch: {covered: 0, missed: 0},
-                      instruction: {covered: 0, missed: 6},
+                      branch: {covered: 0, missed: 0, percentage: 0},
+                      instruction: {covered: 0, missed: 6, percentage: 0},
                       number: 43,
                     },
                   ],
@@ -126,7 +166,7 @@ describe('process', function () {
       })
 
       it('multiple files changed', async () => {
-        const reports = await getSingleReport()
+        const reports = await getSingleReports()
         const changedFiles = CHANGED_FILE.SINGLE_MODULE
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual(PROJECT.SINGLE_MODULE)
@@ -147,11 +187,7 @@ describe('process', function () {
             missed: 156,
             percentage: 20.41,
           },
-          changed: {
-            covered: 0,
-            missed: 0,
-            percentage: undefined,
-          },
+          changed: null,
         })
       })
 
@@ -170,13 +206,13 @@ describe('process', function () {
                 {
                   lines: [
                     {
-                      branch: {covered: 0, missed: 0},
-                      instruction: {covered: 3, missed: 0},
+                      branch: {covered: 0, missed: 0, percentage: 0},
+                      instruction: {covered: 3, missed: 0, percentage: 100},
                       number: 6,
                     },
                     {
-                      branch: {covered: 0, missed: 0},
-                      instruction: {covered: 0, missed: 2},
+                      branch: {covered: 0, missed: 0, percentage: 0},
+                      instruction: {covered: 0, missed: 2, percentage: 0},
                       number: 20,
                     },
                   ],
@@ -242,11 +278,7 @@ describe('process', function () {
             missed: 8754,
             percentage: 76.32,
           },
-          changed: {
-            covered: 0,
-            missed: 0,
-            percentage: undefined,
-          },
+          changed: null,
         })
       })
 
@@ -268,11 +300,7 @@ describe('process', function () {
                     missed: 7,
                     percentage: 58.82,
                   },
-                  changed: {
-                    covered: 0,
-                    missed: 0,
-                    percentage: undefined,
-                  },
+                  changed: null,
                   lines: [],
                   name: 'MainViewModel.kt',
                   url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
@@ -284,11 +312,7 @@ describe('process', function () {
                 covered: 10,
                 missed: 110,
               },
-              changed: {
-                covered: 0,
-                missed: 0,
-                percentage: undefined,
-              },
+              changed: null,
             },
           ],
           overall: {
@@ -296,11 +320,7 @@ describe('process', function () {
             missed: 8754,
             percentage: 76.32,
           },
-          changed: {
-            covered: 0,
-            missed: 0,
-            percentage: undefined,
-          },
+          changed: null,
         })
       })
 
@@ -323,8 +343,8 @@ describe('process', function () {
                 {
                   lines: [
                     {
-                      branch: {covered: 0, missed: 0},
-                      instruction: {covered: 0, missed: 5},
+                      branch: {covered: 0, missed: 0, percentage: 0},
+                      instruction: {covered: 0, missed: 5, percentage: 0},
                       number: 22,
                     },
                   ],
@@ -362,11 +382,7 @@ describe('process', function () {
                     missed: 7,
                     percentage: 58.82,
                   },
-                  changed: {
-                    covered: 0,
-                    missed: 0,
-                    percentage: undefined,
-                  },
+                  changed: null,
                   name: 'MainViewModel.kt',
                   lines: [],
                   url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/app/src/main/java/com/madrapps/playground/MainViewModel.kt',
@@ -378,11 +394,7 @@ describe('process', function () {
                 covered: 10,
                 missed: 110,
               },
-              changed: {
-                covered: 0,
-                missed: 0,
-                percentage: undefined,
-              },
+              changed: null,
             },
           ],
           overall: {
@@ -417,8 +429,14 @@ async function getMultipleReports(): Promise<Report[]> {
   )
 }
 
-async function getSingleReport(): Promise<Report[]> {
+async function getSingleReports(): Promise<Report[]> {
   const reportPath = './__tests__/__fixtures__/report.xml'
+  const report = await getReport(reportPath)
+  return [report]
+}
+
+async function getEmptyReports(): Promise<Report[]> {
+  const reportPath = './__tests__/__fixtures__/empty-report.xml'
   const report = await getReport(reportPath)
   return [report]
 }

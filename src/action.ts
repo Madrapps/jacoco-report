@@ -90,7 +90,7 @@ export async function action(): Promise<void> {
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-overall',
-      parseFloat((project.overall.percentage ?? 0).toFixed(2))
+      project.overall ? parseFloat(project.overall.percentage.toFixed(2)) : 100
     )
     core.setOutput(
       'coverage-changed-files',
