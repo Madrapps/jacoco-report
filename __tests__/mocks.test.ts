@@ -1,5 +1,3 @@
-import {Project} from '../src/models/project'
-
 export const PATCH = {
   SINGLE_MODULE: {
     COVERAGE:
@@ -240,7 +238,7 @@ export const PROJECT = {
       missed: 21,
       percentage: 38.24,
     },
-  } as Project,
+  },
   MULTI_MODULE: {
     modules: [
       {
@@ -442,7 +440,7 @@ export const PROJECT = {
       missed: 38,
       percentage: 7.32,
     },
-  } as Project,
+  },
 }
 
 it('Empty test', function () {
