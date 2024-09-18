@@ -60,6 +60,9 @@ async function action() {
         const updateComment = (0, processors_1.parseBooleans)(core.getInput('update-comment'));
         const commentType = core.getInput('comment-type');
         core.info(`commentType: ${commentType}`);
+        if (!isValidCommentType(commentType)) {
+            core.setFailed(`'comment-type' ${commentType} is invalid`);
+        }
         if (updateComment) {
             if (!title) {
                 core.info("'title' is not set. 'update-comment' does not work without 'title'");
@@ -124,8 +127,18 @@ async function action() {
                 overall: minCoverageOverall,
                 changed: minCoverageChangedFiles,
             }, title, emoji);
-            await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
-            await addWorkflowSummary(bodyFormatted);
+            switch (commentType) {
+                case 'pr_comment':
+                    await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
+                    break;
+                case 'summary':
+                    await addWorkflowSummary(bodyFormatted);
+                    break;
+                case 'both':
+                    await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
+                    await addWorkflowSummary(bodyFormatted);
+                    break;
+            }
         }
     }
     catch (error) {
@@ -210,6 +223,10 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
 async function addWorkflowSummary(body) {
     await core.summary.addRaw(body, true).write();
 }
+const validCommentTypes = ['pr_comment', 'summary', 'both'];
+const isValidCommentType = (value) => {
+    return validCommentTypes.includes(value);
+};
 
 
 /***/ }),

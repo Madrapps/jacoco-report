@@ -33,8 +33,11 @@ export async function action(): Promise<void> {
     )
     const title = core.getInput('title')
     const updateComment = parseBooleans(core.getInput('update-comment'))
-    const commentType = core.getInput('comment-type')
+    const commentType: string = core.getInput('comment-type')
     core.info(`commentType: ${commentType}`)
+    if (!isValidCommentType(commentType)) {
+      core.setFailed(`'comment-type' ${commentType} is invalid`)
+    }
     if (updateComment) {
       if (!title) {
         core.info(
@@ -118,15 +121,32 @@ export async function action(): Promise<void> {
         title,
         emoji
       )
-      await addComment(
-        prNumber,
-        updateComment,
-        titleFormatted,
-        bodyFormatted,
-        client,
-        debugMode
-      )
-      await addWorkflowSummary(bodyFormatted)
+      switch (commentType) {
+        case 'pr_comment':
+          await addComment(
+            prNumber,
+            updateComment,
+            titleFormatted,
+            bodyFormatted,
+            client,
+            debugMode
+          )
+          break
+        case 'summary':
+          await addWorkflowSummary(bodyFormatted)
+          break
+        case 'both':
+          await addComment(
+            prNumber,
+            updateComment,
+            titleFormatted,
+            bodyFormatted,
+            client,
+            debugMode
+          )
+          await addWorkflowSummary(bodyFormatted)
+          break
+      }
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -229,4 +249,12 @@ async function addComment(
 
 async function addWorkflowSummary(body: string): Promise<void> {
   await core.summary.addRaw(body, true).write()
+}
+
+type Options = (typeof validCommentTypes)[number]
+
+const validCommentTypes = ['pr_comment', 'summary', 'both'] as const
+
+const isValidCommentType = (value: any): value is Options => {
+  return validCommentTypes.includes(value)
 }

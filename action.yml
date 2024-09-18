@@ -26,7 +26,6 @@ inputs:
     description: 'Specifies where to add the comment: as a PR comment, workflow summary, or both.'
     required: false
     default: 'pr_comment'
-    type: choice
     options:
       - 'pr_comment'
       - 'summary'
