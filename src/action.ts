@@ -45,6 +45,7 @@ export async function action(): Promise<void> {
 
     continueOnError = parseBooleans(core.getInput('continue-on-error'))
     const debugMode = parseBooleans(core.getInput('debug-mode'))
+    const summaryMode = parseBooleans(core.getInput('summary-mode'))
 
     const event = github.context.eventName
     core.info(`Event is ${event}`)
@@ -106,22 +107,28 @@ export async function action(): Promise<void> {
         pass: passEmoji,
         fail: failEmoji,
       }
-      await addComment(
-        prNumber,
-        updateComment,
-        getTitle(title),
-        getPRComment(
-          project,
-          {
-            overall: minCoverageOverall,
-            changed: minCoverageChangedFiles,
-          },
-          title,
-          emoji
-        ),
-        client,
-        debugMode
-      )
+      const comment = getPRComment(
+                        project,
+                        {
+                          overall: minCoverageOverall,
+                          changed: minCoverageChangedFiles,
+                        },
+                        title,
+                        emoji
+                      )
+      if (summaryMode) {
+        await core.summary.addRaw(comment).write({overwrite: updateComment})
+      }
+      else {
+        await addComment(
+          prNumber,
+          updateComment,
+          getTitle(title),
+          comment,
+          client,
+          debugMode
+        )
+      }
     }
   } catch (error) {
     if (error instanceof Error) {
