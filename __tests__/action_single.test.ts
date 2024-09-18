@@ -13,6 +13,8 @@ describe('Single report', function () {
   let listComments
   let updateComment
   let output
+  const addRaw = jest.fn().mockReturnThis()
+  const write = jest.fn().mockReturnThis()
 
   function getInput(key): string {
     switch (key) {
@@ -20,6 +22,8 @@ describe('Single report', function () {
         return './__tests__/__fixtures__/report.xml'
       case 'token':
         return 'SMPLEHDjasdf876a987'
+      case 'title':
+        return TITLE
       case 'comment-type':
         return 'pr_comment'
       case 'min-coverage-overall':
@@ -61,6 +65,8 @@ describe('Single report', function () {
     core.setFailed = jest.fn(c => {
       fail(c)
     })
+    core.summary.addRaw = addRaw
+    core.summary.write = write
   })
 
   const compareCommitsResponse = {
@@ -136,12 +142,8 @@ describe('Single report', function () {
     })
 
     describe('With update-comment ON', function () {
-      const title = 'JaCoCo Report'
-
       function mockInput(key): string {
         switch (key) {
-          case 'title':
-            return title
           case 'update-comment':
             return 'true'
           default:
@@ -158,7 +160,7 @@ describe('Single report', function () {
         listComments.mockReturnValue({
           data: [
             {id: 1, body: 'some comment'},
-            {id: 2, body: `### ${title}\n to update`},
+            {id: 2, body: `### ${TITLE}\n to update`},
           ],
         })
 
@@ -197,7 +199,7 @@ describe('Single report', function () {
         listComments.mockReturnValue({
           data: [
             {id: 1, body: 'some comment'},
-            {id: 2, body: `### ${title}\n to update`},
+            {id: 2, body: `### ${TITLE}\n to update`},
           ],
         })
 
@@ -285,8 +287,8 @@ describe('Single report', function () {
 
         await action.action()
 
-        expect(createComment.mock.calls[0][0].body)
-          .toEqual(`|Overall Project|35.25% **\`-17.21%\`**|red_circle|
+        expect(createComment.mock.calls[0][0].body).toEqual(`### JaCoCo Report
+|Overall Project|35.25% **\`-17.21%\`**|red_circle|
 |:-|:-|:-:|
 |Files changed|38.24%|red_circle|
 <br>
@@ -295,6 +297,67 @@ describe('Single report', function () {
 |:-|:-|:-:|
 |[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|red_circle|
 |[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_circle:|`)
+      })
+    })
+
+    describe('With comment-type present', function () {
+      function mockInput(key): string {
+        switch (key) {
+          case 'comment-type':
+            return 'pr_comment'
+          default:
+            return getInput(key)
+        }
+      }
+
+      it('when comment-type is summary, add the comment as workflow summary', async () => {
+        core.getInput = jest.fn(c => {
+          switch (c) {
+            case 'comment-type':
+              return 'summary'
+            default:
+              return mockInput(c)
+          }
+        })
+        initContext(eventName, payload)
+
+        await action.action()
+        expect(addRaw.mock.calls[0][0]).toEqual(PROPER_COMMENT)
+        expect(write).toHaveBeenCalledTimes(1)
+        expect(createComment).toHaveBeenCalledTimes(0)
+      })
+
+      it('when comment-type is pr_comment, comment added in pr', async () => {
+        core.getInput = jest.fn(c => {
+          switch (c) {
+            case 'comment-type':
+              return 'pr_comment'
+            default:
+              return mockInput(c)
+          }
+        })
+        initContext(eventName, payload)
+
+        await action.action()
+        expect(write).toHaveBeenCalledTimes(0)
+        expect(createComment.mock.calls[0][0].body).toEqual(PROPER_COMMENT)
+      })
+
+      it('when comment-type is both, add the comment in pr and as workflow summary', async () => {
+        core.getInput = jest.fn(c => {
+          switch (c) {
+            case 'comment-type':
+              return 'both'
+            default:
+              return mockInput(c)
+          }
+        })
+        initContext(eventName, payload)
+
+        await action.action()
+        expect(createComment.mock.calls[0][0].body).toEqual(PROPER_COMMENT)
+        expect(addRaw.mock.calls[0][0]).toEqual(PROPER_COMMENT)
+        expect(write).toHaveBeenCalledTimes(1)
       })
     })
   })
@@ -324,6 +387,7 @@ describe('Single report', function () {
   })
 
   describe('Push event', function () {
+    const eventName = 'push'
     const payload = {
       before: 'guasft7asdtf78asfd87as6df7y2u3',
       after: 'aahsdflais76dfa78wrglghjkaghkj',
@@ -347,6 +411,67 @@ describe('Single report', function () {
 
       const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-files', 28.83])
+    })
+
+    describe('With comment-type present', function () {
+      function mockInput(key): string {
+        switch (key) {
+          case 'comment-type':
+            return 'pr_comment'
+          default:
+            return getInput(key)
+        }
+      }
+
+      it('when comment-type is summary, add the comment as workflow summary', async () => {
+        core.getInput = jest.fn(c => {
+          switch (c) {
+            case 'comment-type':
+              return 'summary'
+            default:
+              return mockInput(c)
+          }
+        })
+        initContext(eventName, payload)
+
+        await action.action()
+        expect(addRaw.mock.calls[0][0]).toEqual(PROPER_COMMENT)
+        expect(write).toHaveBeenCalledTimes(1)
+        expect(createComment).toHaveBeenCalledTimes(0)
+      })
+
+      it('when comment-type is pr_comment, comment not added', async () => {
+        core.getInput = jest.fn(c => {
+          switch (c) {
+            case 'comment-type':
+              return 'pr_comment'
+            default:
+              return mockInput(c)
+          }
+        })
+        initContext(eventName, payload)
+
+        await action.action()
+        expect(write).toHaveBeenCalledTimes(0)
+        expect(createComment).toHaveBeenCalledTimes(0)
+      })
+
+      it('when comment-type is both, add the comment as workflow summary', async () => {
+        core.getInput = jest.fn(c => {
+          switch (c) {
+            case 'comment-type':
+              return 'both'
+            default:
+              return mockInput(c)
+          }
+        })
+        initContext(eventName, payload)
+
+        await action.action()
+        expect(addRaw.mock.calls[0][0]).toEqual(PROPER_COMMENT)
+        expect(write).toHaveBeenCalledTimes(1)
+        expect(createComment).toHaveBeenCalledTimes(0)
+      })
     })
   })
 
@@ -373,7 +498,10 @@ function initContext(eventName, payload): void {
   context.owner = 'madrapps'
 }
 
-const PROPER_COMMENT = `|Overall Project|35.25% **\`-17.21%\`**|:x:|
+const TITLE = 'JaCoCo Report'
+
+const PROPER_COMMENT = `### JaCoCo Report
+|Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
 |Files changed|38.24%|:x:|
 <br>
