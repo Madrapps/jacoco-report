@@ -10,6 +10,7 @@ import {debug, getChangedLines, parseToReport} from './util'
 import {Project} from './models/project'
 import {ChangedFile} from './models/github'
 import {Report} from './models/jacoco-types'
+import {GitHub} from '@actions/github/lib/utils'
 
 export async function action(): Promise<void> {
   let continueOnError = true
@@ -105,22 +106,25 @@ export async function action(): Promise<void> {
         pass: passEmoji,
         fail: failEmoji,
       }
+      const titleFormatted = getTitle(title)
+      const bodyFormatted = getPRComment(
+        project,
+        {
+          overall: minCoverageOverall,
+          changed: minCoverageChangedFiles,
+        },
+        title,
+        emoji
+      )
       await addComment(
         prNumber,
         updateComment,
-        getTitle(title),
-        getPRComment(
-          project,
-          {
-            overall: minCoverageOverall,
-            changed: minCoverageChangedFiles,
-          },
-          title,
-          emoji
-        ),
+        titleFormatted,
+        bodyFormatted,
         client,
         debugMode
       )
+      await addWorkflowSummary(titleFormatted, bodyFormatted)
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -152,7 +156,7 @@ async function getJsonReports(
 async function getChangedFiles(
   base: string,
   head: string,
-  client: any,
+  client: InstanceType<typeof GitHub>,
   debugMode: boolean
 ): Promise<ChangedFile[]> {
   const response = await client.rest.repos.compareCommits({
@@ -163,7 +167,8 @@ async function getChangedFiles(
   })
 
   const changedFiles: ChangedFile[] = []
-  for (const file of response.data.files) {
+  const files = response.data.files ?? []
+  for (const file of files) {
     if (debugMode) core.info(`file: ${debug(file)}`)
     const changedFile: ChangedFile = {
       filePath: file.filename,
@@ -180,7 +185,7 @@ async function addComment(
   update: boolean,
   title: string,
   body: string,
-  client: any,
+  client: InstanceType<typeof GitHub>,
   debugMode: boolean
 ): Promise<void> {
   let commentUpdated = false
@@ -218,4 +223,8 @@ async function addComment(
       ...github.context.repo,
     })
   }
+}
+
+async function addWorkflowSummary(title: string, body: string): Promise<void> {
+  await core.summary.addRaw(title, true).addRaw(body, true).write()
 }
