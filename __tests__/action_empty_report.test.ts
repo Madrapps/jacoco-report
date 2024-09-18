@@ -20,6 +20,8 @@ describe('Single Empty report', function () {
         return './__tests__/__fixtures__/empty-report.xml'
       case 'token':
         return 'SMPLEHDjasdf876a987'
+      case 'comment-type':
+        return 'pr_comment'
       case 'min-coverage-overall':
         return 45
       case 'min-coverage-changed-files':

@@ -10,6 +10,7 @@ import {debug, getChangedLines, parseToReport} from './util'
 import {Project} from './models/project'
 import {ChangedFile} from './models/github'
 import {Report} from './models/jacoco-types'
+import {GitHub} from '@actions/github/lib/utils'
 
 export async function action(): Promise<void> {
   let continueOnError = true
@@ -51,6 +52,14 @@ export async function action(): Promise<void> {
     if (debugMode) {
       core.info(`passEmoji: ${passEmoji}`)
       core.info(`failEmoji: ${failEmoji}`)
+    }
+
+    const commentType: string = core.getInput('comment-type')
+    if (debugMode) {
+      core.info(`commentType: ${commentType}`)
+    }
+    if (!isValidCommentType(commentType)) {
+      core.setFailed(`'comment-type' ${commentType} is invalid`)
     }
 
     let base: string
@@ -100,27 +109,47 @@ export async function action(): Promise<void> {
     const skip = skipIfNoChanges && project.modules.length === 0
     if (debugMode) core.info(`skip: ${skip}`)
     if (debugMode) core.info(`prNumber: ${prNumber}`)
-    if (prNumber != null && !skip) {
+    if (!skip) {
       const emoji = {
         pass: passEmoji,
         fail: failEmoji,
       }
-      await addComment(
-        prNumber,
-        updateComment,
-        getTitle(title),
-        getPRComment(
-          project,
-          {
-            overall: minCoverageOverall,
-            changed: minCoverageChangedFiles,
-          },
-          title,
-          emoji
-        ),
-        client,
-        debugMode
+      const titleFormatted = getTitle(title)
+      const bodyFormatted = getPRComment(
+        project,
+        {
+          overall: minCoverageOverall,
+          changed: minCoverageChangedFiles,
+        },
+        title,
+        emoji
       )
+      switch (commentType) {
+        case 'pr_comment':
+          await addComment(
+            prNumber,
+            updateComment,
+            titleFormatted,
+            bodyFormatted,
+            client,
+            debugMode
+          )
+          break
+        case 'summary':
+          await addWorkflowSummary(bodyFormatted)
+          break
+        case 'both':
+          await addComment(
+            prNumber,
+            updateComment,
+            titleFormatted,
+            bodyFormatted,
+            client,
+            debugMode
+          )
+          await addWorkflowSummary(bodyFormatted)
+          break
+      }
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -152,7 +181,7 @@ async function getJsonReports(
 async function getChangedFiles(
   base: string,
   head: string,
-  client: any,
+  client: InstanceType<typeof GitHub>,
   debugMode: boolean
 ): Promise<ChangedFile[]> {
   const response = await client.rest.repos.compareCommits({
@@ -163,7 +192,8 @@ async function getChangedFiles(
   })
 
   const changedFiles: ChangedFile[] = []
-  for (const file of response.data.files) {
+  const files = response.data.files ?? []
+  for (const file of files) {
     if (debugMode) core.info(`file: ${debug(file)}`)
     const changedFile: ChangedFile = {
       filePath: file.filename,
@@ -176,13 +206,17 @@ async function getChangedFiles(
 }
 
 async function addComment(
-  prNumber: number,
+  prNumber: number | undefined,
   update: boolean,
   title: string,
   body: string,
-  client: any,
+  client: InstanceType<typeof GitHub>,
   debugMode: boolean
 ): Promise<void> {
+  if (prNumber === undefined) {
+    if (debugMode) core.info('prNumber not present')
+    return
+  }
   let commentUpdated = false
 
   if (debugMode) core.info(`update: ${update}`)
@@ -218,4 +252,16 @@ async function addComment(
       ...github.context.repo,
     })
   }
+}
+
+async function addWorkflowSummary(body: string): Promise<void> {
+  await core.summary.addRaw(body, true).write()
+}
+
+type Options = (typeof validCommentTypes)[number]
+
+const validCommentTypes = ['pr_comment', 'summary', 'both'] as const
+
+const isValidCommentType = (value: any): value is Options => {
+  return validCommentTypes.includes(value)
 }

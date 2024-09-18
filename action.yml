@@ -22,6 +22,14 @@ inputs:
     description: 'Update the coverage report comment instead of creating new ones. Requires title to works properly.'
     required: false
     default: 'false'
+  comment-type:
+    description: 'Specifies where to add the comment, whether as a PR comment, workflow summary, or both.'
+    required: false
+    default: 'pr_comment'
+    options:
+      - 'pr_comment'
+      - 'summary'
+      - 'both'
   skip-if-no-changes:
     description: "Comment won't be added if there is no coverage information present for the files changed"
     required: false

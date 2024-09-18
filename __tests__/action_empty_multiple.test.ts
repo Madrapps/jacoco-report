@@ -57,6 +57,8 @@ describe('Multiple Empty reports', function () {
         return './__tests__/__fixtures__/empty_multi_module/empty-appCoverage.xml,./__tests__/__fixtures__/multi_module/mathCoverage.xml,./__tests__/__fixtures__/empty_multi_module/empty-textCoverage.xml'
       case 'token':
         return 'SMPLEHDjasdf876a987'
+      case 'comment-type':
+        return 'pr_comment'
       case 'min-coverage-overall':
         return 45
       case 'min-coverage-changed-files':

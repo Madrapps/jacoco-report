@@ -74,6 +74,13 @@ async function action() {
             core.info(`passEmoji: ${passEmoji}`);
             core.info(`failEmoji: ${failEmoji}`);
         }
+        const commentType = core.getInput('comment-type');
+        if (debugMode) {
+            core.info(`commentType: ${commentType}`);
+        }
+        if (!isValidCommentType(commentType)) {
+            core.setFailed(`'comment-type' ${commentType} is invalid`);
+        }
         let base;
         let head;
         let prNumber;
@@ -112,15 +119,28 @@ async function action() {
             core.info(`skip: ${skip}`);
         if (debugMode)
             core.info(`prNumber: ${prNumber}`);
-        if (prNumber != null && !skip) {
+        if (!skip) {
             const emoji = {
                 pass: passEmoji,
                 fail: failEmoji,
             };
-            await addComment(prNumber, updateComment, (0, render_1.getTitle)(title), (0, render_1.getPRComment)(project, {
+            const titleFormatted = (0, render_1.getTitle)(title);
+            const bodyFormatted = (0, render_1.getPRComment)(project, {
                 overall: minCoverageOverall,
                 changed: minCoverageChangedFiles,
-            }, title, emoji), client, debugMode);
+            }, title, emoji);
+            switch (commentType) {
+                case 'pr_comment':
+                    await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
+                    break;
+                case 'summary':
+                    await addWorkflowSummary(bodyFormatted);
+                    break;
+                case 'both':
+                    await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
+                    await addWorkflowSummary(bodyFormatted);
+                    break;
+            }
         }
     }
     catch (error) {
@@ -152,7 +172,8 @@ async function getChangedFiles(base, head, client, debugMode) {
         repo: github.context.repo.repo,
     });
     const changedFiles = [];
-    for (const file of response.data.files) {
+    const files = response.data.files ?? [];
+    for (const file of files) {
         if (debugMode)
             core.info(`file: ${(0, util_1.debug)(file)}`);
         const changedFile = {
@@ -165,6 +186,11 @@ async function getChangedFiles(base, head, client, debugMode) {
     return changedFiles;
 }
 async function addComment(prNumber, update, title, body, client, debugMode) {
+    if (prNumber === undefined) {
+        if (debugMode)
+            core.info('prNumber not present');
+        return;
+    }
     let commentUpdated = false;
     if (debugMode)
         core.info(`update: ${update}`);
@@ -201,6 +227,13 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
         });
     }
 }
+async function addWorkflowSummary(body) {
+    await core.summary.addRaw(body, true).write();
+}
+const validCommentTypes = ['pr_comment', 'summary', 'both'];
+const isValidCommentType = (value) => {
+    return validCommentTypes.includes(value);
+};
 
 
 /***/ }),
