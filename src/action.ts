@@ -62,7 +62,8 @@ export async function action(): Promise<void> {
       core.setFailed(`'comment-type' ${commentType} is invalid`)
     }
 
-    let prNumber: number | undefined = Number(core.getInput('pr-number'))
+    let prNumber: number | undefined =
+      Number(core.getInput('pr-number')) || undefined
 
     const client = github.getOctokit(token)
 

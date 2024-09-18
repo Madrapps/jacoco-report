@@ -81,7 +81,7 @@ async function action() {
         if (!isValidCommentType(commentType)) {
             core.setFailed(`'comment-type' ${commentType} is invalid`);
         }
-        let prNumber = Number(core.getInput('pr-number'));
+        let prNumber = Number(core.getInput('pr-number')) || undefined;
         const client = github.getOctokit(token);
         let base;
         let head;
