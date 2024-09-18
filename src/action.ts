@@ -11,7 +11,6 @@ import {Project} from './models/project'
 import {ChangedFile} from './models/github'
 import {Report} from './models/jacoco-types'
 import {GitHub} from '@actions/github/lib/utils'
-import {parseString} from 'xml2js'
 
 export async function action(): Promise<void> {
   let continueOnError = true

@@ -58,6 +58,8 @@ async function action() {
         const minCoverageChangedFiles = parseFloat(core.getInput('min-coverage-changed-files'));
         const title = core.getInput('title');
         const updateComment = (0, processors_1.parseBooleans)(core.getInput('update-comment'));
+        const commentType = core.getInput('comment-type');
+        core.info(`commentType: ${commentType}`);
         if (updateComment) {
             if (!title) {
                 core.info("'title' is not set. 'update-comment' does not work without 'title'");
