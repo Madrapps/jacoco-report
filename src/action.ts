@@ -11,6 +11,7 @@ import {Project} from './models/project'
 import {ChangedFile} from './models/github'
 import {Report} from './models/jacoco-types'
 import {GitHub} from '@actions/github/lib/utils'
+import {parseString} from 'xml2js'
 
 export async function action(): Promise<void> {
   let continueOnError = true
@@ -33,6 +34,8 @@ export async function action(): Promise<void> {
     )
     const title = core.getInput('title')
     const updateComment = parseBooleans(core.getInput('update-comment'))
+    const commentType = core.getInput('comment-type')
+    core.info(`commentType: ${commentType}`)
     if (updateComment) {
       if (!title) {
         core.info(
