@@ -53,6 +53,9 @@ describe('Single report', function () {
             compareCommits: jest.fn(() => {
               return compareCommitsResponse
             }),
+            listPullRequestsAssociatedWithCommit: jest.fn(() => {
+              return {data: []}
+            }),
           },
           issues: {
             createComment,
