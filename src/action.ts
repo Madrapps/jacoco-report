@@ -33,11 +33,6 @@ export async function action(): Promise<void> {
     )
     const title = core.getInput('title')
     const updateComment = parseBooleans(core.getInput('update-comment'))
-    const commentType: string = core.getInput('comment-type')
-    core.info(`commentType: ${commentType}`)
-    if (!isValidCommentType(commentType)) {
-      core.setFailed(`'comment-type' ${commentType} is invalid`)
-    }
     if (updateComment) {
       if (!title) {
         core.info(
@@ -57,6 +52,14 @@ export async function action(): Promise<void> {
     if (debugMode) {
       core.info(`passEmoji: ${passEmoji}`)
       core.info(`failEmoji: ${failEmoji}`)
+    }
+
+    const commentType: string = core.getInput('comment-type')
+    if (debugMode) {
+      core.info(`commentType: ${commentType}`)
+    }
+    if (!isValidCommentType(commentType)) {
+      core.setFailed(`'comment-type' ${commentType} is invalid`)
     }
 
     let base: string
@@ -106,7 +109,7 @@ export async function action(): Promise<void> {
     const skip = skipIfNoChanges && project.modules.length === 0
     if (debugMode) core.info(`skip: ${skip}`)
     if (debugMode) core.info(`prNumber: ${prNumber}`)
-    if (prNumber != null && !skip) {
+    if (!skip) {
       const emoji = {
         pass: passEmoji,
         fail: failEmoji,
@@ -203,13 +206,17 @@ async function getChangedFiles(
 }
 
 async function addComment(
-  prNumber: number,
+  prNumber: number | undefined,
   update: boolean,
   title: string,
   body: string,
   client: InstanceType<typeof GitHub>,
   debugMode: boolean
 ): Promise<void> {
+  if (prNumber === undefined) {
+    if (debugMode) core.info('prNumber not present')
+    return
+  }
   let commentUpdated = false
 
   if (debugMode) core.info(`update: ${update}`)
