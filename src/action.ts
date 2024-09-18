@@ -124,7 +124,7 @@ export async function action(): Promise<void> {
         client,
         debugMode
       )
-      await addWorkflowSummary(titleFormatted, bodyFormatted)
+      await addWorkflowSummary(bodyFormatted)
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -225,6 +225,6 @@ async function addComment(
   }
 }
 
-async function addWorkflowSummary(title: string, body: string): Promise<void> {
-  await core.summary.addRaw(title, true).addRaw(body, true).write()
+async function addWorkflowSummary(body: string): Promise<void> {
+  await core.summary.addRaw(body, true).write()
 }

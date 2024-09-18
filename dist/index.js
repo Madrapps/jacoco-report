@@ -123,7 +123,7 @@ async function action() {
                 changed: minCoverageChangedFiles,
             }, title, emoji);
             await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
-            await addWorkflowSummary(titleFormatted, bodyFormatted);
+            await addWorkflowSummary(bodyFormatted);
         }
     }
     catch (error) {
@@ -205,8 +205,8 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
         });
     }
 }
-async function addWorkflowSummary(title, body) {
-    await core.summary.addRaw(title, true).addRaw(body, true).write();
+async function addWorkflowSummary(body) {
+    await core.summary.addRaw(body, true).write();
 }
 
 
