@@ -2,14 +2,15 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as fs from 'fs'
-import parser from 'xml2js'
 import {parseBooleans} from 'xml2js/lib/processors'
 import * as glob from '@actions/glob'
 import {getProjectCoverage} from './process'
 import {getPRComment, getTitle} from './render'
-import {debug, getChangedLines} from './util'
+import {debug, getChangedLines, parseToReport} from './util'
 import {Project} from './models/project'
 import {ChangedFile} from './models/github'
+import {Report} from './models/jacoco-types'
+import {GitHub} from '@actions/github/lib/utils'
 
 export async function action(): Promise<void> {
   let continueOnError = true
@@ -45,13 +46,20 @@ export async function action(): Promise<void> {
 
     continueOnError = parseBooleans(core.getInput('continue-on-error'))
     const debugMode = parseBooleans(core.getInput('debug-mode'))
-    const summaryMode = parseBooleans(core.getInput('summary-mode'))
 
     const event = github.context.eventName
     core.info(`Event is ${event}`)
     if (debugMode) {
       core.info(`passEmoji: ${passEmoji}`)
       core.info(`failEmoji: ${failEmoji}`)
+    }
+
+    const commentType: string = core.getInput('comment-type')
+    if (debugMode) {
+      core.info(`commentType: ${commentType}`)
+    }
+    if (!isValidCommentType(commentType)) {
+      core.setFailed(`'comment-type' ${commentType} is invalid`)
     }
 
     let base: string
@@ -81,18 +89,17 @@ export async function action(): Promise<void> {
     const client = github.getOctokit(token)
 
     if (debugMode) core.info(`reportPaths: ${reportPaths}`)
-    const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
     const changedFiles = await getChangedFiles(base, head, client, debugMode)
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
-    const reportsJson = await reportsJsonAsync
-    const reports = reportsJson.map(report => report['report'])
+    const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
+    const reports = await reportsJsonAsync
 
     const project: Project = getProjectCoverage(reports, changedFiles)
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-overall',
-      parseFloat((project.overall.percentage ?? 0).toFixed(2))
+      project.overall ? parseFloat(project.overall.percentage.toFixed(2)) : 100
     )
     core.setOutput(
       'coverage-changed-files',
@@ -102,32 +109,46 @@ export async function action(): Promise<void> {
     const skip = skipIfNoChanges && project.modules.length === 0
     if (debugMode) core.info(`skip: ${skip}`)
     if (debugMode) core.info(`prNumber: ${prNumber}`)
-    if (prNumber != null && !skip) {
+    if (!skip) {
       const emoji = {
         pass: passEmoji,
         fail: failEmoji,
       }
-      const comment = getPRComment(
-                        project,
-                        {
-                          overall: minCoverageOverall,
-                          changed: minCoverageChangedFiles,
-                        },
-                        title,
-                        emoji
-                      )
-      if (summaryMode) {
-        await core.summary.addRaw(comment).write({overwrite: updateComment})
-      }
-      else {
-        await addComment(
-          prNumber,
-          updateComment,
-          getTitle(title),
-          comment,
-          client,
-          debugMode
-        )
+      const titleFormatted = getTitle(title)
+      const bodyFormatted = getPRComment(
+        project,
+        {
+          overall: minCoverageOverall,
+          changed: minCoverageChangedFiles,
+        },
+        title,
+        emoji
+      )
+      switch (commentType) {
+        case 'pr_comment':
+          await addComment(
+            prNumber,
+            updateComment,
+            titleFormatted,
+            bodyFormatted,
+            client,
+            debugMode
+          )
+          break
+        case 'summary':
+          await addWorkflowSummary(bodyFormatted)
+          break
+        case 'both':
+          await addComment(
+            prNumber,
+            updateComment,
+            titleFormatted,
+            bodyFormatted,
+            client,
+            debugMode
+          )
+          await addWorkflowSummary(bodyFormatted)
+          break
       }
     }
   } catch (error) {
@@ -144,7 +165,7 @@ export async function action(): Promise<void> {
 async function getJsonReports(
   xmlPaths: string[],
   debugMode: boolean
-): Promise<any[]> {
+): Promise<Report[]> {
   const globber = await glob.create(xmlPaths.join('\n'))
   const files = await globber.glob()
   if (debugMode) core.info(`Resolved files: ${files}`)
@@ -152,7 +173,7 @@ async function getJsonReports(
   return Promise.all(
     files.map(async path => {
       const reportXml = await fs.promises.readFile(path.trim(), 'utf-8')
-      return await parser.parseStringPromise(reportXml)
+      return await parseToReport(reportXml)
     })
   )
 }
@@ -160,7 +181,7 @@ async function getJsonReports(
 async function getChangedFiles(
   base: string,
   head: string,
-  client: any,
+  client: InstanceType<typeof GitHub>,
   debugMode: boolean
 ): Promise<ChangedFile[]> {
   const response = await client.rest.repos.compareCommits({
@@ -171,7 +192,8 @@ async function getChangedFiles(
   })
 
   const changedFiles: ChangedFile[] = []
-  for (const file of response.data.files) {
+  const files = response.data.files ?? []
+  for (const file of files) {
     if (debugMode) core.info(`file: ${debug(file)}`)
     const changedFile: ChangedFile = {
       filePath: file.filename,
@@ -184,13 +206,17 @@ async function getChangedFiles(
 }
 
 async function addComment(
-  prNumber: number,
+  prNumber: number | undefined,
   update: boolean,
   title: string,
   body: string,
-  client: any,
+  client: InstanceType<typeof GitHub>,
   debugMode: boolean
 ): Promise<void> {
+  if (prNumber === undefined) {
+    if (debugMode) core.info('prNumber not present')
+    return
+  }
   let commentUpdated = false
 
   if (debugMode) core.info(`update: ${update}`)
@@ -226,4 +252,16 @@ async function addComment(
       ...github.context.repo,
     })
   }
+}
+
+async function addWorkflowSummary(body: string): Promise<void> {
+  await core.summary.addRaw(body, true).write()
+}
+
+type Options = (typeof validCommentTypes)[number]
+
+const validCommentTypes = ['pr_comment', 'summary', 'both'] as const
+
+const isValidCommentType = (value: any): value is Options => {
+  return validCommentTypes.includes(value)
 }

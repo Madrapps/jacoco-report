@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.0//EN"
+        "report.dtd">
+<report name="Only Class with Counter">
+    <package name="com.example.package1">
+        <class name="com.example.package1.ExampleClass1">
+            <counter type="INSTRUCTION" missed="1" covered="2"/>
+        </class>
+    </package>
+</report>

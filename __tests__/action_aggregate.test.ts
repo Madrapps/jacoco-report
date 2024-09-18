@@ -20,6 +20,8 @@ describe('Aggregate report', function () {
         return './__tests__/__fixtures__/aggregate-report.xml'
       case 'token':
         return 'SMPLEHDjasdf876a987'
+      case 'comment-type':
+        return 'pr_comment'
       case 'min-coverage-overall':
         return 45
       case 'min-coverage-changed-files':
@@ -40,7 +42,6 @@ describe('Aggregate report', function () {
     output = jest.fn()
 
     core.getInput = jest.fn(getInput)
-    // @ts-ignore
     github.getOctokit = jest.fn(() => {
       return {
         rest: {
@@ -57,7 +58,6 @@ describe('Aggregate report', function () {
         },
       }
     })
-    // @ts-ignore
     core.setFailed = jest.fn(c => {
       fail(c)
     })

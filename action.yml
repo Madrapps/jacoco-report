@@ -5,9 +5,8 @@ inputs:
     description: 'Comma separated paths of the generated jacoco xml files (supports wildcard glob pattern)'
     required: true
   token:
-    description: 'Github personal token to add commits to Pull Request'
-    required: false
-    default: ${{ github.token }}
+    description: 'Github personal token to add comments to Pull Request'
+    required: true
   min-coverage-overall:
     description: 'The minimum code coverage that is required to pass for overall project'
     required: false
@@ -23,6 +22,14 @@ inputs:
     description: 'Update the coverage report comment instead of creating new ones. Requires title to works properly.'
     required: false
     default: 'false'
+  comment-type:
+    description: 'Specifies where to add the comment: as a PR comment, workflow summary, or both.'
+    required: false
+    default: 'pr_comment'
+    options:
+      - 'pr_comment'
+      - 'summary'
+      - 'both'
   skip-if-no-changes:
     description: "Comment won't be added if there is no coverage information present for the files changed"
     required: false
@@ -43,10 +50,6 @@ inputs:
     description: 'Run the action in debug mode and get debug logs printed in console'
     required: false
     default: 'false'
-  summary-mode:
-    description: 'Report to workflow summary'
-    required: false
-    default: 'false'
 
 outputs:
   coverage-overall:
@@ -55,7 +58,7 @@ outputs:
     description: 'The total coverage of all changed files'
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
 
 branding:
