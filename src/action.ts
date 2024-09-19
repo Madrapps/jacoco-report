@@ -83,7 +83,6 @@ export async function action(): Promise<void> {
           prNumber ??
           (await getPrNumberAssociatedWithCommit(client, github.context.sha))
         break
-      case 'workflow_run':
       case 'workflow_dispatch':
       case 'schedule':
         base = github.context.sha
@@ -91,6 +90,20 @@ export async function action(): Promise<void> {
         prNumber =
           prNumber ??
           (await getPrNumberAssociatedWithCommit(client, github.context.sha))
+        break
+      case 'workflow_run':
+        const pullRequests = github.context.payload?.workflow_run?.pull_requests
+        if (pullRequests?.length !== 0) {
+          base = pullRequests[0]?.base?.sha
+          head = pullRequests[0]?.head?.sha
+          prNumber = prNumber ?? pullRequests[0]?.number
+        } else {
+          base = github.context.sha
+          head = github.context.sha
+          prNumber =
+            prNumber ??
+            (await getPrNumberAssociatedWithCommit(client, github.context.sha))
+        }
         break
       default:
         core.setFailed(
