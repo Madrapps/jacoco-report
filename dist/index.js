@@ -93,11 +93,17 @@ async function action() {
                 prNumber = prNumber ?? github.context.payload.pull_request?.number;
                 break;
             case 'push':
+                base = github.context.payload.before;
+                head = github.context.payload.after;
+                prNumber =
+                    prNumber ??
+                        (await getPrNumberAssociatedWithCommit(client, github.context.sha));
+                break;
             case 'workflow_run':
             case 'workflow_dispatch':
             case 'schedule':
-                base = github.context.payload.before;
-                head = github.context.payload.after;
+                base = github.context.sha;
+                head = github.context.sha;
                 prNumber =
                     prNumber ??
                         (await getPrNumberAssociatedWithCommit(client, github.context.sha));
