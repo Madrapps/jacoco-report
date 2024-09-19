@@ -81,19 +81,23 @@ async function action() {
         if (!isValidCommentType(commentType)) {
             core.setFailed(`'comment-type' ${commentType} is invalid`);
         }
+        let prNumber = Number(core.getInput('pr-number')) || undefined;
+        const client = github.getOctokit(token);
         let base;
         let head;
-        let prNumber;
         switch (event) {
             case 'pull_request':
             case 'pull_request_target':
                 base = github.context.payload.pull_request?.base.sha;
                 head = github.context.payload.pull_request?.head.sha;
-                prNumber = github.context.payload.pull_request?.number;
+                prNumber = prNumber ?? github.context.payload.pull_request?.number;
                 break;
             case 'push':
                 base = github.context.payload.before;
                 head = github.context.payload.after;
+                prNumber =
+                    prNumber ??
+                        (await getPrNumberAssociatedWithCommit(client, github.context.sha));
                 break;
             default:
                 core.setFailed(`Only pull requests and pushes are supported, ${github.context.eventName} not supported.`);
@@ -101,7 +105,6 @@ async function action() {
         }
         core.info(`base sha: ${base}`);
         core.info(`head sha: ${head}`);
-        const client = github.getOctokit(token);
         if (debugMode)
             core.info(`reportPaths: ${reportPaths}`);
         const changedFiles = await getChangedFiles(base, head, client, debugMode);
@@ -234,6 +237,14 @@ const validCommentTypes = ['pr_comment', 'summary', 'both'];
 const isValidCommentType = (value) => {
     return validCommentTypes.includes(value);
 };
+async function getPrNumberAssociatedWithCommit(client, commitSha) {
+    const response = await client.rest.repos.listPullRequestsAssociatedWithCommit({
+        commit_sha: commitSha,
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+    });
+    return response.data.length > 0 ? response.data[0].number : undefined;
+}
 
 
 /***/ }),

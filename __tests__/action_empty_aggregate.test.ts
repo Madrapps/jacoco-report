@@ -49,6 +49,9 @@ describe('Aggregate Empty report', function () {
             compareCommits: jest.fn(() => {
               return compareCommitsResponse
             }),
+            listPullRequestsAssociatedWithCommit: jest.fn(() => {
+              return {data: []}
+            }),
           },
           issues: {
             createComment,

@@ -30,6 +30,9 @@ inputs:
       - 'pr_comment'
       - 'summary'
       - 'both'
+  pr-number:
+    description: 'The PR number to add the comment to. If not provided, the action will try to get it from the environment.'
+    required: false
   skip-if-no-changes:
     description: "Comment won't be added if there is no coverage information present for the files changed"
     required: false
