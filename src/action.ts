@@ -77,6 +77,9 @@ export async function action(): Promise<void> {
         prNumber = prNumber ?? github.context.payload.pull_request?.number
         break
       case 'push':
+      case 'workflow_run':
+      case 'workflow_dispatch':
+      case 'schedule':
         base = github.context.payload.before
         head = github.context.payload.after
         prNumber =
@@ -85,7 +88,7 @@ export async function action(): Promise<void> {
         break
       default:
         core.setFailed(
-          `Only pull requests and pushes are supported, ${github.context.eventName} not supported.`
+          `The event ${github.context.eventName} is not supported.`
         )
         return
     }
