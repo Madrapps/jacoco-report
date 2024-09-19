@@ -109,6 +109,12 @@ async function action() {
         core.info(`base sha: ${base}`);
         core.info(`head sha: ${head}`);
         if (debugMode)
+            core.info(`context: ${(0, util_1.debug)(github.context)}`);
+        if (debugMode)
+            core.info(`payload: ${(0, util_1.debug)(github.context.payload)}`);
+        if (debugMode)
+            core.info(`sha: ${github.context.sha}`);
+        if (debugMode)
             core.info(`reportPaths: ${reportPaths}`);
         const changedFiles = await getChangedFiles(base, head, client, debugMode);
         if (debugMode)
