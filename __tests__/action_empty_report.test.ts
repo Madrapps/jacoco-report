@@ -350,9 +350,7 @@ describe('Single Empty report', function () {
     it('Fail by throwing appropriate error', async () => {
       initContext('pr_review', {})
       core.setFailed = jest.fn(c => {
-        expect(c).toEqual(
-          'Only pull requests and pushes are supported, pr_review not supported.'
-        )
+        expect(c).toEqual('The event pr_review is not supported.')
       })
       core.setOutput = output
 

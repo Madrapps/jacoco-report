@@ -67,8 +67,9 @@ export async function action(): Promise<void> {
 
     const client = github.getOctokit(token)
 
-    let base: string
-    let head: string
+    const sha = github.context.sha
+    let base: string = sha
+    let head: string = sha
     switch (event) {
       case 'pull_request':
       case 'pull_request_target':
@@ -80,20 +81,37 @@ export async function action(): Promise<void> {
         base = github.context.payload.before
         head = github.context.payload.after
         prNumber =
-          prNumber ??
-          (await getPrNumberAssociatedWithCommit(client, github.context.sha))
+          prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha))
+        break
+      case 'workflow_dispatch':
+      case 'schedule':
+        prNumber =
+          prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha))
+        break
+      case 'workflow_run':
+        const pullRequests =
+          github.context.payload?.workflow_run?.pull_requests ?? []
+        if (pullRequests.length !== 0) {
+          base = pullRequests[0]?.base?.sha
+          head = pullRequests[0]?.head?.sha
+          prNumber = prNumber ?? pullRequests[0]?.number
+        } else {
+          prNumber =
+            prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha))
+        }
         break
       default:
         core.setFailed(
-          `Only pull requests and pushes are supported, ${github.context.eventName} not supported.`
+          `The event ${github.context.eventName} is not supported.`
         )
         return
     }
 
     core.info(`base sha: ${base}`)
     core.info(`head sha: ${head}`)
-
+    if (debugMode) core.info(`context: ${debug(github.context)}`)
     if (debugMode) core.info(`reportPaths: ${reportPaths}`)
+
     const changedFiles = await getChangedFiles(base, head, client, debugMode)
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 

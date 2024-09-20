@@ -50,8 +50,12 @@ describe('Single report', function () {
       return {
         rest: {
           repos: {
-            compareCommits: jest.fn(() => {
-              return compareCommitsResponse
+            compareCommits: jest.fn(({base, head}) => {
+              if (base !== head) {
+                return compareCommitsResponse
+              } else {
+                return {data: {files: []}}
+              }
             }),
             listPullRequestsAssociatedWithCommit: jest.fn(() => {
               return {data: []}
@@ -70,6 +74,7 @@ describe('Single report', function () {
     })
     core.summary.addRaw = addRaw
     core.summary.write = write
+    github.context.sha = 'guasft7asdtf78asfd87as6df7y2u3'
   })
 
   const compareCommitsResponse = {
@@ -366,6 +371,7 @@ describe('Single report', function () {
   })
 
   describe('Pull Request Target event', function () {
+    const eventName = 'pull_request_target'
     const payload = {
       pull_request: {
         number: '45',
@@ -378,8 +384,15 @@ describe('Single report', function () {
       },
     }
 
+    it('publish proper comment', async () => {
+      initContext(eventName, payload)
+      await action.action()
+
+      expect(createComment.mock.calls[0][0].body).toEqual(PROPER_COMMENT)
+    })
+
     it('set overall coverage output', async () => {
-      initContext('pull_request_target', payload)
+      initContext(eventName, payload)
       core.setOutput = output
 
       await action.action()
@@ -526,13 +539,128 @@ describe('Single report', function () {
     })
   })
 
-  describe('Other than push or pull_request or pull_request_target event', function () {
+  describe('Schedule event', function () {
+    const eventName = 'schedule'
+    const payload = {}
+
+    it('publish project coverage comment', async () => {
+      core.getInput = jest.fn(key => {
+        switch (key) {
+          case 'comment-type':
+            return 'summary'
+          default:
+            return getInput(key)
+        }
+      })
+      initContext(eventName, payload)
+
+      await action.action()
+
+      expect(addRaw.mock.calls[0][0]).toEqual(ONLY_PROJECT_COMMENT)
+      expect(write).toHaveBeenCalledTimes(1)
+    })
+
+    it('set overall coverage output', async () => {
+      initContext(eventName, payload)
+      core.setOutput = output
+
+      await action.action()
+
+      const out = output.mock.calls[0]
+      expect(out).toEqual(['coverage-overall', 35.25])
+    })
+  })
+
+  describe('Workflow Dispatch event', function () {
+    const eventName = 'workflow_dispatch'
+    const payload = {}
+
+    it('publish project coverage comment', async () => {
+      core.getInput = jest.fn(key => {
+        switch (key) {
+          case 'comment-type':
+            return 'summary'
+          default:
+            return getInput(key)
+        }
+      })
+      initContext(eventName, payload)
+
+      await action.action()
+
+      expect(addRaw.mock.calls[0][0]).toEqual(ONLY_PROJECT_COMMENT)
+      expect(write).toHaveBeenCalledTimes(1)
+    })
+
+    it('set overall coverage output', async () => {
+      initContext(eventName, payload)
+      core.setOutput = output
+
+      await action.action()
+
+      const out = output.mock.calls[0]
+      expect(out).toEqual(['coverage-overall', 35.25])
+    })
+  })
+
+  describe('Workflow Run event', function () {
+    const eventName = 'workflow_run'
+    const payload = {
+      workflow_run: {
+        pull_requests: [
+          {
+            base: {
+              sha: 'guasft7asdtf78asfd87as6df7y2u3',
+            },
+            head: {
+              sha: 'aahsdflais76dfa78wrglghjkaghkj',
+            },
+            number: 45,
+          },
+        ],
+      },
+    }
+
+    it('when proper payload present, publish proper comment', async () => {
+      initContext(eventName, payload)
+
+      await action.action()
+
+      expect(createComment.mock.calls[0][0].body).toEqual(PROPER_COMMENT)
+    })
+
+    it('when payload does not have pull_requests, publish project coverage comment', async () => {
+      initContext(eventName, {})
+      core.getInput = jest.fn(key => {
+        switch (key) {
+          case 'pr-number':
+            return 45
+          default:
+            return getInput(key)
+        }
+      })
+
+      await action.action()
+
+      expect(createComment.mock.calls[0][0].body).toEqual(ONLY_PROJECT_COMMENT)
+    })
+
+    it('set overall coverage output', async () => {
+      initContext(eventName, payload)
+      core.setOutput = output
+
+      await action.action()
+
+      const out = output.mock.calls[0]
+      expect(out).toEqual(['coverage-overall', 35.25])
+    })
+  })
+
+  describe('Unsupported events', function () {
     it('Fail by throwing appropriate error', async () => {
       initContext('pr_review', {})
       core.setFailed = jest.fn(c => {
-        expect(c).toEqual(
-          'Only pull requests and pushes are supported, pr_review not supported.'
-        )
+        expect(c).toEqual('The event pr_review is not supported.')
       })
       core.setOutput = output
 
@@ -561,3 +689,9 @@ const PROPER_COMMENT = `### JaCoCo Report
 |:-|:-|:-:|
 |[Math.kt](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt)|42% **\`-42%\`**|:x:|
 |[Utility.java](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/java/com/madrapps/jacoco/Utility.java)|18.03%|:green_apple:|`
+
+const ONLY_PROJECT_COMMENT = `### JaCoCo Report
+|Overall Project|35.25%|:x:|
+|:-|:-|:-:|
+
+> There is no coverage information present for the Files changed`
