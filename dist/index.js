@@ -83,8 +83,9 @@ async function action() {
         }
         let prNumber = Number(core.getInput('pr-number')) || undefined;
         const client = github.getOctokit(token);
-        let base;
-        let head;
+        const sha = github.context.sha;
+        let base = sha;
+        let head = sha;
         switch (event) {
             case 'pull_request':
             case 'pull_request_target':
@@ -96,30 +97,23 @@ async function action() {
                 base = github.context.payload.before;
                 head = github.context.payload.after;
                 prNumber =
-                    prNumber ??
-                        (await getPrNumberAssociatedWithCommit(client, github.context.sha));
+                    prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha));
                 break;
             case 'workflow_dispatch':
             case 'schedule':
-                base = github.context.sha;
-                head = github.context.sha;
                 prNumber =
-                    prNumber ??
-                        (await getPrNumberAssociatedWithCommit(client, github.context.sha));
+                    prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha));
                 break;
             case 'workflow_run':
-                const pullRequests = github.context.payload?.workflow_run?.pull_requests;
-                if (pullRequests?.length !== 0) {
+                const pullRequests = github.context.payload?.workflow_run?.pull_requests ?? [];
+                if (pullRequests.length !== 0) {
                     base = pullRequests[0]?.base?.sha;
                     head = pullRequests[0]?.head?.sha;
                     prNumber = prNumber ?? pullRequests[0]?.number;
                 }
                 else {
-                    base = github.context.sha;
-                    head = github.context.sha;
                     prNumber =
-                        prNumber ??
-                            (await getPrNumberAssociatedWithCommit(client, github.context.sha));
+                        prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha));
                 }
                 break;
             default:
@@ -130,10 +124,6 @@ async function action() {
         core.info(`head sha: ${head}`);
         if (debugMode)
             core.info(`context: ${(0, util_1.debug)(github.context)}`);
-        if (debugMode)
-            core.info(`payload: ${(0, util_1.debug)(github.context.payload)}`);
-        if (debugMode)
-            core.info(`sha: ${github.context.sha}`);
         if (debugMode)
             core.info(`reportPaths: ${reportPaths}`);
         const changedFiles = await getChangedFiles(base, head, client, debugMode);
