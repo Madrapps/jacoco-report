@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import {parseBooleans} from 'xml2js/lib/processors'
+import {Emoji, MinCoverage} from './models/project'
 
 const validCommentTypes = ['pr_comment', 'summary', 'both'] as const
 
@@ -37,13 +38,14 @@ export function getInputFields(): InputFields | undefined {
   return {
     token,
     pathsString,
-    minCoverageOverall,
-    minCoverageChangedFiles,
+    minCoverage: {
+      overall: minCoverageOverall,
+      changed: minCoverageChangedFiles,
+    },
     title,
     updateComment,
     skipIfNoChanges,
-    passEmoji,
-    failEmoji,
+    emoji: {pass: passEmoji, fail: failEmoji},
     continueOnError,
     debugMode,
     commentType,
@@ -83,13 +85,11 @@ type CommentType = (typeof validCommentTypes)[number]
 interface InputFields {
   token: string
   pathsString: string
-  minCoverageOverall: number
-  minCoverageChangedFiles: number
+  minCoverage: MinCoverage
   title: string
   updateComment: boolean
   skipIfNoChanges: boolean
-  passEmoji: string
-  failEmoji: string
+  emoji: Emoji
   continueOnError: boolean
   debugMode: boolean
   commentType: CommentType

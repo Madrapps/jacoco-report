@@ -22,10 +22,8 @@ export async function action(): Promise<void> {
       pathsString,
       debugMode,
       skipIfNoChanges,
-      passEmoji,
-      failEmoji,
-      minCoverageOverall,
-      minCoverageChangedFiles,
+      minCoverage,
+      emoji,
       title,
       updateComment,
       commentType,
@@ -62,13 +60,12 @@ export async function action(): Promise<void> {
     const skip = skipIfNoChanges && project.modules.length === 0
     if (debugMode) core.info(`skip: ${skip}`)
     if (!skip) {
-      const emoji = {pass: passEmoji, fail: failEmoji}
       const titleFormatted = getTitle(title)
       const bodyFormatted = getPRComment(
         project,
         {
-          overall: minCoverageOverall,
-          changed: minCoverageChangedFiles,
+          overall: minCoverage.overall,
+          changed: minCoverage.changed,
         },
         title,
         emoji

@@ -46,7 +46,7 @@ async function action() {
         const inputs = (0, inputs_1.getInputFields)();
         if (!inputs)
             return;
-        const { pathsString, debugMode, skipIfNoChanges, passEmoji, failEmoji, minCoverageOverall, minCoverageChangedFiles, title, updateComment, commentType, } = inputs;
+        const { pathsString, debugMode, skipIfNoChanges, minCoverage, emoji, title, updateComment, commentType, } = inputs;
         continueOnError = inputs.continueOnError;
         const client = github.getOctokit(inputs.token);
         if (debugMode)
@@ -66,11 +66,10 @@ async function action() {
         if (debugMode)
             core.info(`skip: ${skip}`);
         if (!skip) {
-            const emoji = { pass: passEmoji, fail: failEmoji };
             const titleFormatted = (0, render_1.getTitle)(title);
             const bodyFormatted = (0, render_1.getPRComment)(project, {
-                overall: minCoverageOverall,
-                changed: minCoverageChangedFiles,
+                overall: minCoverage.overall,
+                changed: minCoverage.changed,
             }, title, emoji);
             switch (commentType) {
                 case 'pr_comment':
@@ -311,13 +310,14 @@ function getInputFields() {
     return {
         token,
         pathsString,
-        minCoverageOverall,
-        minCoverageChangedFiles,
+        minCoverage: {
+            overall: minCoverageOverall,
+            changed: minCoverageChangedFiles,
+        },
         title,
         updateComment,
         skipIfNoChanges,
-        passEmoji,
-        failEmoji,
+        emoji: { pass: passEmoji, fail: failEmoji },
         continueOnError,
         debugMode,
         commentType,
