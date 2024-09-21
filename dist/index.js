@@ -35,73 +35,28 @@ exports.action = action;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const fs = __importStar(__nccwpck_require__(7147));
-const processors_1 = __nccwpck_require__(9236);
 const glob = __importStar(__nccwpck_require__(8090));
 const process_1 = __nccwpck_require__(8578);
 const render_1 = __nccwpck_require__(8523);
 const util_1 = __nccwpck_require__(1597);
-const validCommentTypes = ['pr_comment', 'summary', 'both'];
+const inputs_1 = __nccwpck_require__(3942);
 async function action() {
     let continueOnError = true;
     try {
-        const inputs = getInputFields();
+        const inputs = (0, inputs_1.getInputFields)();
         if (!inputs)
             return;
         const { pathsString, debugMode, skipIfNoChanges, passEmoji, failEmoji, minCoverageOverall, minCoverageChangedFiles, title, updateComment, commentType, } = inputs;
         continueOnError = inputs.continueOnError;
         const client = github.getOctokit(inputs.token);
-        const event = github.context.eventName;
-        core.info(`Event is ${event}`);
         if (debugMode)
             core.info(`context: ${(0, util_1.debug)(github.context)}`);
-        const sha = github.context.sha;
-        let base = sha;
-        let head = sha;
-        let prNumber = inputs.prNumber;
-        switch (event) {
-            case 'pull_request':
-            case 'pull_request_target':
-                base = github.context.payload.pull_request?.base.sha;
-                head = github.context.payload.pull_request?.head.sha;
-                prNumber = prNumber ?? github.context.payload.pull_request?.number;
-                break;
-            case 'push':
-                base = github.context.payload.before;
-                head = github.context.payload.after;
-                prNumber =
-                    prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha));
-                break;
-            case 'workflow_dispatch':
-            case 'schedule':
-                prNumber =
-                    prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha));
-                break;
-            case 'workflow_run':
-                const pullRequests = github.context.payload?.workflow_run?.pull_requests ?? [];
-                if (pullRequests.length !== 0) {
-                    base = pullRequests[0]?.base?.sha;
-                    head = pullRequests[0]?.head?.sha;
-                    prNumber = prNumber ?? pullRequests[0]?.number;
-                }
-                else {
-                    prNumber =
-                        prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha));
-                }
-                break;
-            default:
-                core.setFailed(`The event ${github.context.eventName} is not supported.`);
-                return;
-        }
-        core.info(`base sha: ${base}`);
-        core.info(`head sha: ${head}`);
-        const changedFiles = await getChangedFiles(base, head, client, debugMode);
-        if (debugMode)
-            core.info(`changedFiles: ${(0, util_1.debug)(changedFiles)}`);
-        const reportPaths = pathsString.split(',');
-        if (debugMode)
-            core.info(`reportPaths: ${reportPaths}`);
-        const reportsJsonAsync = getJsonReports(reportPaths, debugMode);
-        const reports = await reportsJsonAsync;
+        const sha = await getSha(client, inputs.prNumber, debugMode);
+        if (!sha)
+            return;
+        const { baseSha, headSha, prNumber } = sha;
+        const reports = await getReports(pathsString, debugMode);
+        const changedFiles = await getChangedFiles(baseSha, headSha, client, debugMode);
         const project = (0, process_1.getProjectCoverage)(reports, changedFiles);
         if (debugMode)
             core.info(`project: ${(0, util_1.debug)(project)}`);
@@ -110,13 +65,8 @@ async function action() {
         const skip = skipIfNoChanges && project.modules.length === 0;
         if (debugMode)
             core.info(`skip: ${skip}`);
-        if (debugMode)
-            core.info(`prNumber: ${prNumber}`);
         if (!skip) {
-            const emoji = {
-                pass: passEmoji,
-                fail: failEmoji,
-            };
+            const emoji = { pass: passEmoji, fail: failEmoji };
             const titleFormatted = (0, render_1.getTitle)(title);
             const bodyFormatted = (0, render_1.getPRComment)(project, {
                 overall: minCoverageOverall,
@@ -157,6 +107,17 @@ async function getJsonReports(xmlPaths, debugMode) {
         return await (0, util_1.parseToReport)(reportXml);
     }));
 }
+async function getReports(pathsString, debugMode) {
+    const reportPaths = pathsString.split(',');
+    if (debugMode)
+        core.info(`reportPaths: ${reportPaths}`);
+    const reportsJsonAsync = getJsonReports(reportPaths, debugMode);
+    const reports = await reportsJsonAsync;
+    if (debugMode) {
+        core.info(`reports: ${reports.map(report => report.name)}`);
+    }
+    return reports;
+}
 async function getChangedFiles(baseSha, headSha, client, debugMode) {
     const response = await client.rest.repos.compareCommits({
         base: baseSha,
@@ -176,6 +137,8 @@ async function getChangedFiles(baseSha, headSha, client, debugMode) {
         };
         changedFiles.push(changedFile);
     }
+    if (debugMode)
+        core.info(`changedFiles: ${(0, util_1.debug)(changedFiles)}`);
     return changedFiles;
 }
 async function addPRComment(prNumber, update, title, body, client, debugMode) {
@@ -226,8 +189,7 @@ async function addWorkflowSummary(body, debugMode) {
         core.info('Adding workflow summary');
     await core.summary.addRaw(body, true).write();
 }
-const isValidCommentType = (value) => validCommentTypes.includes(value);
-async function getPrNumberAssociatedWithCommit(client, commitSha) {
+async function getPrNumberForCommit(client, commitSha) {
     const response = await client.rest.repos.listPullRequestsAssociatedWithCommit({
         commit_sha: commitSha,
         owner: github.context.repo.owner,
@@ -235,25 +197,92 @@ async function getPrNumberAssociatedWithCommit(client, commitSha) {
     });
     return response.data.length > 0 ? response.data[0].number : undefined;
 }
-function getRequiredField(inputField) {
-    const input = getInput(inputField);
-    if (!input) {
-        core.setFailed(`'${inputField}' is missing`);
-        return undefined;
+async function getSha(client, prNum, debugMode) {
+    const context = github.context;
+    const payload = context.payload;
+    const event = context.eventName;
+    if (debugMode)
+        core.info(`Event is ${event}`);
+    const sha = context.sha;
+    let baseSha = sha;
+    let headSha = sha;
+    let prNumber = prNum;
+    switch (event) {
+        case 'pull_request':
+        case 'pull_request_target':
+            baseSha = payload.pull_request?.base.sha;
+            headSha = payload.pull_request?.head.sha;
+            prNumber = prNumber ?? payload.pull_request?.number;
+            break;
+        case 'push':
+            baseSha = payload.before;
+            headSha = payload.after;
+            prNumber = prNumber ?? (await getPrNumberForCommit(client, sha));
+            break;
+        case 'workflow_run':
+            const pullRequests = payload?.workflow_run?.pull_requests ?? [];
+            if (pullRequests.length !== 0) {
+                baseSha = pullRequests[0]?.base?.sha;
+                headSha = pullRequests[0]?.head?.sha;
+                prNumber = prNumber ?? pullRequests[0]?.number;
+            }
+            else {
+                prNumber = prNumber ?? (await getPrNumberForCommit(client, sha));
+            }
+            break;
+        case 'workflow_dispatch':
+        case 'schedule':
+            prNumber = prNumber ?? (await getPrNumberForCommit(client, sha));
+            break;
+        default:
+            core.setFailed(`The event ${context.eventName} is not supported.`);
+            return undefined;
     }
-    return input;
+    if (debugMode)
+        core.info(`base sha: ${baseSha}`);
+    if (debugMode)
+        core.info(`head sha: ${headSha}`);
+    if (debugMode)
+        core.info(`prNumber: ${prNumber}`);
+    return { baseSha: baseSha ?? sha, headSha: headSha ?? sha, prNumber };
 }
-function getFloatField(inputField) {
-    return parseFloat(getInput(inputField));
-}
-function getBooleanField(inputField) {
-    return (0, processors_1.parseBooleans)(getInput(inputField));
-}
-function getInput(inputField) {
-    const field = core.getInput(inputField);
-    core.info(`${inputField}: ${field}`);
-    return field;
-}
+
+
+/***/ }),
+
+/***/ 3942:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getInputFields = getInputFields;
+const core = __importStar(__nccwpck_require__(2186));
+const processors_1 = __nccwpck_require__(9236);
+const validCommentTypes = ['pr_comment', 'summary', 'both'];
 function getInputFields() {
     const token = getRequiredField('token');
     if (!token)
@@ -295,6 +324,27 @@ function getInputFields() {
         prNumber,
     };
 }
+function getRequiredField(inputField) {
+    const input = getInput(inputField);
+    if (!input) {
+        core.setFailed(`'${inputField}' is missing`);
+        return undefined;
+    }
+    return input;
+}
+function getFloatField(inputField) {
+    return parseFloat(getInput(inputField));
+}
+function getBooleanField(inputField) {
+    return (0, processors_1.parseBooleans)(getInput(inputField));
+}
+function getInput(inputField) {
+    const field = core.getInput(inputField);
+    core.info(`${inputField}: ${field}`);
+    return field;
+}
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const isValidCommentType = (value) => validCommentTypes.includes(value);
 
 
 /***/ }),

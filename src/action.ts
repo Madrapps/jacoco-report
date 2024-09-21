@@ -2,17 +2,15 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as fs from 'fs'
-import {parseBooleans} from 'xml2js/lib/processors'
 import * as glob from '@actions/glob'
 import {getProjectCoverage} from './process'
 import {getPRComment, getTitle} from './render'
 import {debug, getChangedLines, parseToReport} from './util'
 import {Project} from './models/project'
-import {ChangedFile} from './models/github'
+import {ChangedFile, Sha} from './models/github'
 import {Report} from './models/jacoco-types'
 import {GitHub} from '@actions/github/lib/utils'
-
-const validCommentTypes = ['pr_comment', 'summary', 'both'] as const
+import {getInputFields} from './inputs'
 
 export async function action(): Promise<void> {
   let continueOnError = true
@@ -34,66 +32,24 @@ export async function action(): Promise<void> {
     } = inputs
     continueOnError = inputs.continueOnError
 
-    const client = github.getOctokit(inputs.token)
-
-    const event = github.context.eventName
-    core.info(`Event is ${event}`)
+    const client: InstanceType<typeof GitHub> = github.getOctokit(inputs.token)
     if (debugMode) core.info(`context: ${debug(github.context)}`)
 
-    const sha = github.context.sha
-    let base: string = sha
-    let head: string = sha
-    let prNumber = inputs.prNumber
-    switch (event) {
-      case 'pull_request':
-      case 'pull_request_target':
-        base = github.context.payload.pull_request?.base.sha
-        head = github.context.payload.pull_request?.head.sha
-        prNumber = prNumber ?? github.context.payload.pull_request?.number
-        break
-      case 'push':
-        base = github.context.payload.before
-        head = github.context.payload.after
-        prNumber =
-          prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha))
-        break
-      case 'workflow_dispatch':
-      case 'schedule':
-        prNumber =
-          prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha))
-        break
-      case 'workflow_run':
-        const pullRequests =
-          github.context.payload?.workflow_run?.pull_requests ?? []
-        if (pullRequests.length !== 0) {
-          base = pullRequests[0]?.base?.sha
-          head = pullRequests[0]?.head?.sha
-          prNumber = prNumber ?? pullRequests[0]?.number
-        } else {
-          prNumber =
-            prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha))
-        }
-        break
-      default:
-        core.setFailed(
-          `The event ${github.context.eventName} is not supported.`
-        )
-        return
-    }
+    const sha = await getSha(client, inputs.prNumber, debugMode)
+    if (!sha) return
+    const {baseSha, headSha, prNumber} = sha
 
-    core.info(`base sha: ${base}`)
-    core.info(`head sha: ${head}`)
-
-    const changedFiles = await getChangedFiles(base, head, client, debugMode)
-    if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
-
-    const reportPaths = pathsString.split(',')
-    if (debugMode) core.info(`reportPaths: ${reportPaths}`)
-    const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
-    const reports = await reportsJsonAsync
+    const reports = await getReports(pathsString, debugMode)
+    const changedFiles = await getChangedFiles(
+      baseSha,
+      headSha,
+      client,
+      debugMode
+    )
 
     const project: Project = getProjectCoverage(reports, changedFiles)
     if (debugMode) core.info(`project: ${debug(project)}`)
+
     core.setOutput(
       'coverage-overall',
       project.overall ? parseFloat(project.overall.percentage.toFixed(2)) : 100
@@ -105,12 +61,8 @@ export async function action(): Promise<void> {
 
     const skip = skipIfNoChanges && project.modules.length === 0
     if (debugMode) core.info(`skip: ${skip}`)
-    if (debugMode) core.info(`prNumber: ${prNumber}`)
     if (!skip) {
-      const emoji = {
-        pass: passEmoji,
-        fail: failEmoji,
-      }
+      const emoji = {pass: passEmoji, fail: failEmoji}
       const titleFormatted = getTitle(title)
       const bodyFormatted = getPRComment(
         project,
@@ -175,6 +127,20 @@ async function getJsonReports(
   )
 }
 
+async function getReports(
+  pathsString: string,
+  debugMode: boolean
+): Promise<Report[]> {
+  const reportPaths = pathsString.split(',')
+  if (debugMode) core.info(`reportPaths: ${reportPaths}`)
+  const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
+  const reports = await reportsJsonAsync
+  if (debugMode) {
+    core.info(`reports: ${reports.map(report => report.name)}`)
+  }
+  return reports
+}
+
 async function getChangedFiles(
   baseSha: string,
   headSha: string,
@@ -199,6 +165,7 @@ async function getChangedFiles(
     }
     changedFiles.push(changedFile)
   }
+  if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
   return changedFiles
 }
 
@@ -260,12 +227,7 @@ async function addWorkflowSummary(
   await core.summary.addRaw(body, true).write()
 }
 
-type CommentType = (typeof validCommentTypes)[number]
-
-const isValidCommentType = (value: any): value is CommentType =>
-  validCommentTypes.includes(value)
-
-async function getPrNumberAssociatedWithCommit(
+async function getPrNumberForCommit(
   client: InstanceType<typeof GitHub>,
   commitSha: string
 ): Promise<number | undefined> {
@@ -280,89 +242,55 @@ async function getPrNumberAssociatedWithCommit(
   return response.data.length > 0 ? response.data[0].number : undefined
 }
 
-function getRequiredField(inputField: string): string | undefined {
-  const input = getInput(inputField)
-  if (!input) {
-    core.setFailed(`'${inputField}' is missing`)
-    return undefined
-  }
-  return input
-}
-
-function getFloatField(inputField: string): number {
-  return parseFloat(getInput(inputField))
-}
-
-function getBooleanField(inputField: string): boolean {
-  return parseBooleans(getInput(inputField))
-}
-
-function getInput(inputField: string): string {
-  const field = core.getInput(inputField)
-  core.info(`${inputField}: ${field}`)
-  return field
-}
-
-interface InputFields {
-  token: string
-  pathsString: string
-  minCoverageOverall: number
-  minCoverageChangedFiles: number
-  title: string
-  updateComment: boolean
-  skipIfNoChanges: boolean
-  passEmoji: string
-  failEmoji: string
-  continueOnError: boolean
+async function getSha(
+  client: InstanceType<typeof GitHub>,
+  prNum: number | undefined,
   debugMode: boolean
-  commentType: CommentType
-  prNumber: number | undefined
-}
+): Promise<Sha | undefined> {
+  const context = github.context
+  const payload = context.payload
+  const event = context.eventName
+  if (debugMode) core.info(`Event is ${event}`)
 
-function getInputFields(): InputFields | undefined {
-  const token = getRequiredField('token')
-  if (!token) return undefined
+  const sha = context.sha
+  let baseSha: string | undefined = sha
+  let headSha: string | undefined = sha
+  let prNumber = prNum
 
-  const pathsString = getRequiredField('paths')
-  if (!pathsString) return undefined
-
-  const minCoverageOverall = getFloatField('min-coverage-overall')
-  const minCoverageChangedFiles = getFloatField('min-coverage-changed-files')
-
-  const title = getInput('title')
-  const updateComment = getBooleanField('update-comment')
-  if (updateComment && !title) {
-    core.info("'title' not set. 'update-comment' doesn't work without 'title'")
+  switch (event) {
+    case 'pull_request':
+    case 'pull_request_target':
+      baseSha = payload.pull_request?.base.sha
+      headSha = payload.pull_request?.head.sha
+      prNumber = prNumber ?? payload.pull_request?.number
+      break
+    case 'push':
+      baseSha = payload.before
+      headSha = payload.after
+      prNumber = prNumber ?? (await getPrNumberForCommit(client, sha))
+      break
+    case 'workflow_run':
+      const pullRequests = payload?.workflow_run?.pull_requests ?? []
+      if (pullRequests.length !== 0) {
+        baseSha = pullRequests[0]?.base?.sha
+        headSha = pullRequests[0]?.head?.sha
+        prNumber = prNumber ?? pullRequests[0]?.number
+      } else {
+        prNumber = prNumber ?? (await getPrNumberForCommit(client, sha))
+      }
+      break
+    case 'workflow_dispatch':
+    case 'schedule':
+      prNumber = prNumber ?? (await getPrNumberForCommit(client, sha))
+      break
+    default:
+      core.setFailed(`The event ${context.eventName} is not supported.`)
+      return undefined
   }
-  const skipIfNoChanges = getBooleanField('skip-if-no-changes')
-  const passEmoji = getInput('pass-emoji')
-  const failEmoji = getInput('fail-emoji')
 
-  const continueOnError = getBooleanField('continue-on-error')
-  const debugMode = getBooleanField('debug-mode')
+  if (debugMode) core.info(`base sha: ${baseSha}`)
+  if (debugMode) core.info(`head sha: ${headSha}`)
+  if (debugMode) core.info(`prNumber: ${prNumber}`)
 
-  const commentType: string = getInput('comment-type')
-  if (!isValidCommentType(commentType)) {
-    core.setFailed(`'comment-type' ${commentType} is invalid`)
-    return undefined
-  }
-
-  const prNumber: number | undefined =
-    Number(getInput('pr-number')) || undefined
-
-  return {
-    token,
-    pathsString,
-    minCoverageOverall,
-    minCoverageChangedFiles,
-    title,
-    updateComment,
-    skipIfNoChanges,
-    passEmoji,
-    failEmoji,
-    continueOnError,
-    debugMode,
-    commentType,
-    prNumber,
-  }
+  return {baseSha: baseSha ?? sha, headSha: headSha ?? sha, prNumber}
 }
