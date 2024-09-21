@@ -11,6 +11,12 @@ export function getInputFields(): InputFields | undefined {
   const pathsString = getRequiredField('paths')
   if (!pathsString) return undefined
 
+  const commentType: string = getInput('comment-type')
+  if (!isValidCommentType(commentType)) {
+    core.setFailed(`'comment-type' ${commentType} is invalid`)
+    return undefined
+  }
+
   const minCoverageOverall = getFloatField('min-coverage-overall')
   const minCoverageChangedFiles = getFloatField('min-coverage-changed-files')
 
@@ -25,12 +31,6 @@ export function getInputFields(): InputFields | undefined {
 
   const continueOnError = getBooleanField('continue-on-error')
   const debugMode = getBooleanField('debug-mode')
-
-  const commentType: string = getInput('comment-type')
-  if (!isValidCommentType(commentType)) {
-    core.setFailed(`'comment-type' ${commentType} is invalid`)
-    return undefined
-  }
 
   const prNumber: number | undefined =
     Number(getInput('pr-number')) || undefined

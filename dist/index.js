@@ -289,6 +289,11 @@ function getInputFields() {
     const pathsString = getRequiredField('paths');
     if (!pathsString)
         return undefined;
+    const commentType = getInput('comment-type');
+    if (!isValidCommentType(commentType)) {
+        core.setFailed(`'comment-type' ${commentType} is invalid`);
+        return undefined;
+    }
     const minCoverageOverall = getFloatField('min-coverage-overall');
     const minCoverageChangedFiles = getFloatField('min-coverage-changed-files');
     const title = getInput('title');
@@ -301,11 +306,6 @@ function getInputFields() {
     const failEmoji = getInput('fail-emoji');
     const continueOnError = getBooleanField('continue-on-error');
     const debugMode = getBooleanField('debug-mode');
-    const commentType = getInput('comment-type');
-    if (!isValidCommentType(commentType)) {
-        core.setFailed(`'comment-type' ${commentType} is invalid`);
-        return undefined;
-    }
     const prNumber = Number(getInput('pr-number')) || undefined;
     return {
         token,
