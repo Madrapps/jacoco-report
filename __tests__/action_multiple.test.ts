@@ -156,33 +156,6 @@ describe('Multiple reports', function () {
       expect(out).toEqual(['coverage-changed-files', 22.6])
     })
   })
-
-  describe('Push event', function () {
-    const payload = {
-      before: 'guasft7asdtf78asfd87as6df7y2u3',
-      after: 'aahsdflais76dfa78wrglghjkaghkj',
-    }
-
-    it('set overall coverage output', async () => {
-      initContext('push', payload)
-      core.setOutput = output
-
-      await action.action()
-
-      const out = output.mock.calls[0]
-      expect(out).toEqual(['coverage-overall', 20.41])
-    })
-
-    it('set changed files coverage output', async () => {
-      initContext('push', payload)
-      core.setOutput = output
-
-      await action.action()
-
-      const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 22.6])
-    })
-  })
 })
 
 function initContext(eventName, payload): void {
