@@ -40,52 +40,24 @@ const glob = __importStar(__nccwpck_require__(8090));
 const process_1 = __nccwpck_require__(8578);
 const render_1 = __nccwpck_require__(8523);
 const util_1 = __nccwpck_require__(1597);
+const validCommentTypes = ['pr_comment', 'summary', 'both'];
 async function action() {
     let continueOnError = true;
     try {
-        const token = core.getInput('token');
-        if (!token) {
-            core.setFailed("'token' is missing");
+        const inputs = getInputFields();
+        if (!inputs)
             return;
-        }
-        const pathsString = core.getInput('paths');
-        if (!pathsString) {
-            core.setFailed("'paths' is missing");
-            return;
-        }
-        const reportPaths = pathsString.split(',');
-        const minCoverageOverall = parseFloat(core.getInput('min-coverage-overall'));
-        const minCoverageChangedFiles = parseFloat(core.getInput('min-coverage-changed-files'));
-        const title = core.getInput('title');
-        const updateComment = (0, processors_1.parseBooleans)(core.getInput('update-comment'));
-        if (updateComment) {
-            if (!title) {
-                core.info("'title' is not set. 'update-comment' does not work without 'title'");
-            }
-        }
-        const skipIfNoChanges = (0, processors_1.parseBooleans)(core.getInput('skip-if-no-changes'));
-        const passEmoji = core.getInput('pass-emoji');
-        const failEmoji = core.getInput('fail-emoji');
-        continueOnError = (0, processors_1.parseBooleans)(core.getInput('continue-on-error'));
-        const debugMode = (0, processors_1.parseBooleans)(core.getInput('debug-mode'));
+        const { pathsString, debugMode, skipIfNoChanges, passEmoji, failEmoji, minCoverageOverall, minCoverageChangedFiles, title, updateComment, commentType, } = inputs;
+        continueOnError = inputs.continueOnError;
+        const client = github.getOctokit(inputs.token);
         const event = github.context.eventName;
         core.info(`Event is ${event}`);
-        if (debugMode) {
-            core.info(`passEmoji: ${passEmoji}`);
-            core.info(`failEmoji: ${failEmoji}`);
-        }
-        const commentType = core.getInput('comment-type');
-        if (debugMode) {
-            core.info(`commentType: ${commentType}`);
-        }
-        if (!isValidCommentType(commentType)) {
-            core.setFailed(`'comment-type' ${commentType} is invalid`);
-        }
-        let prNumber = Number(core.getInput('pr-number')) || undefined;
-        const client = github.getOctokit(token);
+        if (debugMode)
+            core.info(`context: ${(0, util_1.debug)(github.context)}`);
         const sha = github.context.sha;
         let base = sha;
         let head = sha;
+        let prNumber = inputs.prNumber;
         switch (event) {
             case 'pull_request':
             case 'pull_request_target':
@@ -122,13 +94,12 @@ async function action() {
         }
         core.info(`base sha: ${base}`);
         core.info(`head sha: ${head}`);
-        if (debugMode)
-            core.info(`context: ${(0, util_1.debug)(github.context)}`);
-        if (debugMode)
-            core.info(`reportPaths: ${reportPaths}`);
         const changedFiles = await getChangedFiles(base, head, client, debugMode);
         if (debugMode)
             core.info(`changedFiles: ${(0, util_1.debug)(changedFiles)}`);
+        const reportPaths = pathsString.split(',');
+        if (debugMode)
+            core.info(`reportPaths: ${reportPaths}`);
         const reportsJsonAsync = getJsonReports(reportPaths, debugMode);
         const reports = await reportsJsonAsync;
         const project = (0, process_1.getProjectCoverage)(reports, changedFiles);
@@ -153,14 +124,14 @@ async function action() {
             }, title, emoji);
             switch (commentType) {
                 case 'pr_comment':
-                    await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
+                    await addPRComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
                     break;
                 case 'summary':
-                    await addWorkflowSummary(bodyFormatted);
+                    await addWorkflowSummary(bodyFormatted, debugMode);
                     break;
                 case 'both':
-                    await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
-                    await addWorkflowSummary(bodyFormatted);
+                    await addPRComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
+                    await addWorkflowSummary(bodyFormatted, debugMode);
                     break;
             }
         }
@@ -186,10 +157,10 @@ async function getJsonReports(xmlPaths, debugMode) {
         return await (0, util_1.parseToReport)(reportXml);
     }));
 }
-async function getChangedFiles(base, head, client, debugMode) {
+async function getChangedFiles(baseSha, headSha, client, debugMode) {
     const response = await client.rest.repos.compareCommits({
-        base,
-        head,
+        base: baseSha,
+        head: headSha,
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
     });
@@ -207,7 +178,7 @@ async function getChangedFiles(base, head, client, debugMode) {
     }
     return changedFiles;
 }
-async function addComment(prNumber, update, title, body, client, debugMode) {
+async function addPRComment(prNumber, update, title, body, client, debugMode) {
     if (prNumber === undefined) {
         if (debugMode)
             core.info('prNumber not present');
@@ -229,8 +200,9 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
         });
         const comment = comments.data.find((it) => it.body.startsWith(title));
         if (comment) {
-            if (debugMode)
+            if (debugMode) {
                 core.info(`Updating existing comment: id=${comment.id} \n body=${comment.body}`);
+            }
             await client.rest.issues.updateComment({
                 comment_id: comment.id,
                 body,
@@ -249,13 +221,12 @@ async function addComment(prNumber, update, title, body, client, debugMode) {
         });
     }
 }
-async function addWorkflowSummary(body) {
+async function addWorkflowSummary(body, debugMode) {
+    if (debugMode)
+        core.info('Adding workflow summary');
     await core.summary.addRaw(body, true).write();
 }
-const validCommentTypes = ['pr_comment', 'summary', 'both'];
-const isValidCommentType = (value) => {
-    return validCommentTypes.includes(value);
-};
+const isValidCommentType = (value) => validCommentTypes.includes(value);
 async function getPrNumberAssociatedWithCommit(client, commitSha) {
     const response = await client.rest.repos.listPullRequestsAssociatedWithCommit({
         commit_sha: commitSha,
@@ -263,6 +234,66 @@ async function getPrNumberAssociatedWithCommit(client, commitSha) {
         repo: github.context.repo.repo,
     });
     return response.data.length > 0 ? response.data[0].number : undefined;
+}
+function getRequiredField(inputField) {
+    const input = getInput(inputField);
+    if (!input) {
+        core.setFailed(`'${inputField}' is missing`);
+        return undefined;
+    }
+    return input;
+}
+function getFloatField(inputField) {
+    return parseFloat(getInput(inputField));
+}
+function getBooleanField(inputField) {
+    return (0, processors_1.parseBooleans)(getInput(inputField));
+}
+function getInput(inputField) {
+    const field = core.getInput(inputField);
+    core.info(`${inputField}: ${field}`);
+    return field;
+}
+function getInputFields() {
+    const token = getRequiredField('token');
+    if (!token)
+        return undefined;
+    const pathsString = getRequiredField('paths');
+    if (!pathsString)
+        return undefined;
+    const minCoverageOverall = getFloatField('min-coverage-overall');
+    const minCoverageChangedFiles = getFloatField('min-coverage-changed-files');
+    const title = getInput('title');
+    const updateComment = getBooleanField('update-comment');
+    if (updateComment && !title) {
+        core.info("'title' not set. 'update-comment' doesn't work without 'title'");
+    }
+    const skipIfNoChanges = getBooleanField('skip-if-no-changes');
+    const passEmoji = getInput('pass-emoji');
+    const failEmoji = getInput('fail-emoji');
+    const continueOnError = getBooleanField('continue-on-error');
+    const debugMode = getBooleanField('debug-mode');
+    const commentType = getInput('comment-type');
+    if (!isValidCommentType(commentType)) {
+        core.setFailed(`'comment-type' ${commentType} is invalid`);
+        return undefined;
+    }
+    const prNumber = Number(getInput('pr-number')) || undefined;
+    return {
+        token,
+        pathsString,
+        minCoverageOverall,
+        minCoverageChangedFiles,
+        title,
+        updateComment,
+        skipIfNoChanges,
+        passEmoji,
+        failEmoji,
+        continueOnError,
+        debugMode,
+        commentType,
+        prNumber,
+    };
 }
 
 

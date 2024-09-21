@@ -12,64 +12,38 @@ import {ChangedFile} from './models/github'
 import {Report} from './models/jacoco-types'
 import {GitHub} from '@actions/github/lib/utils'
 
+const validCommentTypes = ['pr_comment', 'summary', 'both'] as const
+
 export async function action(): Promise<void> {
   let continueOnError = true
   try {
-    const token = core.getInput('token')
-    if (!token) {
-      core.setFailed("'token' is missing")
-      return
-    }
-    const pathsString = core.getInput('paths')
-    if (!pathsString) {
-      core.setFailed("'paths' is missing")
-      return
-    }
+    const inputs = getInputFields()
+    if (!inputs) return
 
-    const reportPaths = pathsString.split(',')
-    const minCoverageOverall = parseFloat(core.getInput('min-coverage-overall'))
-    const minCoverageChangedFiles = parseFloat(
-      core.getInput('min-coverage-changed-files')
-    )
-    const title = core.getInput('title')
-    const updateComment = parseBooleans(core.getInput('update-comment'))
-    if (updateComment) {
-      if (!title) {
-        core.info(
-          "'title' is not set. 'update-comment' does not work without 'title'"
-        )
-      }
-    }
-    const skipIfNoChanges = parseBooleans(core.getInput('skip-if-no-changes'))
-    const passEmoji = core.getInput('pass-emoji')
-    const failEmoji = core.getInput('fail-emoji')
+    const {
+      pathsString,
+      debugMode,
+      skipIfNoChanges,
+      passEmoji,
+      failEmoji,
+      minCoverageOverall,
+      minCoverageChangedFiles,
+      title,
+      updateComment,
+      commentType,
+    } = inputs
+    continueOnError = inputs.continueOnError
 
-    continueOnError = parseBooleans(core.getInput('continue-on-error'))
-    const debugMode = parseBooleans(core.getInput('debug-mode'))
+    const client = github.getOctokit(inputs.token)
 
     const event = github.context.eventName
     core.info(`Event is ${event}`)
-    if (debugMode) {
-      core.info(`passEmoji: ${passEmoji}`)
-      core.info(`failEmoji: ${failEmoji}`)
-    }
-
-    const commentType: string = core.getInput('comment-type')
-    if (debugMode) {
-      core.info(`commentType: ${commentType}`)
-    }
-    if (!isValidCommentType(commentType)) {
-      core.setFailed(`'comment-type' ${commentType} is invalid`)
-    }
-
-    let prNumber: number | undefined =
-      Number(core.getInput('pr-number')) || undefined
-
-    const client = github.getOctokit(token)
+    if (debugMode) core.info(`context: ${debug(github.context)}`)
 
     const sha = github.context.sha
     let base: string = sha
     let head: string = sha
+    let prNumber = inputs.prNumber
     switch (event) {
       case 'pull_request':
       case 'pull_request_target':
@@ -109,12 +83,12 @@ export async function action(): Promise<void> {
 
     core.info(`base sha: ${base}`)
     core.info(`head sha: ${head}`)
-    if (debugMode) core.info(`context: ${debug(github.context)}`)
-    if (debugMode) core.info(`reportPaths: ${reportPaths}`)
 
     const changedFiles = await getChangedFiles(base, head, client, debugMode)
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
+    const reportPaths = pathsString.split(',')
+    if (debugMode) core.info(`reportPaths: ${reportPaths}`)
     const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
     const reports = await reportsJsonAsync
 
@@ -149,7 +123,7 @@ export async function action(): Promise<void> {
       )
       switch (commentType) {
         case 'pr_comment':
-          await addComment(
+          await addPRComment(
             prNumber,
             updateComment,
             titleFormatted,
@@ -159,10 +133,10 @@ export async function action(): Promise<void> {
           )
           break
         case 'summary':
-          await addWorkflowSummary(bodyFormatted)
+          await addWorkflowSummary(bodyFormatted, debugMode)
           break
         case 'both':
-          await addComment(
+          await addPRComment(
             prNumber,
             updateComment,
             titleFormatted,
@@ -170,7 +144,7 @@ export async function action(): Promise<void> {
             client,
             debugMode
           )
-          await addWorkflowSummary(bodyFormatted)
+          await addWorkflowSummary(bodyFormatted, debugMode)
           break
       }
     }
@@ -202,14 +176,14 @@ async function getJsonReports(
 }
 
 async function getChangedFiles(
-  base: string,
-  head: string,
+  baseSha: string,
+  headSha: string,
   client: InstanceType<typeof GitHub>,
   debugMode: boolean
 ): Promise<ChangedFile[]> {
   const response = await client.rest.repos.compareCommits({
-    base,
-    head,
+    base: baseSha,
+    head: headSha,
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
   })
@@ -228,7 +202,7 @@ async function getChangedFiles(
   return changedFiles
 }
 
-async function addComment(
+async function addPRComment(
   prNumber: number | undefined,
   update: boolean,
   title: string,
@@ -254,10 +228,11 @@ async function addComment(
     const comment = comments.data.find((it: any) => it.body.startsWith(title))
 
     if (comment) {
-      if (debugMode)
+      if (debugMode) {
         core.info(
           `Updating existing comment: id=${comment.id} \n body=${comment.body}`
         )
+      }
       await client.rest.issues.updateComment({
         comment_id: comment.id,
         body,
@@ -277,17 +252,18 @@ async function addComment(
   }
 }
 
-async function addWorkflowSummary(body: string): Promise<void> {
+async function addWorkflowSummary(
+  body: string,
+  debugMode: boolean
+): Promise<void> {
+  if (debugMode) core.info('Adding workflow summary')
   await core.summary.addRaw(body, true).write()
 }
 
-type Options = (typeof validCommentTypes)[number]
+type CommentType = (typeof validCommentTypes)[number]
 
-const validCommentTypes = ['pr_comment', 'summary', 'both'] as const
-
-const isValidCommentType = (value: any): value is Options => {
-  return validCommentTypes.includes(value)
-}
+const isValidCommentType = (value: any): value is CommentType =>
+  validCommentTypes.includes(value)
 
 async function getPrNumberAssociatedWithCommit(
   client: InstanceType<typeof GitHub>,
@@ -302,4 +278,91 @@ async function getPrNumberAssociatedWithCommit(
   )
 
   return response.data.length > 0 ? response.data[0].number : undefined
+}
+
+function getRequiredField(inputField: string): string | undefined {
+  const input = getInput(inputField)
+  if (!input) {
+    core.setFailed(`'${inputField}' is missing`)
+    return undefined
+  }
+  return input
+}
+
+function getFloatField(inputField: string): number {
+  return parseFloat(getInput(inputField))
+}
+
+function getBooleanField(inputField: string): boolean {
+  return parseBooleans(getInput(inputField))
+}
+
+function getInput(inputField: string): string {
+  const field = core.getInput(inputField)
+  core.info(`${inputField}: ${field}`)
+  return field
+}
+
+interface InputFields {
+  token: string
+  pathsString: string
+  minCoverageOverall: number
+  minCoverageChangedFiles: number
+  title: string
+  updateComment: boolean
+  skipIfNoChanges: boolean
+  passEmoji: string
+  failEmoji: string
+  continueOnError: boolean
+  debugMode: boolean
+  commentType: CommentType
+  prNumber: number | undefined
+}
+
+function getInputFields(): InputFields | undefined {
+  const token = getRequiredField('token')
+  if (!token) return undefined
+
+  const pathsString = getRequiredField('paths')
+  if (!pathsString) return undefined
+
+  const minCoverageOverall = getFloatField('min-coverage-overall')
+  const minCoverageChangedFiles = getFloatField('min-coverage-changed-files')
+
+  const title = getInput('title')
+  const updateComment = getBooleanField('update-comment')
+  if (updateComment && !title) {
+    core.info("'title' not set. 'update-comment' doesn't work without 'title'")
+  }
+  const skipIfNoChanges = getBooleanField('skip-if-no-changes')
+  const passEmoji = getInput('pass-emoji')
+  const failEmoji = getInput('fail-emoji')
+
+  const continueOnError = getBooleanField('continue-on-error')
+  const debugMode = getBooleanField('debug-mode')
+
+  const commentType: string = getInput('comment-type')
+  if (!isValidCommentType(commentType)) {
+    core.setFailed(`'comment-type' ${commentType} is invalid`)
+    return undefined
+  }
+
+  const prNumber: number | undefined =
+    Number(getInput('pr-number')) || undefined
+
+  return {
+    token,
+    pathsString,
+    minCoverageOverall,
+    minCoverageChangedFiles,
+    title,
+    updateComment,
+    skipIfNoChanges,
+    passEmoji,
+    failEmoji,
+    continueOnError,
+    debugMode,
+    commentType,
+    prNumber,
+  }
 }
