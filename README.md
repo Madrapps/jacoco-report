@@ -22,6 +22,9 @@ for [Creating a workflow file](https://help.github.com/en/articles/configuring-a
 - `min-coverage-changed-files` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for changed files
 - `update-comment` - [*optional* {default: false}] If true, updates the previous coverage report comment instead of creating new one.
   Requires `title` to work properly
+- `comment-type` - [*optional* {pr_comment, summary, both} {default: pr_comment}] Specifies where to add the comment, whether as a PR comment,
+  workflow summary, or both.
+- `pr-number` - [*optional*] The PR number to add the comment to. If not provided, the action will try to get it from the environment.
 - `title` - [*optional*] Title for the Pull Request comment
 - `skip-if-no-changes` - [*optional* {default: false}] If true, comment won't be added if there is no coverage information present for
   the files changed
@@ -61,7 +64,7 @@ jobs:
 
       - name: Add coverage to PR
         id: jacoco
-        uses: madrapps/jacoco-report@v1.7.1
+        uses: madrapps/jacoco-report@v1.7.2
         with:
           paths: |
             ${{ github.workspace }}/**/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,
@@ -121,7 +124,7 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
    ```yaml
    - name: Jacoco Report to PR
      id: jacoco
-     uses: madrapps/jacoco-report@v1.7.1
+     uses: madrapps/jacoco-report@v1.7.2
      with:
        paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
        token: ${{ secrets.GITHUB_TOKEN }}
@@ -142,7 +145,7 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
    ```yaml
    - name: Jacoco Report to PR
      id: jacoco
-     uses: madrapps/jacoco-report@v1.7.1
+     uses: madrapps/jacoco-report@v1.7.2
      with:
        paths: |
          ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,
@@ -162,7 +165,7 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
    ```yaml
    - name: Jacoco Report to PR
      id: jacoco
-     uses: madrapps/jacoco-report@v1.7.1
+     uses: madrapps/jacoco-report@v1.7.2
      with:
        paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
        token: ${{ secrets.GITHUB_TOKEN }}
