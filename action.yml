@@ -5,8 +5,9 @@ inputs:
     description: 'Comma separated paths of the generated jacoco xml files (supports wildcard glob pattern)'
     required: true
   token:
-    description: 'Github personal token to add comments to Pull Request'
-    required: true
+    description: Github token to add comments to Pull Request (defaults to automatic token, make sure job permissions allow it to write to pull_requests)
+    required: false
+    default: ${{ github.token }}
   min-coverage-overall:
     description: 'The minimum code coverage that is required to pass for overall project'
     required: false
