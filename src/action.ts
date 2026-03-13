@@ -41,6 +41,8 @@ export async function action(): Promise<void> {
       }
     }
     const skipIfNoChanges = parseBooleans(core.getInput('skip-if-no-changes'))
+    const ignoreRemovedFiles =
+      parseBooleans(core.getInput('ignore-removed-files')) === true
     const passEmoji = core.getInput('pass-emoji')
     const failEmoji = core.getInput('fail-emoji')
 
@@ -112,7 +114,13 @@ export async function action(): Promise<void> {
     if (debugMode) core.info(`context: ${debug(github.context)}`)
     if (debugMode) core.info(`reportPaths: ${reportPaths}`)
 
-    const changedFiles = await getChangedFiles(base, head, client, debugMode)
+    const changedFiles = await getChangedFiles(
+      base,
+      head,
+      client,
+      debugMode,
+      ignoreRemovedFiles
+    )
     if (debugMode) core.info(`changedFiles: ${debug(changedFiles)}`)
 
     const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
@@ -205,7 +213,8 @@ async function getChangedFiles(
   base: string,
   head: string,
   client: InstanceType<typeof GitHub>,
-  debugMode: boolean
+  debugMode: boolean,
+  ignoreRemovedFiles: boolean
 ): Promise<ChangedFile[]> {
   const response = await client.rest.repos.compareCommits({
     base,
@@ -218,10 +227,14 @@ async function getChangedFiles(
   const files = response.data.files ?? []
   for (const file of files) {
     if (debugMode) core.info(`file: ${debug(file)}`)
+    if (ignoreRemovedFiles && file.status === 'removed') {
+      continue
+    }
     const changedFile: ChangedFile = {
       filePath: file.filename,
       url: file.blob_url,
       lines: getChangedLines(file.patch),
+      status: file.status,
     }
     changedFiles.push(changedFile)
   }

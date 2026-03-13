@@ -30,6 +30,8 @@ describe('Single report', function () {
         return 45
       case 'min-coverage-changed-files':
         return 80
+      case 'ignore-removed-files':
+        return 'false'
       case 'pass-emoji':
         return ':green_apple:'
       case 'fail-emoji':
@@ -147,6 +149,100 @@ describe('Single report', function () {
 
       const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-files', 28.83])
+    })
+
+    it('keep removed files when the option is disabled', async () => {
+      initContext(eventName, payload)
+      core.setOutput = output
+
+      github.getOctokit = jest.fn(() => {
+        return {
+          rest: {
+            repos: {
+              compareCommits: jest.fn(({base, head}) => {
+                if (base !== head) {
+                  return {
+                    data: {
+                      files: [
+                        {
+                          ...compareCommitsResponse.data.files[0],
+                          status: 'removed',
+                        },
+                        ...compareCommitsResponse.data.files.slice(1),
+                      ],
+                    },
+                  }
+                }
+                return {data: {files: []}}
+              }),
+              listPullRequestsAssociatedWithCommit: jest.fn(() => {
+                return {data: []}
+              }),
+            },
+            issues: {
+              createComment,
+              listComments,
+              updateComment,
+            },
+          },
+        }
+      })
+
+      await action.action()
+
+      const out = output.mock.calls[1]
+      expect(out).toEqual(['coverage-changed-files', 28.83])
+    })
+
+    it('ignore removed files when the option is enabled', async () => {
+      initContext(eventName, payload)
+      core.setOutput = output
+      core.getInput = jest.fn(key => {
+        switch (key) {
+          case 'ignore-removed-files':
+            return 'true'
+          default:
+            return getInput(key)
+        }
+      })
+
+      github.getOctokit = jest.fn(() => {
+        return {
+          rest: {
+            repos: {
+              compareCommits: jest.fn(({base, head}) => {
+                if (base !== head) {
+                  return {
+                    data: {
+                      files: [
+                        {
+                          ...compareCommitsResponse.data.files[0],
+                          status: 'removed',
+                        },
+                        ...compareCommitsResponse.data.files.slice(1),
+                      ],
+                    },
+                  }
+                }
+                return {data: {files: []}}
+              }),
+              listPullRequestsAssociatedWithCommit: jest.fn(() => {
+                return {data: []}
+              }),
+            },
+            issues: {
+              createComment,
+              listComments,
+              updateComment,
+            },
+          },
+        }
+      })
+
+      await action.action()
+
+      const out = output.mock.calls[1]
+      expect(out).toEqual(['coverage-changed-files', 18.03])
     })
 
     describe('With update-comment ON', function () {
