@@ -28,6 +28,7 @@ for [Creating a workflow file](https://help.github.com/en/articles/configuring-a
 - `title` - [*optional*] Title for the Pull Request comment
 - `skip-if-no-changes` - [*optional* {default: false}] If true, comment won't be added if there is no coverage information present for
   the files changed
+- `ignore-removed-files` - [*optional* {default: false}] If true, files reported as removed by the GitHub compare API are excluded from changed files coverage calculation
 - `pass-emoji` - [*optional* {default: :green_apple:}] Emoji to use for pass status shown when 'coverage >= min coverage' (should be a Github supported emoji).
 - `fail-emoji` - [*optional* {default: :x:}] Emoji to use for fail status shown when 'coverage < min coverage' (should be a Github supported emoji).
 - `continue-on-error` - [*optional* {default: true}] If true, then do not fail the action on error, but log a warning

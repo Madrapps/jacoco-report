@@ -37,6 +37,10 @@ inputs:
     description: "Comment won't be added if there is no coverage information present for the files changed"
     required: false
     default: 'false'
+  ignore-removed-files:
+    description: 'Ignore files with status removed from the GitHub compare API when calculating changed files coverage'
+    required: false
+    default: 'false'
   pass-emoji:
     description: 'Github emoji to use for pass status shown when coverage greater than min coverage (should be a Github supported emoji)'
     required: false

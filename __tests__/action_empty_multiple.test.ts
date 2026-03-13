@@ -63,6 +63,8 @@ describe('Multiple Empty reports', function () {
         return 45
       case 'min-coverage-changed-files':
         return 90
+      case 'ignore-removed-files':
+        return 'false'
       case 'pass-emoji':
         return ':green_apple:'
       case 'fail-emoji':
