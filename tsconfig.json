@@ -1,8 +1,11 @@
 {
-  "extends": "@tsconfig/node20/tsconfig.json",
+  "extends": "@tsconfig/node24/tsconfig.json",
   "compilerOptions": {
     "outDir": "./lib" /* Redirect output structure to the directory. */,
-    "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type. */
+    "noImplicitAny": true,
+    /* Raise error on expressions and declarations with an implied 'any' type. */
+    "allowSyntheticDefaultImports": true,
+    "types": ["jest", "node"]
   },
   "exclude": ["node_modules"]
 }

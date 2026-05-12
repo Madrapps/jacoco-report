@@ -13,6 +13,7 @@ import {Report} from './models/jacoco-types'
 import {GitHub} from '@actions/github/lib/utils'
 
 export async function action(): Promise<void> {
+  core.info(`Running on Node.js ${process.version}`)
   let continueOnError = true
   try {
     const token = core.getInput('token')
