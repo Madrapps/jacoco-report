@@ -4,6 +4,7 @@
 
 This fork introduces several improvements and new features:
 - **Custom `head-sha`**: Added a new `head-sha` input to allow manually specifying the head SHA for coverage comparison.
+- **Node 24 migration**: Migrated the action runtime and toolchain to Node.js 24 with the help of [Claude Code](https://claude.ai/code).
 
 [![Tests](https://github.com/Madrapps/jacoco-report/actions/workflows/check.yml/badge.svg)](https://github.com/Madrapps/jacoco-report/actions/workflows/check.yml)
 
