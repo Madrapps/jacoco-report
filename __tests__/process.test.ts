@@ -1,3 +1,4 @@
+import {describe, it, expect} from '@jest/globals'
 import fs from 'fs'
 import * as process from '../src/process'
 import {CHANGED_FILE, PROJECT} from './mocks.test'

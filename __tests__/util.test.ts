@@ -1,10 +1,8 @@
+import {describe, it, expect} from '@jest/globals'
 import * as util from '../src/util'
 import * as fs from 'fs'
 import {Report} from '../src/models/jacoco-types'
 import {parseToReport} from '../src/util'
-
-jest.mock('@actions/core')
-jest.mock('@actions/github')
 
 describe('Util', function () {
   describe('getChangedLines', function () {

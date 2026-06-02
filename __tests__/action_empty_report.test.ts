@@ -1,12 +1,17 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import * as action from '../src/action'
-import * as core from '@actions/core'
-import * as github from '@actions/github'
+import {jest, describe, it, expect, beforeEach} from '@jest/globals'
+import {createMockCore, createMockContext, createMockGithub} from './helpers'
 import {PATCH} from './mocks.test'
 
-jest.mock('@actions/core')
-jest.mock('@actions/github')
+const mockCore = createMockCore()
+const mockContext = createMockContext()
+const mockGithub = createMockGithub(mockContext)
+
+jest.unstable_mockModule('@actions/core', () => mockCore)
+jest.unstable_mockModule('@actions/github', () => mockGithub)
+
+const action = await import('../src/action')
 
 describe('Single Empty report', function () {
   let createComment
@@ -41,27 +46,26 @@ describe('Single Empty report', function () {
     updateComment = jest.fn()
     output = jest.fn()
 
-    core.getInput = jest.fn(getInput)
-    github.getOctokit = jest.fn(() => {
-      return {
-        rest: {
-          repos: {
-            compareCommits: jest.fn(() => {
-              return compareCommitsResponse
-            }),
-            listPullRequestsAssociatedWithCommit: jest.fn(() => {
-              return {data: []}
-            }),
-          },
-          issues: {
-            createComment,
-            listComments,
-            updateComment,
-          },
+    mockCore.getInput.mockImplementation(getInput)
+    mockCore.setOutput.mockImplementation((...args) => output(...args))
+    mockGithub.getOctokit.mockReturnValue({
+      rest: {
+        repos: {
+          compareCommits: jest.fn(() => {
+            return compareCommitsResponse
+          }),
+          listPullRequestsAssociatedWithCommit: jest.fn(() => {
+            return {data: []}
+          }),
         },
-      }
+        issues: {
+          createComment,
+          listComments,
+          updateComment,
+        },
+      },
     })
-    core.setFailed = jest.fn(c => {
+    mockCore.setFailed.mockImplementation(c => {
       fail(c)
     })
   })
@@ -120,7 +124,6 @@ describe('Single Empty report', function () {
 
     it('set overall coverage output', async () => {
       initContext(eventName, payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -130,7 +133,6 @@ describe('Single Empty report', function () {
 
     it('set changed files coverage output', async () => {
       initContext(eventName, payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -154,7 +156,7 @@ describe('Single Empty report', function () {
 
       it('if comment exists, update it', async () => {
         initContext(eventName, payload)
-        core.getInput = jest.fn(key => {
+        mockCore.getInput.mockImplementation(key => {
           return mockInput(key)
         })
 
@@ -173,7 +175,7 @@ describe('Single Empty report', function () {
 
       it('if comment does not exist, create new comment', async () => {
         initContext(eventName, payload)
-        core.getInput = jest.fn(key => {
+        mockCore.getInput.mockImplementation(key => {
           return mockInput(key)
         })
         listComments.mockReturnValue({
@@ -188,7 +190,7 @@ describe('Single Empty report', function () {
 
       it('if title not set, warn user and create new comment', async () => {
         initContext(eventName, payload)
-        core.getInput = jest.fn(c => {
+        mockCore.getInput.mockImplementation(c => {
           switch (c) {
             case 'title':
               return ''
@@ -206,7 +208,7 @@ describe('Single Empty report', function () {
 
         await action.action()
 
-        expect(core.info).toBeCalledWith(
+        expect(mockCore.info).toHaveBeenCalledWith(
           "'title' is not set. 'update-comment' does not work without 'title'"
         )
         expect(createComment.mock.calls[0][0].body).not.toBeNull()
@@ -216,7 +218,7 @@ describe('Single Empty report', function () {
 
     describe('Skip if no changes set to true', function () {
       function mockInput(): void {
-        core.getInput = jest.fn(c => {
+        mockCore.getInput.mockImplementation(c => {
           switch (c) {
             case 'skip-if-no-changes':
               return 'true'
@@ -238,32 +240,30 @@ describe('Single Empty report', function () {
       it("Don't add comment when coverage absent for changes files", async () => {
         initContext(eventName, payload)
         mockInput()
-        github.getOctokit = jest.fn(() => {
-          return {
-            rest: {
-              repos: {
-                compareCommits: jest.fn(() => {
-                  return {
-                    data: {
-                      files: [
-                        {
-                          filename: '.github/workflows/coverage.yml',
-                          blob_url:
-                            'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/.github/workflows/coverage.yml',
-                          patch: PATCH.SINGLE_MODULE.COVERAGE,
-                        },
-                      ],
-                    },
-                  }
-                }),
-              },
-              issues: {
-                createComment,
-                listComments,
-                updateComment,
-              },
+        mockGithub.getOctokit.mockReturnValue({
+          rest: {
+            repos: {
+              compareCommits: jest.fn(() => {
+                return {
+                  data: {
+                    files: [
+                      {
+                        filename: '.github/workflows/coverage.yml',
+                        blob_url:
+                          'https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/.github/workflows/coverage.yml',
+                        patch: PATCH.SINGLE_MODULE.COVERAGE,
+                      },
+                    ],
+                  },
+                }
+              }),
             },
-          }
+            issues: {
+              createComment,
+              listComments,
+              updateComment,
+            },
+          },
         })
 
         await action.action()
@@ -275,7 +275,7 @@ describe('Single Empty report', function () {
     describe('With custom emoji', function () {
       it('publish proper comment', async () => {
         initContext(eventName, payload)
-        core.getInput = jest.fn(key => {
+        mockCore.getInput.mockImplementation(key => {
           switch (key) {
             case 'pass-emoji':
               return ':green_circle:'
@@ -310,7 +310,6 @@ describe('Single Empty report', function () {
 
     it('set overall coverage output', async () => {
       initContext('pull_request_target', payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -327,7 +326,6 @@ describe('Single Empty report', function () {
 
     it('set overall coverage output', async () => {
       initContext('push', payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -337,7 +335,6 @@ describe('Single Empty report', function () {
 
     it('set changed files coverage output', async () => {
       initContext('push', payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -349,10 +346,9 @@ describe('Single Empty report', function () {
   describe('Other than push or pull_request or pull_request_target event', function () {
     it('Fail by throwing appropriate error', async () => {
       initContext('pr_review', {})
-      core.setFailed = jest.fn(c => {
+      mockCore.setFailed.mockImplementation(c => {
         expect(c).toEqual('The event pr_review is not supported.')
       })
-      core.setOutput = output
 
       await action.action()
     })
@@ -360,11 +356,9 @@ describe('Single Empty report', function () {
 })
 
 function initContext(eventName, payload): void {
-  const context = github.context
-  context.eventName = eventName
-  context.payload = payload
-  context.repo = 'jacoco-playground'
-  context.owner = 'madrapps'
+  mockContext.eventName = eventName
+  mockContext.payload = payload
+  mockContext.repo = {owner: 'madrapps', repo: 'jacoco-playground'}
 }
 
 const PROPER_COMMENT = `> There is no coverage information present for the Files changed`

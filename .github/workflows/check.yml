@@ -19,11 +19,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install
         run: |
           npm install
+
+      - name: Check format
+        run: |
+          npm run format:check
 
       - name: Lint
         run: |

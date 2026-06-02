@@ -1,9 +1,16 @@
 {
-  "extends": "@tsconfig/node24/tsconfig.json",
   "compilerOptions": {
-    "outDir": "./lib",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "strict": true,
     "noImplicitAny": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
     "isolatedModules": true
   },
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "__tests__"]
 }

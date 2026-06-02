@@ -1,3 +1,4 @@
+import {describe, it, expect} from '@jest/globals'
 import * as render from '../src/render'
 import {PROJECT} from './mocks.test'
 import {Project} from '../src/models/project'

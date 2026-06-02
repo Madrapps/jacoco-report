@@ -1,6 +1,6 @@
-import {JacocoFile} from './models/jacoco'
+import {JacocoFile} from './models/jacoco.js'
 import parser from 'xml2js'
-import {Counter, Package, Report} from './models/jacoco-types'
+import {Counter, Package, Report} from './models/jacoco-types.js'
 
 export function debug(obj: object): string {
   return JSON.stringify(obj, null, 4)
