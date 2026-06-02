@@ -130,6 +130,5 @@ describe('Input validation', function () {
 function initContext(eventName, payload): void {
   mockContext.eventName = eventName
   mockContext.payload = payload
-  mockContext.repo = 'jacoco-playground'
-  mockContext.owner = 'madrapps'
+  mockContext.repo = {owner: 'madrapps', repo: 'jacoco-playground'}
 }

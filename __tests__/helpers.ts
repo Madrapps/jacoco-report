@@ -18,8 +18,7 @@ export interface MockContext {
   eventName: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: Record<string, any>
-  repo: string | {owner: string; repo: string}
-  owner: string
+  repo: {owner: string; repo: string}
   sha: string
 }
 
@@ -48,8 +47,7 @@ export function createMockContext(): MockContext {
   return {
     eventName: '',
     payload: {},
-    repo: '',
-    owner: '',
+    repo: {owner: '', repo: ''},
     sha: '',
   }
 }

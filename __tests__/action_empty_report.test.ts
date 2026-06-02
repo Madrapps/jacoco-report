@@ -358,8 +358,7 @@ describe('Single Empty report', function () {
 function initContext(eventName, payload): void {
   mockContext.eventName = eventName
   mockContext.payload = payload
-  mockContext.repo = 'jacoco-playground'
-  mockContext.owner = 'madrapps'
+  mockContext.repo = {owner: 'madrapps', repo: 'jacoco-playground'}
 }
 
 const PROPER_COMMENT = `> There is no coverage information present for the Files changed`
