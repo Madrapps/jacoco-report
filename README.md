@@ -14,8 +14,8 @@ An [example workflow](#example-workflow) is available below. For more informatio
 Documentation
 for [Creating a workflow file](https://help.github.com/en/articles/configuring-a-workflow#creating-a-workflow-file).
 
-Note: The following permissions are required for the action to run:
-- `issues: write` (or `pull-requests: write`)
+Note: When using `comment-type: pr_comment` or `comment-type: both` (the default is `pr_comment`), the following permissions are required:
+- `pull-requests: write` (or `issues: write`)
 - `contents: read`
 
 ### Inputs
