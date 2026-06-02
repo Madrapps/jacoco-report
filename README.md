@@ -31,6 +31,8 @@ Note: When using `comment-type: pr_comment` or `comment-type: both` (the default
   workflow summary, or both.
 - `pr-number` - [*optional*] The PR number to add the comment to. If not provided, the action will try to get it from the environment.
 - `title` - [*optional*] Title for the Pull Request comment
+- `head-sha` - [*optional*] The head SHA to use for comparing changes. Useful when the head SHA is not available in the context (e.g. PRs from forks via `workflow_run`).
+- `base-sha` - [*optional*] The base SHA to use for comparing changes. Useful when the base SHA is not available in the context (e.g. PRs from forks via `workflow_run`).
 - `skip-if-no-changes` - [*optional* {default: false}] If true, comment won't be added if there is no coverage information present for
   the files changed
 - `pass-emoji` - [*optional* {default: :green_apple:}] Emoji to use for pass status shown when 'coverage >= min coverage' (should be a Github supported emoji).

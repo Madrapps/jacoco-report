@@ -107,6 +107,17 @@ export async function action(): Promise<void> {
         return
     }
 
+    const headShaInput = core.getInput('head-sha')
+    const baseShaInput = core.getInput('base-sha')
+    switch (event) {
+      case 'pull_request':
+      case 'pull_request_target':
+      case 'workflow_run':
+        if (headShaInput) head = headShaInput
+        if (baseShaInput) base = baseShaInput
+        break
+    }
+
     core.info(`base sha: ${base}`)
     core.info(`head sha: ${head}`)
     if (debugMode) core.info(`context: ${debug(github.context)}`)
