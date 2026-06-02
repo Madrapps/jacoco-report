@@ -57,6 +57,9 @@ inputs:
   head-sha:
     description: 'The head SHA to use for comparing changes. Useful when the head SHA is not available in the context (e.g. PRs from forks via workflow_run).'
     required: false
+  base-sha:
+    description: 'The base SHA to use for comparing changes. Useful when the base SHA is not available in the context (e.g. PRs from forks via workflow_run).'
+    required: false
 
 outputs:
   coverage-overall:

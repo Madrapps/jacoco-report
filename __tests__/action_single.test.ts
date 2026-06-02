@@ -693,7 +693,38 @@ describe('Single report', function () {
       )
     })
 
-    it('ignores head-sha input for push events', async () => {
+    it('uses base-sha input when provided', async () => {
+      const compareCommits = jest.fn(() => compareCommitsResponse)
+      mockGithub.getOctokit.mockReturnValue({
+        rest: {
+          repos: {
+            compareCommits,
+            listPullRequestsAssociatedWithCommit: jest.fn(() => ({data: []})),
+          },
+          issues: {createComment: jest.fn(), listComments: jest.fn(), updateComment: jest.fn()},
+        },
+      })
+      mockCore.getInput.mockImplementation(key => {
+        switch (key) {
+          case 'base-sha':
+            return 'custom-base-sha'
+          default:
+            return getInput(key)
+        }
+      })
+      initContext(eventName, payload)
+
+      await action.action()
+
+      expect(compareCommits).toHaveBeenCalledWith(
+        expect.objectContaining({
+          base: 'custom-base-sha',
+          head: 'head-sha-from-payload',
+        })
+      )
+    })
+
+    it('ignores head-sha and base-sha inputs for push events', async () => {
       const compareCommits = jest.fn(() => compareCommitsResponse)
       mockGithub.getOctokit.mockReturnValue({
         rest: {
@@ -708,6 +739,8 @@ describe('Single report', function () {
         switch (key) {
           case 'head-sha':
             return 'custom-head-sha'
+          case 'base-sha':
+            return 'custom-base-sha'
           default:
             return getInput(key)
         }

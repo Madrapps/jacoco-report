@@ -44302,14 +44302,16 @@ async function action() {
                 return;
         }
         const headShaInput = getInput('head-sha');
-        if (headShaInput) {
-            switch (event) {
-                case 'pull_request':
-                case 'pull_request_target':
-                case 'workflow_run':
+        const baseShaInput = getInput('base-sha');
+        switch (event) {
+            case 'pull_request':
+            case 'pull_request_target':
+            case 'workflow_run':
+                if (headShaInput)
                     head = headShaInput;
-                    break;
-            }
+                if (baseShaInput)
+                    base = baseShaInput;
+                break;
         }
         info(`base sha: ${base}`);
         info(`head sha: ${head}`);
