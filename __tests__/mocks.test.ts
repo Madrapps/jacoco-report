@@ -1,3 +1,5 @@
+import {it} from '@jest/globals'
+
 export const PATCH = {
   SINGLE_MODULE: {
     COVERAGE:

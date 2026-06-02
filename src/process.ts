@@ -1,7 +1,7 @@
-import {getFilesWithCoverage} from './util'
-import {ChangedFile} from './models/github'
-import {Coverage, File, Line, Module, Project} from './models/project'
-import {Counter, Group, Package, Report} from './models/jacoco-types'
+import {getFilesWithCoverage} from './util.js'
+import {ChangedFile} from './models/github.js'
+import {Coverage, File, Line, Module, Project} from './models/project.js'
+import {Counter, Group, Package, Report} from './models/jacoco-types.js'
 
 export function getProjectCoverage(
   reports: Report[],

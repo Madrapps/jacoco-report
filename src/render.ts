@@ -1,4 +1,10 @@
-import {Coverage, Emoji, MinCoverage, Module, Project} from './models/project'
+import {
+  Coverage,
+  Emoji,
+  MinCoverage,
+  Module,
+  Project,
+} from './models/project.js'
 
 const coverageAbsent =
   '> There is no coverage information present for the Files changed'

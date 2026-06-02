@@ -1,16 +1,21 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import * as action from '../src/action'
-import * as core from '@actions/core'
-import * as github from '@actions/github'
+import {jest, describe, it, expect, beforeEach} from '@jest/globals'
+import {createMockCore, createMockContext, createMockGithub} from './helpers'
 import {PATCH} from './mocks.test'
 
-jest.mock('@actions/core')
-jest.mock('@actions/github')
+const mockCore = createMockCore()
+const mockContext = createMockContext()
+const mockGithub = createMockGithub(mockContext)
+
+jest.unstable_mockModule('@actions/core', () => mockCore)
+jest.unstable_mockModule('@actions/github', () => mockGithub)
+
+const action = await import('../src/action')
 
 describe('Multiple reports', function () {
-  const comment = jest.fn()
-  const output = jest.fn()
+  let comment
+  let output
 
   const compareCommitsResponse = {
     data: {
@@ -51,7 +56,7 @@ describe('Multiple reports', function () {
     },
   }
 
-  core.getInput = jest.fn(c => {
+  function getInput(c): string {
     switch (c) {
       case 'paths':
         return './__tests__/__fixtures__/multi_module/appCoverage.xml,./__tests__/__fixtures__/multi_module/mathCoverage.xml,./__tests__/__fixtures__/multi_module/textCoverage.xml'
@@ -70,9 +75,15 @@ describe('Multiple reports', function () {
       case 'debug-mode':
         return 'false'
     }
-  })
-  github.getOctokit = jest.fn(() => {
-    return {
+  }
+
+  beforeEach(() => {
+    comment = jest.fn()
+    output = jest.fn()
+
+    mockCore.getInput.mockImplementation(getInput)
+    mockCore.setOutput.mockImplementation((...args) => output(...args))
+    mockGithub.getOctokit.mockReturnValue({
       rest: {
         repos: {
           compareCommits: jest.fn(() => {
@@ -86,10 +97,10 @@ describe('Multiple reports', function () {
           createComment: comment,
         },
       },
-    }
-  })
-  core.setFailed = jest.fn(c => {
-    fail(c)
+    })
+    mockCore.setFailed.mockImplementation(c => {
+      fail(c)
+    })
   })
 
   describe('Pull Request event', function () {
@@ -138,7 +149,6 @@ describe('Multiple reports', function () {
 
     it('set overall coverage output', async () => {
       initContext(eventName, payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -148,7 +158,6 @@ describe('Multiple reports', function () {
 
     it('set changed files coverage output', async () => {
       initContext(eventName, payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -165,7 +174,6 @@ describe('Multiple reports', function () {
 
     it('set overall coverage output', async () => {
       initContext('push', payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -175,7 +183,6 @@ describe('Multiple reports', function () {
 
     it('set changed files coverage output', async () => {
       initContext('push', payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -186,9 +193,8 @@ describe('Multiple reports', function () {
 })
 
 function initContext(eventName, payload): void {
-  const context = github.context
-  context.eventName = eventName
-  context.payload = payload
-  context.repo = 'jacoco-playground'
-  context.owner = 'madrapps'
+  mockContext.eventName = eventName
+  mockContext.payload = payload
+  mockContext.repo = 'jacoco-playground'
+  mockContext.owner = 'madrapps'
 }
