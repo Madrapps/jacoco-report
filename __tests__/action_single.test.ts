@@ -670,7 +670,11 @@ describe('Single report', function () {
             compareCommits,
             listPullRequestsAssociatedWithCommit: jest.fn(() => ({data: []})),
           },
-          issues: {createComment: jest.fn(), listComments: jest.fn(), updateComment: jest.fn()},
+          issues: {
+            createComment: jest.fn(),
+            listComments: jest.fn(),
+            updateComment: jest.fn(),
+          },
         },
       })
       mockCore.getInput.mockImplementation(key => {
@@ -701,7 +705,11 @@ describe('Single report', function () {
             compareCommits,
             listPullRequestsAssociatedWithCommit: jest.fn(() => ({data: []})),
           },
-          issues: {createComment: jest.fn(), listComments: jest.fn(), updateComment: jest.fn()},
+          issues: {
+            createComment: jest.fn(),
+            listComments: jest.fn(),
+            updateComment: jest.fn(),
+          },
         },
       })
       mockCore.getInput.mockImplementation(key => {
@@ -732,7 +740,11 @@ describe('Single report', function () {
             compareCommits,
             listPullRequestsAssociatedWithCommit: jest.fn(() => ({data: []})),
           },
-          issues: {createComment: jest.fn(), listComments: jest.fn(), updateComment: jest.fn()},
+          issues: {
+            createComment: jest.fn(),
+            listComments: jest.fn(),
+            updateComment: jest.fn(),
+          },
         },
       })
       mockCore.getInput.mockImplementation(key => {
@@ -768,7 +780,11 @@ describe('Single report', function () {
             compareCommits,
             listPullRequestsAssociatedWithCommit: jest.fn(() => ({data: []})),
           },
-          issues: {createComment: jest.fn(), listComments: jest.fn(), updateComment: jest.fn()},
+          issues: {
+            createComment: jest.fn(),
+            listComments: jest.fn(),
+            updateComment: jest.fn(),
+          },
         },
       })
       initContext(eventName, payload)
