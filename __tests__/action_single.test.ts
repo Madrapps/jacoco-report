@@ -648,6 +648,109 @@ describe('Single report', function () {
     })
   })
 
+  describe('head-sha input', function () {
+    const eventName = 'pull_request'
+    const payload = {
+      pull_request: {
+        number: '45',
+        base: {
+          sha: 'base-sha-from-payload',
+        },
+        head: {
+          sha: 'head-sha-from-payload',
+        },
+      },
+    }
+
+    it('uses head-sha input when provided', async () => {
+      const compareCommits = jest.fn(() => compareCommitsResponse)
+      mockGithub.getOctokit.mockReturnValue({
+        rest: {
+          repos: {
+            compareCommits,
+            listPullRequestsAssociatedWithCommit: jest.fn(() => ({data: []})),
+          },
+          issues: {createComment: jest.fn(), listComments: jest.fn(), updateComment: jest.fn()},
+        },
+      })
+      mockCore.getInput.mockImplementation(key => {
+        switch (key) {
+          case 'head-sha':
+            return 'custom-head-sha'
+          default:
+            return getInput(key)
+        }
+      })
+      initContext(eventName, payload)
+
+      await action.action()
+
+      expect(compareCommits).toHaveBeenCalledWith(
+        expect.objectContaining({
+          base: 'base-sha-from-payload',
+          head: 'custom-head-sha',
+        })
+      )
+    })
+
+    it('ignores head-sha input for push events', async () => {
+      const compareCommits = jest.fn(() => compareCommitsResponse)
+      mockGithub.getOctokit.mockReturnValue({
+        rest: {
+          repos: {
+            compareCommits,
+            listPullRequestsAssociatedWithCommit: jest.fn(() => ({data: []})),
+          },
+          issues: {createComment: jest.fn(), listComments: jest.fn(), updateComment: jest.fn()},
+        },
+      })
+      mockCore.getInput.mockImplementation(key => {
+        switch (key) {
+          case 'head-sha':
+            return 'custom-head-sha'
+          default:
+            return getInput(key)
+        }
+      })
+      initContext('push', {
+        before: 'base-sha-from-push',
+        after: 'head-sha-from-push',
+      })
+
+      await action.action()
+
+      expect(compareCommits).toHaveBeenCalledWith(
+        expect.objectContaining({
+          base: 'base-sha-from-push',
+          head: 'head-sha-from-push',
+        })
+      )
+    })
+
+    it('falls back to payload head sha when head-sha input is not provided', async () => {
+      const compareCommits = jest.fn(() => compareCommitsResponse)
+      mockGithub.getOctokit.mockReturnValue({
+        rest: {
+          repos: {
+            compareCommits,
+            listPullRequestsAssociatedWithCommit: jest.fn(() => ({data: []})),
+          },
+          issues: {createComment: jest.fn(), listComments: jest.fn(), updateComment: jest.fn()},
+        },
+      })
+      initContext(eventName, payload)
+
+      await action.action()
+
+      expect(compareCommits).toHaveBeenCalledWith(
+        expect.objectContaining({
+          base: 'base-sha-from-payload',
+          head: 'head-sha-from-payload',
+        })
+      )
+    })
+  })
+
   describe('Unsupported events', function () {
     it('Fail by throwing appropriate error', async () => {
       initContext('pr_review', {})

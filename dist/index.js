@@ -44301,6 +44301,16 @@ async function action() {
                 setFailed(`The event ${context.eventName} is not supported.`);
                 return;
         }
+        const headShaInput = getInput('head-sha');
+        if (headShaInput) {
+            switch (event) {
+                case 'pull_request':
+                case 'pull_request_target':
+                case 'workflow_run':
+                    head = headShaInput;
+                    break;
+            }
+        }
         info(`base sha: ${base}`);
         info(`head sha: ${head}`);
         if (debugMode)

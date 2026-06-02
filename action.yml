@@ -54,6 +54,9 @@ inputs:
     description: 'Run the action in debug mode and get debug logs printed in console'
     required: false
     default: 'false'
+  head-sha:
+    description: 'The head SHA to use for comparing changes. Useful when the head SHA is not available in the context (e.g. PRs from forks via workflow_run).'
+    required: false
 
 outputs:
   coverage-overall:
