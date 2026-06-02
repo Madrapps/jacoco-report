@@ -22,7 +22,7 @@ Note: When using `comment-type: pr_comment` or `comment-type: both` (the default
 ### Inputs
 
 - `paths` - [**required**] Comma separated paths of the generated jacoco xml files (supports wildcard glob pattern)
-- `token` - [**required**] Github personal token to add comments to Pull Request
+- `token` - Github token to add comments to Pull Request (defaults to automatic token, make sure job permissions allow it to write to pull_requests)
 - `min-coverage-overall` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for overall project
 - `min-coverage-changed-files` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for changed files
 - `update-comment` - [*optional* {default: false}] If true, updates the previous coverage report comment instead of creating new one.
