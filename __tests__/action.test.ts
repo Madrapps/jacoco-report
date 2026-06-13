@@ -32,6 +32,8 @@ describe('Input validation', function () {
         return './__tests__/__fixtures__/report.xml'
       case 'token':
         return 'SMPLEHDjasdf876a987'
+      case 'coverage-counter-type':
+        return 'INSTRUCTION'
     }
   }
 
@@ -120,6 +122,44 @@ describe('Input validation', function () {
     })
     mockCore.setFailed.mockImplementation(c => {
       expect(c).toEqual("'comment-type' invalid is invalid")
+    })
+    initContext(eventName, payload)
+
+    await action.action()
+  })
+
+  it('Fail if coverage-counter-type is invalid', async () => {
+    mockCore.getInput.mockImplementation(c => {
+      switch (c) {
+        case 'coverage-counter-type':
+          return 'INVALID'
+        default:
+          return getInput(c)
+      }
+    })
+    mockCore.setFailed.mockImplementation(c => {
+      expect(c).toEqual(
+        "'coverage-counter-type' INVALID is invalid. Valid values: INSTRUCTION, BRANCH, LINE, COMPLEXITY, METHOD"
+      )
+    })
+    initContext(eventName, payload)
+
+    await action.action()
+  })
+
+  it('coverage-counter-type is uppercased before validation', async () => {
+    mockCore.getInput.mockImplementation(c => {
+      switch (c) {
+        case 'coverage-counter-type':
+          return 'invalid_lower'
+        default:
+          return getInput(c)
+      }
+    })
+    mockCore.setFailed.mockImplementation(c => {
+      expect(c).toEqual(
+        "'coverage-counter-type' INVALID_LOWER is invalid. Valid values: INSTRUCTION, BRANCH, LINE, COMPLEXITY, METHOD"
+      )
     })
     initContext(eventName, payload)
 

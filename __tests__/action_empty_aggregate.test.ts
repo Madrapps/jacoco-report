@@ -35,6 +35,8 @@ describe('Aggregate Empty report', function () {
         return ':green_apple:'
       case 'fail-emoji':
         return ':x:'
+      case 'coverage-counter-type':
+        return 'INSTRUCTION'
       case 'debug-mode':
         return 'true'
     }

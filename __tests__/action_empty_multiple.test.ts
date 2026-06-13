@@ -72,6 +72,8 @@ describe('Multiple Empty reports', function () {
         return ':green_apple:'
       case 'fail-emoji':
         return ':x:'
+      case 'coverage-counter-type':
+        return 'INSTRUCTION'
       case 'debug-mode':
         return 'false'
     }

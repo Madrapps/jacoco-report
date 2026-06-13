@@ -43865,13 +43865,13 @@ function convertObjToReport(obj) {
     };
 }
 
-function getProjectCoverage(reports, changedFiles) {
+function getProjectCoverage(reports, changedFiles, coverageCounterType = 'INSTRUCTION') {
     const moduleCoverages = [];
     const modules = getModulesFromReports(reports);
     for (const module of modules) {
-        const files = getFileCoverageFromPackages(module.packages, changedFiles);
+        const files = getFileCoverageFromPackages(module.packages, changedFiles, coverageCounterType);
         if (files.length !== 0) {
-            const moduleCoverage = getModuleCoverage(module.root);
+            const moduleCoverage = getModuleCoverage(module.root, coverageCounterType);
             const changedCoverage = getCoverage(files);
             moduleCoverages.push({
                 name: module.name,
@@ -43890,7 +43890,7 @@ function getProjectCoverage(reports, changedFiles) {
         return module.files;
     });
     const changedCoverage = getCoverage(moduleCoverages);
-    const projectCoverage = getOverallProjectCoverage(reports);
+    const projectCoverage = getOverallProjectCoverage(reports, coverageCounterType);
     const totalPercentage = getTotalPercentage(totalFiles);
     return {
         modules: moduleCoverages,
@@ -43934,7 +43934,7 @@ function getModuleFromParent(parent) {
     }
     return null;
 }
-function getFileCoverageFromPackages(packages, files) {
+function getFileCoverageFromPackages(packages, files, coverageCounterType) {
     const resultFiles = [];
     const jacocoFiles = getFilesWithCoverage(packages);
     for (const jacocoFile of jacocoFiles) {
@@ -43944,10 +43944,10 @@ function getFileCoverageFromPackages(packages, files) {
             return f.filePath.endsWith(`${packageName}/${name}`);
         });
         if (githubFile) {
-            const instruction = jacocoFile.counters.find(counter => counter.name === 'instruction');
-            if (instruction) {
-                const missed = instruction.missed;
-                const covered = instruction.covered;
+            const counter = jacocoFile.counters.find(c => c.name === coverageCounterType.toLowerCase());
+            if (counter) {
+                const missed = counter.missed;
+                const covered = counter.covered;
                 const lines = [];
                 for (const lineNumber of githubFile.lines) {
                     const jacocoLine = jacocoFile.lines.find(line => line.number === lineNumber);
@@ -43968,12 +43968,21 @@ function getFileCoverageFromPackages(packages, files) {
                         lines.push(line);
                     }
                 }
-                const changedMissed = lines
-                    .map(line => toFloat$1(line.instruction.missed))
-                    .reduce(sumReducer, 0.0);
-                const changedCovered = lines
-                    .map(line => toFloat$1(line.instruction.covered))
-                    .reduce(sumReducer, 0.0);
+                let changedMissed;
+                let changedCovered;
+                if (coverageCounterType === 'LINE') {
+                    changedCovered = lines.filter(line => line.instruction.covered > 0).length;
+                    changedMissed = lines.filter(line => line.instruction.covered === 0 && line.instruction.missed > 0).length;
+                }
+                else {
+                    const lineCounterKey = coverageCounterType === 'BRANCH' ? 'branch' : 'instruction';
+                    changedMissed = lines
+                        .map(line => toFloat$1(line[lineCounterKey].missed))
+                        .reduce(sumReducer, 0.0);
+                    changedCovered = lines
+                        .map(line => toFloat$1(line[lineCounterKey].covered))
+                        .reduce(sumReducer, 0.0);
+                }
                 const changedPercentage = calculatePercentage(changedCovered, changedMissed);
                 const changedCoverage = changedPercentage !== null
                     ? {
@@ -44024,14 +44033,14 @@ function getTotalPercentage(files) {
         return null;
     }
 }
-function getModuleCoverage(report) {
+function getModuleCoverage(report, coverageCounterType) {
     const counters = report.counter ?? [];
-    return getDetailedCoverage(counters, 'INSTRUCTION');
+    return getDetailedCoverage(counters, coverageCounterType);
 }
-function getOverallProjectCoverage(reports) {
+function getOverallProjectCoverage(reports, coverageCounterType) {
     const coverages = reports.map(report => {
         const counters = report.counter ?? [];
-        return getDetailedCoverage(counters, 'INSTRUCTION');
+        return getDetailedCoverage(counters, coverageCounterType);
     });
     if (coverages.length === 0)
         return null;
@@ -44220,6 +44229,14 @@ function toFloat(value) {
     return parseFloat(value.toFixed(2));
 }
 
+const VALID_COVERAGE_COUNTER_TYPES = [
+    'INSTRUCTION',
+    'BRANCH',
+    'LINE',
+    'COMPLEXITY',
+    'METHOD',
+];
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 async function action() {
     let continueOnError = true;
@@ -44249,6 +44266,12 @@ async function action() {
         const failEmoji = getInput('fail-emoji');
         continueOnError = processorsExports.parseBooleans(getInput('continue-on-error'));
         const debugMode = processorsExports.parseBooleans(getInput('debug-mode'));
+        const coverageCounterType = getInput('coverage-counter-type')
+            .toUpperCase();
+        if (!VALID_COVERAGE_COUNTER_TYPES.includes(coverageCounterType)) {
+            setFailed(`'coverage-counter-type' ${coverageCounterType} is invalid. Valid values: ${VALID_COVERAGE_COUNTER_TYPES.join(', ')}`);
+            return;
+        }
         const event = context.eventName;
         info(`Event is ${event}`);
         if (debugMode) {
@@ -44324,7 +44347,7 @@ async function action() {
             info(`changedFiles: ${debug(changedFiles)}`);
         const reportsJsonAsync = getJsonReports(reportPaths, debugMode);
         const reports = await reportsJsonAsync;
-        const project = getProjectCoverage(reports, changedFiles);
+        const project = getProjectCoverage(reports, changedFiles, coverageCounterType);
         if (debugMode)
             info(`project: ${debug(project)}`);
         setOutput('coverage-overall', project.overall ? parseFloat(project.overall.percentage.toFixed(2)) : 100);

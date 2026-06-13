@@ -9,7 +9,11 @@ import {getPRComment, getTitle} from './render.js'
 import {debug, getChangedLines, parseToReport} from './util.js'
 import {Project} from './models/project.js'
 import {ChangedFile} from './models/github.js'
-import {Report} from './models/jacoco-types.js'
+import {
+  CoverageCounterType,
+  Report,
+  VALID_COVERAGE_COUNTER_TYPES,
+} from './models/jacoco-types.js'
 import {GitHub} from '@actions/github/lib/utils'
 
 export async function action(): Promise<void> {
@@ -46,6 +50,15 @@ export async function action(): Promise<void> {
 
     continueOnError = parseBooleans(core.getInput('continue-on-error'))
     const debugMode = parseBooleans(core.getInput('debug-mode'))
+    const coverageCounterType = core
+      .getInput('coverage-counter-type')
+      .toUpperCase() as CoverageCounterType
+    if (!VALID_COVERAGE_COUNTER_TYPES.includes(coverageCounterType)) {
+      core.setFailed(
+        `'coverage-counter-type' ${coverageCounterType} is invalid. Valid values: ${VALID_COVERAGE_COUNTER_TYPES.join(', ')}`
+      )
+      return
+    }
 
     const event = github.context.eventName
     core.info(`Event is ${event}`)
@@ -129,7 +142,11 @@ export async function action(): Promise<void> {
     const reportsJsonAsync = getJsonReports(reportPaths, debugMode)
     const reports = await reportsJsonAsync
 
-    const project: Project = getProjectCoverage(reports, changedFiles)
+    const project: Project = getProjectCoverage(
+      reports,
+      changedFiles,
+      coverageCounterType
+    )
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(
       'coverage-overall',
