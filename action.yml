@@ -66,6 +66,8 @@ outputs:
     description: 'The overall coverage of the project'
   coverage-changed-files:
     description: 'The total coverage of all changed files'
+  coverage-changed-lines:
+    description: 'The coverage of lines that were changed in the PR'
 
 runs:
   using: 'node24'

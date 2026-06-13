@@ -174,6 +174,16 @@ describe('Aggregate report', function () {
       const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-files', 65.91])
     })
+
+    it('set changed lines coverage output', async () => {
+      initContext(eventName, payload)
+      core.setOutput = output
+
+      await action.action()
+
+      const out = output.mock.calls[2]
+      expect(out).toEqual(['coverage-changed-lines', 0])
+    })
   })
 })
 

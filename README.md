@@ -44,6 +44,7 @@ Note: When using `comment-type: pr_comment` or `comment-type: both` (the default
 
 - `coverage-overall` - The overall coverage of the project
 - `coverage-changed-files` - The total coverage of all changed files
+- `coverage-changed-lines` - The coverage of lines that were changed in the PR
 
 ### Example Workflow
 
