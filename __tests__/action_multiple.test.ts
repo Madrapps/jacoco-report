@@ -167,7 +167,6 @@ describe('Multiple reports', function () {
 
     it('set changed lines coverage output', async () => {
       initContext(eventName, payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -202,7 +201,6 @@ describe('Multiple reports', function () {
 
     it('set changed lines coverage output', async () => {
       initContext('push', payload)
-      core.setOutput = output
 
       await action.action()
 

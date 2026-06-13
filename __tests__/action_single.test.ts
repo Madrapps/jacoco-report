@@ -149,7 +149,6 @@ describe('Single report', function () {
 
     it('set changed lines coverage output', async () => {
       initContext(eventName, payload)
-      core.setOutput = output
 
       await action.action()
 
@@ -434,7 +433,6 @@ describe('Single report', function () {
 
     it('set changed lines coverage output', async () => {
       initContext('push', payload)
-      core.setOutput = output
 
       await action.action()
 

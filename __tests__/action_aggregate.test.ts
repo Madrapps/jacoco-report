@@ -177,7 +177,6 @@ describe('Aggregate report', function () {
 
     it('set changed lines coverage output', async () => {
       initContext(eventName, payload)
-      core.setOutput = output
 
       await action.action()
 
