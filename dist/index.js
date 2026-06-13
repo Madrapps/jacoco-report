@@ -44329,6 +44329,7 @@ async function action() {
             info(`project: ${debug(project)}`);
         setOutput('coverage-overall', project.overall ? parseFloat(project.overall.percentage.toFixed(2)) : 100);
         setOutput('coverage-changed-files', parseFloat(project['coverage-changed-files'].toFixed(2)));
+        setOutput('coverage-changed-lines', project.changed ? parseFloat(project.changed.percentage.toFixed(2)) : 100);
         const skip = skipIfNoChanges && project.modules.length === 0;
         if (debugMode)
             info(`skip: ${skip}`);

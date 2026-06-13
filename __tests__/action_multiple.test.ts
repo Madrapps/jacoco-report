@@ -164,6 +164,15 @@ describe('Multiple reports', function () {
       const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-files', 22.6])
     })
+
+    it('set changed lines coverage output', async () => {
+      initContext(eventName, payload)
+
+      await action.action()
+
+      const out = output.mock.calls[2]
+      expect(out).toEqual(['coverage-changed-lines', 8.33])
+    })
   })
 
   describe('Push event', function () {
@@ -188,6 +197,15 @@ describe('Multiple reports', function () {
 
       const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-files', 22.6])
+    })
+
+    it('set changed lines coverage output', async () => {
+      initContext('push', payload)
+
+      await action.action()
+
+      const out = output.mock.calls[2]
+      expect(out).toEqual(['coverage-changed-lines', 8.33])
     })
   })
 })

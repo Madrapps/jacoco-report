@@ -147,6 +147,15 @@ describe('Single report', function () {
       expect(out).toEqual(['coverage-changed-files', 28.83])
     })
 
+    it('set changed lines coverage output', async () => {
+      initContext(eventName, payload)
+
+      await action.action()
+
+      const out = output.mock.calls[2]
+      expect(out).toEqual(['coverage-changed-lines', 38.24])
+    })
+
     describe('With update-comment ON', function () {
       function mockInput(key): string {
         switch (key) {
@@ -420,6 +429,15 @@ describe('Single report', function () {
 
       const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-files', 28.83])
+    })
+
+    it('set changed lines coverage output', async () => {
+      initContext('push', payload)
+
+      await action.action()
+
+      const out = output.mock.calls[2]
+      expect(out).toEqual(['coverage-changed-lines', 38.24])
     })
 
     describe('With comment-type present', function () {

@@ -139,6 +139,10 @@ export async function action(): Promise<void> {
       'coverage-changed-files',
       parseFloat(project['coverage-changed-files'].toFixed(2))
     )
+    core.setOutput(
+      'coverage-changed-lines',
+      project.changed ? parseFloat(project.changed.percentage.toFixed(2)) : 100
+    )
 
     const skip = skipIfNoChanges && project.modules.length === 0
     if (debugMode) core.info(`skip: ${skip}`)
