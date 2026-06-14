@@ -517,6 +517,145 @@ describe('process', function () {
       })
     })
   })
+
+  describe('module name disambiguation', function () {
+    it('disambiguates modules with same name using file path (Gradle)', async () => {
+      const reportPath =
+        './__tests__/__fixtures__/multi_module/textCoverage.xml'
+      const report1 = await getReport(reportPath)
+      report1.filePath =
+        '/workspace/features/feature1/tests/build/reports/jacoco/debugCoverage.xml'
+
+      const report2 = await getReport(reportPath)
+      report2.filePath =
+        '/workspace/features/feature2/tests/build/reports/jacoco/debugCoverage.xml'
+
+      report1.name = 'tests'
+      report2.name = 'tests'
+
+      const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
+        return file.filePath.endsWith('StringOp.java')
+      })
+      const actual = process.getProjectCoverage(
+        [report1, report2],
+        changedFiles
+      )
+      expect(actual.modules[0].name).toEqual(':feature1:tests')
+      expect(actual.modules[1].name).toEqual(':feature2:tests')
+    })
+
+    it('disambiguates modules with same name using file path (Maven)', async () => {
+      const reportPath =
+        './__tests__/__fixtures__/multi_module/textCoverage.xml'
+      const report1 = await getReport(reportPath)
+      report1.filePath = '/workspace/modules/core/target/site/jacoco/jacoco.xml'
+
+      const report2 = await getReport(reportPath)
+      report2.filePath = '/workspace/modules/api/target/site/jacoco/jacoco.xml'
+
+      report1.name = 'app'
+      report2.name = 'app'
+
+      const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
+        return file.filePath.endsWith('StringOp.java')
+      })
+      const actual = process.getProjectCoverage(
+        [report1, report2],
+        changedFiles
+      )
+      expect(actual.modules[0].name).toEqual(':core')
+      expect(actual.modules[1].name).toEqual(':api')
+    })
+
+    it('does not disambiguate when names are unique', async () => {
+      const reports = await getMultipleReports()
+      const changedFiles = CHANGED_FILE.MULTI_MODULE
+      const actual = process.getProjectCoverage(reports, changedFiles)
+      const moduleNames = actual.modules.map(m => m.name)
+      expect(moduleNames).toContain('text')
+      expect(moduleNames).toContain('math')
+      expect(moduleNames).toContain('app')
+    })
+
+    it('keeps original names when filePath is not available', async () => {
+      const reportPath =
+        './__tests__/__fixtures__/multi_module/textCoverage.xml'
+      const report1 = await getReport(reportPath)
+      const report2 = await getReport(reportPath)
+      report1.name = 'tests'
+      report2.name = 'tests'
+
+      const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
+        return file.filePath.endsWith('StringOp.java')
+      })
+      const actual = process.getProjectCoverage(
+        [report1, report2],
+        changedFiles
+      )
+      expect(actual.modules[0].name).toEqual('tests')
+      expect(actual.modules[1].name).toEqual('tests')
+    })
+
+    it('keeps original names when paths resolve to same value', async () => {
+      const reportPath =
+        './__tests__/__fixtures__/multi_module/textCoverage.xml'
+      const report1 = await getReport(reportPath)
+      report1.filePath = '/workspace/app/build/reports/jacoco/debug.xml'
+
+      const report2 = await getReport(reportPath)
+      report2.filePath = '/workspace/app/build/reports/jacoco/release.xml'
+
+      report1.name = 'app'
+      report2.name = 'app'
+
+      const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
+        return file.filePath.endsWith('StringOp.java')
+      })
+      const actual = process.getProjectCoverage(
+        [report1, report2],
+        changedFiles
+      )
+      expect(actual.modules[0].name).toEqual('app')
+      expect(actual.modules[1].name).toEqual('app')
+    })
+  })
+
+  describe('getModulePathFromFilePath', function () {
+    it('extracts path for Gradle build', () => {
+      const result = process.getModulePathFromFilePath(
+        '/workspace/features/auth/build/reports/jacoco/debugCoverage.xml'
+      )
+      expect(result).toEqual('/workspace/features/auth')
+    })
+
+    it('extracts path for Maven target/site/jacoco', () => {
+      const result = process.getModulePathFromFilePath(
+        '/workspace/modules/core/target/site/jacoco/jacoco.xml'
+      )
+      expect(result).toEqual('/workspace/modules/core')
+    })
+
+    it('extracts path for Maven target/jacoco', () => {
+      const result = process.getModulePathFromFilePath(
+        '/workspace/modules/api/target/jacoco/jacoco.xml'
+      )
+      expect(result).toEqual('/workspace/modules/api')
+    })
+
+    it('handles Windows-style paths', () => {
+      const result = process.getModulePathFromFilePath(
+        'C:\\workspace\\features\\auth\\build\\reports\\jacoco\\report.xml'
+      )
+      expect(result).toEqual('C:/workspace/features/auth')
+    })
+
+    it('returns null for unrecognized path patterns', () => {
+      const result = process.getModulePathFromFilePath(
+        '/workspace/reports/coverage.xml'
+      )
+      expect(result).toBeNull()
+    })
+  })
 })
 
 async function getAggregateReport(): Promise<Report[]> {

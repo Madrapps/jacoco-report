@@ -226,9 +226,11 @@ async function getJsonReports(
   if (debugMode) core.info(`Resolved files: ${files}`)
 
   return Promise.all(
-    files.map(async path => {
-      const reportXml = await fs.promises.readFile(path.trim(), 'utf-8')
-      return await parseToReport(reportXml)
+    files.map(async filePath => {
+      const reportXml = await fs.promises.readFile(filePath.trim(), 'utf-8')
+      const report = await parseToReport(reportXml)
+      report.filePath = filePath.trim()
+      return report
     })
   )
 }

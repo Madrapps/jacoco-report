@@ -62,23 +62,24 @@ function toFloat(value: number): number {
 }
 
 function getModulesFromReports(reports: Report[]): LocalModule[] {
-  const modules = []
+  const modules: LocalModule[] = []
   for (const report of reports) {
     const groupTag = report.group
     if (groupTag) {
       const groups = groupTag.filter(group => group !== undefined)
       for (const group of groups) {
-        const module = getModuleFromParent(group)
+        const module = getModuleFromParent(group, report.filePath)
         if (module) {
           modules.push(module)
         }
       }
     }
-    const module = getModuleFromParent(report)
+    const module = getModuleFromParent(report, report.filePath)
     if (module) {
       modules.push(module)
     }
   }
+  disambiguateModuleNames(modules)
   return modules
 }
 
@@ -86,18 +87,80 @@ interface LocalModule {
   name: string
   packages: Package[]
   root: Report | Group
+  filePath?: string
 }
 
-function getModuleFromParent(parent: Report | Group): LocalModule | null {
+function getModuleFromParent(
+  parent: Report | Group,
+  filePath?: string
+): LocalModule | null {
   const packages = parent.package
   if (packages && packages.length !== 0) {
     return {
       name: parent.name,
       packages,
-      root: parent, // TODO just pass array of 'counters'
+      root: parent,
+      filePath,
     }
   }
   return null
+}
+
+function disambiguateModuleNames(modules: LocalModule[]): void {
+  const nameGroups = new Map<string, LocalModule[]>()
+  for (const module of modules) {
+    const group = nameGroups.get(module.name) ?? []
+    group.push(module)
+    nameGroups.set(module.name, group)
+  }
+  for (const [, group] of nameGroups) {
+    if (group.length <= 1) continue
+    const modulePaths = group.map(m =>
+      m.filePath ? getModulePathFromFilePath(m.filePath) : null
+    )
+    const allResolved = modulePaths.every(p => p !== null)
+    if (!allResolved) continue
+    const commonPrefix = getCommonPrefix(modulePaths)
+    for (let i = 0; i < group.length; i++) {
+      const fullPath = modulePaths[i]
+      const uniquePart = fullPath.substring(commonPrefix.length)
+      if (uniquePart) {
+        group[i].name = ':' + uniquePart.split('/').join(':')
+      }
+    }
+  }
+}
+
+export function getModulePathFromFilePath(filePath: string): string | null {
+  const normalizedPath = filePath.replace(/\\/g, '/')
+  const patterns = [
+    /(.+?)\/build\/reports\/jacoco\b/,
+    /(.+?)\/target\/site\/jacoco\b/,
+    /(.+?)\/target\/jacoco\b/,
+  ]
+  for (const pattern of patterns) {
+    const match = normalizedPath.match(pattern)
+    if (match) {
+      return match[1]
+    }
+  }
+  return null
+}
+
+function getCommonPrefix(paths: string[]): string {
+  if (paths.length === 0) return ''
+  const segments = paths.map(p => p.split('/'))
+  const minLen = Math.min(...segments.map(s => s.length))
+  let commonEnd = 0
+  for (let i = 0; i < minLen; i++) {
+    if (segments.every(s => s[i] === segments[0][i])) {
+      commonEnd = i + 1
+    } else {
+      break
+    }
+  }
+  if (commonEnd === 0) return ''
+  return segments[0].slice(0, commonEnd).join('/') + '/'
 }
 
 function getFileCoverageFromPackages(

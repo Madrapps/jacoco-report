@@ -1,5 +1,6 @@
 export interface Report {
   name: string
+  filePath?: string
   sessioninfo?: SessionInfo[]
   group?: Group[]
   package?: Package[]
