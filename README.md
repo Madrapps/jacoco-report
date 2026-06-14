@@ -39,6 +39,7 @@ Note: When using `comment-type: pr_comment` or `comment-type: both` (the default
 - `fail-emoji` - [*optional* {default: :x:}] Emoji to use for fail status shown when 'coverage < min coverage' (should be a Github supported emoji).
 - `coverage-counter-type` - [*optional* {INSTRUCTION, BRANCH, LINE, COMPLEXITY, METHOD} {default: INSTRUCTION}] The type of JaCoCo counter to use for coverage calculation. Note: COMPLEXITY and METHOD are not available at per-line granularity, so changed-lines coverage will fall back to INSTRUCTION for those types.
 - `show-all-modules` - [*optional* {default: false}] If true, show coverage for all modules in the comment, not just those with changed files
+- `show-missing-lines` - [*optional* {default: true}] If true, show the line numbers of uncovered code in the Files table with hyperlinks to the exact lines in the source
 - `continue-on-error` - [*optional* {default: true}] If true, then do not fail the action on error, but log a warning
 - `debug-mode` - [*optional* {default: false}] If true, run the action in debug mode and get debug logs printed in console
 
