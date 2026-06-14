@@ -66,7 +66,7 @@ describe('Multiple Empty reports', function () {
         return 'pr_comment'
       case 'min-coverage-overall':
         return 45
-      case 'min-coverage-changed-files':
+      case 'min-coverage-changed-lines':
         return 90
       case 'pass-emoji':
         return ':green_apple:'
@@ -126,7 +126,7 @@ describe('Multiple Empty reports', function () {
       expect(comment.mock.calls[0][0].body)
         .toEqual(`|Overall Project|15.85% **\`-14.75%\`**|:x:|
 |:-|:-|:-:|
-|Files changed|0%|:x:|
+|Changed lines|0%|:x:|
 <br>
 
 |Module|Coverage||
@@ -155,13 +155,13 @@ describe('Multiple Empty reports', function () {
       expect(out).toEqual(['coverage-overall', 15.85])
     })
 
-    it('set changed files coverage output', async () => {
+    it('set changed lines coverage output', async () => {
       initContext(eventName, payload)
 
       await action.action()
 
       const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 18.13])
+      expect(out).toEqual(['coverage-changed-lines', 0])
     })
   })
 
@@ -180,13 +180,13 @@ describe('Multiple Empty reports', function () {
       expect(out).toEqual(['coverage-overall', 15.85])
     })
 
-    it('set changed files coverage output', async () => {
+    it('set changed lines coverage output', async () => {
       initContext('push', payload)
 
       await action.action()
 
       const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 18.13])
+      expect(out).toEqual(['coverage-changed-lines', 0])
     })
   })
 })

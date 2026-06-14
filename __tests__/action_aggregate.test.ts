@@ -29,7 +29,7 @@ describe('Aggregate report', function () {
         return 'pr_comment'
       case 'min-coverage-overall':
         return 45
-      case 'min-coverage-changed-files':
+      case 'min-coverage-changed-lines':
         return 90
       case 'pass-emoji':
         return ':green_apple:'
@@ -113,7 +113,7 @@ describe('Aggregate report', function () {
       expect(createComment.mock.calls[0][0].body)
         .toEqual(`|Overall Project|76.32% **\`-0.01%\`**|:green_apple:|
 |:-|:-|:-:|
-|Files changed|0%|:x:|
+|Changed lines|0%|:x:|
 <br>
 
 |Module|Coverage||
@@ -168,21 +168,12 @@ describe('Aggregate report', function () {
       expect(out).toEqual(['coverage-overall', 76.32])
     })
 
-    it('set changed files coverage output', async () => {
-      initContext(eventName, payload)
-
-      await action.action()
-
-      const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 65.91])
-    })
-
     it('set changed lines coverage output', async () => {
       initContext(eventName, payload)
 
       await action.action()
 
-      const out = output.mock.calls[2]
+      const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-lines', 0])
     })
   })

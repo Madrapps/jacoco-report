@@ -12,8 +12,8 @@ inputs:
     description: 'The minimum code coverage that is required to pass for overall project'
     required: false
     default: '80'
-  min-coverage-changed-files:
-    description: 'The minimum code coverage that is required to pass for changed files'
+  min-coverage-changed-lines:
+    description: 'The minimum code coverage that is required to pass for changed lines'
     required: false
     default: '80'
   title:
@@ -72,8 +72,6 @@ inputs:
 outputs:
   coverage-overall:
     description: 'The overall coverage of the project'
-  coverage-changed-files:
-    description: 'The total coverage of all changed files'
   coverage-changed-lines:
     description: 'The coverage of lines that were changed in the PR'
 

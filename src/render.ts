@@ -7,7 +7,7 @@ import {
 } from './models/project.js'
 
 const coverageAbsent =
-  '> There is no coverage information present for the Files changed'
+  '> There is no coverage information present for the changed lines'
 
 export function getPRComment(
   project: Project,
@@ -176,16 +176,16 @@ function getOverallTable(
   let changedCoverageRow = ''
   if (totalChangedLines !== 0) {
     const changedLinesPercentage = (coveredLines / totalChangedLines) * 100
-    const filesChangedStatus = getStatus(
+    const changedLinesStatus = getStatus(
       changedLinesPercentage,
       minCoverage.changed,
       emoji
     )
     changedCoverageRow =
       '\n' +
-      `|Files changed|${formatCoverage(
+      `|Changed lines|${formatCoverage(
         changedLinesPercentage
-      )}|${filesChangedStatus}|` +
+      )}|${changedLinesStatus}|` +
       '\n<br>'
   }
   return `${tableHeader}\n${tableStructure}${changedCoverageRow}`

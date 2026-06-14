@@ -43899,18 +43899,13 @@ function getProjectCoverage(reports, changedFiles, coverageCounterType = 'INSTRU
         }
     }
     moduleCoverages.sort((a, b) => b.overall.percentage - a.overall.percentage);
-    const totalFiles = moduleCoverages.flatMap(module => {
-        return module.files;
-    });
     const changedCoverage = getCoverage(moduleCoverages);
     const projectCoverage = getOverallProjectCoverage(reports, coverageCounterType);
-    const totalPercentage = getTotalPercentage(totalFiles);
     return {
         modules: moduleCoverages,
         isMultiModule: reports.length > 1 || modules.length > 1,
         overall: projectCoverage,
         changed: changedCoverage,
-        'coverage-changed-files': totalPercentage ?? 100,
     };
 }
 function toFloat$1(value) {
@@ -44091,20 +44086,6 @@ function calculatePercentage(covered, missed) {
         return null;
     }
 }
-function getTotalPercentage(files) {
-    let missed = 0;
-    let covered = 0;
-    if (files.length !== 0) {
-        for (const file of files) {
-            missed += file.overall.missed;
-            covered += file.overall.covered;
-        }
-        return parseFloat(((covered / (covered + missed)) * 100).toFixed(2));
-    }
-    else {
-        return null;
-    }
-}
 function getModuleCoverage(report, coverageCounterType) {
     const counters = report.counter ?? [];
     return getDetailedCoverage(counters, coverageCounterType);
@@ -44163,7 +44144,7 @@ function sumReducer(total, value) {
     return total + value;
 }
 
-const coverageAbsent = '> There is no coverage information present for the Files changed';
+const coverageAbsent = '> There is no coverage information present for the changed lines';
 function getPRComment(project, minCoverage, title, emoji) {
     const heading = getTitle(title);
     if (!project.overall) {
@@ -44263,10 +44244,10 @@ function getOverallTable(overall, changed, minCoverage, emoji) {
     let changedCoverageRow = '';
     if (totalChangedLines !== 0) {
         const changedLinesPercentage = (coveredLines / totalChangedLines) * 100;
-        const filesChangedStatus = getStatus(changedLinesPercentage, minCoverage.changed, emoji);
+        const changedLinesStatus = getStatus(changedLinesPercentage, minCoverage.changed, emoji);
         changedCoverageRow =
             '\n' +
-                `|Files changed|${formatCoverage(changedLinesPercentage)}|${filesChangedStatus}|` +
+                `|Changed lines|${formatCoverage(changedLinesPercentage)}|${changedLinesStatus}|` +
                 '\n<br>';
     }
     return `${tableHeader}\n${tableStructure}${changedCoverageRow}`;
@@ -44328,8 +44309,12 @@ async function action() {
             return;
         }
         const reportPaths = pathsString.split(',');
+        if (getInput('min-coverage-changed-files')) {
+            setFailed("'min-coverage-changed-files' is no longer supported. Please use 'min-coverage-changed-lines' instead.");
+            return;
+        }
         const minCoverageOverall = parseFloat(getInput('min-coverage-overall'));
-        const minCoverageChangedFiles = parseFloat(getInput('min-coverage-changed-files'));
+        const minCoverageChangedLines = parseFloat(getInput('min-coverage-changed-lines'));
         const title = getInput('title');
         const updateComment = processorsExports.parseBooleans(getInput('update-comment'));
         if (updateComment) {
@@ -44428,7 +44413,6 @@ async function action() {
         if (debugMode)
             info(`project: ${debug(project)}`);
         setOutput('coverage-overall', project.overall ? parseFloat(project.overall.percentage.toFixed(2)) : 100);
-        setOutput('coverage-changed-files', parseFloat(project['coverage-changed-files'].toFixed(2)));
         setOutput('coverage-changed-lines', project.changed ? parseFloat(project.changed.percentage.toFixed(2)) : 100);
         const skip = skipIfNoChanges && project.modules.length === 0;
         if (debugMode)
@@ -44443,7 +44427,7 @@ async function action() {
             const titleFormatted = getTitle(title);
             const bodyFormatted = getPRComment(project, {
                 overall: minCoverageOverall,
-                changed: minCoverageChangedFiles,
+                changed: minCoverageChangedLines,
             }, title, emoji);
             switch (commentType) {
                 case 'pr_comment':

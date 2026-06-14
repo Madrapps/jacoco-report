@@ -17,7 +17,6 @@ describe('process', function () {
         expect(actual).toEqual({
           modules: [],
           isMultiModule: false,
-          'coverage-changed-files': 100,
           overall: null,
           changed: null,
         })
@@ -32,7 +31,6 @@ describe('process', function () {
         expect(actual).toEqual({
           modules: [],
           isMultiModule: false,
-          'coverage-changed-files': 100,
           overall: null,
           changed: null,
         })
@@ -45,7 +43,6 @@ describe('process', function () {
         expect(actual).toEqual({
           modules: [],
           isMultiModule: false,
-          'coverage-changed-files': 100,
           overall: null,
           changed: null,
         })
@@ -61,7 +58,6 @@ describe('process', function () {
         expect(actual).toEqual({
           modules: [],
           isMultiModule: false,
-          'coverage-changed-files': 100,
           overall: {
             covered: 43,
             missed: 79,
@@ -78,7 +74,6 @@ describe('process', function () {
         })
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
-          'coverage-changed-files': 42,
           isMultiModule: false,
           modules: [
             {
@@ -258,7 +253,6 @@ describe('process', function () {
         expect(actual).toEqual({
           modules: [],
           isMultiModule: true,
-          'coverage-changed-files': 100,
           overall: {
             covered: 40,
             missed: 156,
@@ -275,7 +269,6 @@ describe('process', function () {
         })
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
-          'coverage-changed-files': 84.62,
           isMultiModule: true,
           modules: [
             {
@@ -458,7 +451,6 @@ describe('process', function () {
         expect(actual).toEqual({
           modules: [],
           isMultiModule: true,
-          'coverage-changed-files': 100,
           overall: {
             covered: 28212,
             missed: 8754,
@@ -475,7 +467,6 @@ describe('process', function () {
         })
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
-          'coverage-changed-files': 58.82,
           isMultiModule: true,
           modules: [
             {
@@ -521,7 +512,6 @@ describe('process', function () {
         })
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual({
-          'coverage-changed-files': 65.91,
           isMultiModule: true,
           modules: [
             {
@@ -734,6 +724,64 @@ describe('process', function () {
         '/workspace/reports/coverage.xml'
       )
       expect(result).toBeNull()
+    })
+  })
+
+  describe('edge cases', function () {
+    it('returns null overall coverage for empty reports array', () => {
+      const actual = process.getProjectCoverage([], [])
+      expect(actual.overall).toBeNull()
+      expect(actual.changed).toBeNull()
+    })
+
+    it('handles report with no counter field', async () => {
+      const reports = await getSingleReports()
+      delete reports[0].counter
+      const actual = process.getProjectCoverage(reports, [])
+      expect(actual.overall).toBeNull()
+    })
+
+    it('skips file when counter has 0 covered and 0 missed', async () => {
+      const reports = await getSingleReports()
+      const packages = reports[0].package ?? []
+      for (const pkg of packages) {
+        if (pkg.sourcefile) {
+          for (const sf of pkg.sourcefile) {
+            if (sf.counter) {
+              for (const counter of sf.counter) {
+                counter.missed = 0
+                counter.covered = 0
+              }
+            }
+          }
+        }
+      }
+      const changedFiles = CHANGED_FILE.SINGLE_MODULE
+      const actual = process.getProjectCoverage(reports, changedFiles)
+      expect(actual.modules.length).toBe(0)
+    })
+
+    it('disambiguates with no common prefix between paths', async () => {
+      const reportPath =
+        './__tests__/__fixtures__/multi_module/textCoverage.xml'
+      const report1 = await getReport(reportPath)
+      report1.filePath = 'alpha/build/reports/jacoco/debug.xml'
+
+      const report2 = await getReport(reportPath)
+      report2.filePath = 'beta/build/reports/jacoco/debug.xml'
+
+      report1.name = 'tests'
+      report2.name = 'tests'
+
+      const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
+        return file.filePath.endsWith('StringOp.java')
+      })
+      const actual = process.getProjectCoverage(
+        [report1, report2],
+        changedFiles
+      )
+      expect(actual.modules[0].name).toEqual(':alpha')
+      expect(actual.modules[1].name).toEqual(':beta')
     })
   })
 })
