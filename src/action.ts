@@ -209,7 +209,8 @@ export async function action(): Promise<void> {
         },
         title,
         emoji,
-        showMissingLines
+        showMissingLines,
+        coverageCounterType
       )
       switch (commentType) {
         case 'pr_comment':

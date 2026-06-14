@@ -2,10 +2,12 @@ import {
   Coverage,
   Emoji,
   File,
+  Line,
   MinCoverage,
   Module,
   Project,
 } from './models/project.js'
+import {CoverageCounterType} from './models/jacoco-types.js'
 
 const coverageAbsent =
   '> There is no coverage information present for the changed lines'
@@ -15,7 +17,8 @@ export function getPRComment(
   minCoverage: MinCoverage,
   title: string,
   emoji: Emoji,
-  showMissingLines = false
+  showMissingLines = false,
+  coverageCounterType: CoverageCounterType = 'INSTRUCTION'
 ): string {
   const heading = getTitle(title)
   if (!project.overall) {
@@ -28,7 +31,13 @@ export function getPRComment(
     emoji
   )
   const moduleTable = getModuleTable(project.modules, minCoverage, emoji)
-  const filesTable = getFileTable(project, minCoverage, emoji, showMissingLines)
+  const filesTable = getFileTable(
+    project,
+    minCoverage,
+    emoji,
+    showMissingLines,
+    coverageCounterType
+  )
 
   const tables =
     project.modules.length === 0
@@ -87,7 +96,8 @@ function getFileTable(
   project: Project,
   minCoverage: MinCoverage,
   emoji: Emoji,
-  showMissingLines: boolean
+  showMissingLines: boolean,
+  coverageCounterType: CoverageCounterType
 ): string {
   const missingLinesHeader = showMissingLines ? 'Lines missed|' : ''
   const missingLinesStructure = showMissingLines ? ':-|' : ''
@@ -135,7 +145,9 @@ function getFileTable(
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
     }
     const fileName = `[${file.name}](${file.url})`
-    const missingLinesCell = showMissingLines ? `${getMissingLines(file)}|` : ''
+    const missingLinesCell = showMissingLines
+      ? `${getMissingLines(file, coverageCounterType)}|`
+      : ''
     const row = isMultiModule
       ? `|${moduleName}|${fileName}|${coveragePercentage}|${missingLinesCell}${status}|`
       : `|${fileName}|${coveragePercentage}|${missingLinesCell}${status}|`
@@ -145,11 +157,12 @@ function getFileTable(
 
 const MISSING_LINES_MAX_GROUPS = 10
 
-function getMissingLines(file: File): string {
+function getMissingLines(
+  file: File,
+  coverageCounterType: CoverageCounterType
+): string {
   const missedLines = file.lines
-    .filter(
-      line => line.instruction.covered === 0 && line.instruction.missed > 0
-    )
+    .filter(line => isLineMissed(line, coverageCounterType))
     .map(line => line.number)
 
   if (missedLines.length === 0) return ''
@@ -189,6 +202,16 @@ function groupConsecutiveLines(lines: number[]): number[][] {
     groups.push(current)
   }
   return groups
+}
+
+function isLineMissed(
+  line: Line,
+  coverageCounterType: CoverageCounterType
+): boolean {
+  if (coverageCounterType === 'BRANCH') {
+    return line.branch.covered === 0 && line.branch.missed > 0
+  }
+  return line.instruction.covered === 0 && line.instruction.missed > 0
 }
 
 function getCoverageDifference(
