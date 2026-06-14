@@ -43910,29 +43910,88 @@ function getModulesFromReports(reports) {
         if (groupTag) {
             const groups = groupTag.filter(group => group !== undefined);
             for (const group of groups) {
-                const module = getModuleFromParent(group);
+                const module = getModuleFromParent(group, report.filePath);
                 if (module) {
                     modules.push(module);
                 }
             }
         }
-        const module = getModuleFromParent(report);
+        const module = getModuleFromParent(report, report.filePath);
         if (module) {
             modules.push(module);
         }
     }
+    disambiguateModuleNames(modules);
     return modules;
 }
-function getModuleFromParent(parent) {
+function getModuleFromParent(parent, filePath) {
     const packages = parent.package;
     if (packages && packages.length !== 0) {
         return {
             name: parent.name,
             packages,
-            root: parent, // TODO just pass array of 'counters'
+            root: parent,
+            filePath,
         };
     }
     return null;
+}
+function disambiguateModuleNames(modules) {
+    const nameGroups = new Map();
+    for (const module of modules) {
+        const group = nameGroups.get(module.name) ?? [];
+        group.push(module);
+        nameGroups.set(module.name, group);
+    }
+    for (const [, group] of nameGroups) {
+        if (group.length <= 1)
+            continue;
+        const modulePaths = group.map(m => m.filePath ? getModulePathFromFilePath(m.filePath) : null);
+        const allResolved = modulePaths.every(p => p !== null);
+        if (!allResolved)
+            continue;
+        const commonPrefix = getCommonPrefix(modulePaths);
+        for (let i = 0; i < group.length; i++) {
+            const fullPath = modulePaths[i];
+            const uniquePart = fullPath.substring(commonPrefix.length);
+            if (uniquePart) {
+                group[i].name = ':' + uniquePart.split('/').join(':');
+            }
+        }
+    }
+}
+function getModulePathFromFilePath(filePath) {
+    const normalizedPath = filePath.replace(/\\/g, '/');
+    const patterns = [
+        /(.+?)\/build\/reports\/jacoco\b/,
+        /(.+?)\/target\/site\/jacoco\b/,
+        /(.+?)\/target\/jacoco\b/,
+    ];
+    for (const pattern of patterns) {
+        const match = normalizedPath.match(pattern);
+        if (match) {
+            return match[1];
+        }
+    }
+    return null;
+}
+function getCommonPrefix(paths) {
+    if (paths.length === 0)
+        return '';
+    const segments = paths.map(p => p.split('/'));
+    const minLen = Math.min(...segments.map(s => s.length));
+    let commonEnd = 0;
+    for (let i = 0; i < minLen; i++) {
+        if (segments.every(s => s[i] === segments[0][i])) {
+            commonEnd = i + 1;
+        }
+        else {
+            break;
+        }
+    }
+    if (commonEnd === 0)
+        return '';
+    return segments[0].slice(0, commonEnd).join('/') + '/';
 }
 function getFileCoverageFromPackages(packages, files, coverageCounterType) {
     const resultFiles = [];
@@ -44398,9 +44457,11 @@ async function getJsonReports(xmlPaths, debugMode) {
     const files = await globber.glob();
     if (debugMode)
         info(`Resolved files: ${files}`);
-    return Promise.all(files.map(async (path) => {
-        const reportXml = await fs.promises.readFile(path.trim(), 'utf-8');
-        return await parseToReport(reportXml);
+    return Promise.all(files.map(async (filePath) => {
+        const reportXml = await fs.promises.readFile(filePath.trim(), 'utf-8');
+        const report = await parseToReport(reportXml);
+        report.filePath = filePath.trim();
+        return report;
     }));
 }
 async function getChangedFiles(base, head, client, debugMode) {
