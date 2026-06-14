@@ -1,6 +1,7 @@
 import {
   Coverage,
   Emoji,
+  File,
   MinCoverage,
   Module,
   Project,
@@ -13,7 +14,8 @@ export function getPRComment(
   project: Project,
   minCoverage: MinCoverage,
   title: string,
-  emoji: Emoji
+  emoji: Emoji,
+  showMissingLines = false
 ): string {
   const heading = getTitle(title)
   if (!project.overall) {
@@ -26,7 +28,7 @@ export function getPRComment(
     emoji
   )
   const moduleTable = getModuleTable(project.modules, minCoverage, emoji)
-  const filesTable = getFileTable(project, minCoverage, emoji)
+  const filesTable = getFileTable(project, minCoverage, emoji, showMissingLines)
 
   const tables =
     project.modules.length === 0
@@ -84,14 +86,17 @@ function getModuleTable(
 function getFileTable(
   project: Project,
   minCoverage: MinCoverage,
-  emoji: Emoji
+  emoji: Emoji,
+  showMissingLines: boolean
 ): string {
+  const missingLinesHeader = showMissingLines ? 'Lines missed|' : ''
+  const missingLinesStructure = showMissingLines ? ':-|' : ''
   const tableHeader = project.isMultiModule
-    ? '|Module|File|Coverage||'
-    : '|File|Coverage||'
+    ? `|Module|File|Coverage|${missingLinesHeader}|`
+    : `|File|Coverage|${missingLinesHeader}|`
   const tableStructure = project.isMultiModule
-    ? '|:-|:-|:-|:-:|'
-    : '|:-|:-|:-:|'
+    ? `|:-|:-|:-|${missingLinesStructure}:-:|`
+    : `|:-|:-|${missingLinesStructure}:-:|`
   let table = `${tableHeader}\n${tableStructure}`
   for (const module of project.modules) {
     for (let index = 0; index < module.files.length; index++) {
@@ -106,8 +111,7 @@ function getFileTable(
       )
       renderRow(
         moduleName,
-        `[${file.name}](${file.url})`,
-        file.overall.percentage,
+        file,
         coverageDifference,
         file.changed?.percentage ?? null,
         project.isMultiModule
@@ -120,22 +124,73 @@ function getFileTable(
 
   function renderRow(
     moduleName: string,
-    fileName: string,
-    overallCoverage: number | null,
+    file: File,
     coverageDiff: number | null,
     changedCoverage: number | null,
     isMultiModule: boolean
   ): void {
     const status = getStatus(changedCoverage, minCoverage.changed, emoji)
-    let coveragePercentage = `${formatCoverage(overallCoverage)}`
+    let coveragePercentage = `${formatCoverage(file.overall.percentage)}`
     if (shouldShow(coverageDiff)) {
       coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`
     }
+    const fileName = `[${file.name}](${file.url})`
+    const missingLinesCell = showMissingLines
+      ? `${getMissingLines(file)}|`
+      : ''
     const row = isMultiModule
-      ? `|${moduleName}|${fileName}|${coveragePercentage}|${status}|`
-      : `|${fileName}|${coveragePercentage}|${status}|`
+      ? `|${moduleName}|${fileName}|${coveragePercentage}|${missingLinesCell}${status}|`
+      : `|${fileName}|${coveragePercentage}|${missingLinesCell}${status}|`
     table = `${table}\n${row}`
   }
+}
+
+const MISSING_LINES_MAX_GROUPS = 10
+
+function getMissingLines(file: File): string {
+  const missedLines = file.lines
+    .filter(
+      line => line.instruction.covered === 0 && line.instruction.missed > 0
+    )
+    .map(line => line.number)
+
+  if (missedLines.length === 0) return ''
+
+  const groups = groupConsecutiveLines(missedLines)
+  const displayGroups = groups.slice(0, MISSING_LINES_MAX_GROUPS)
+  const remaining = groups.length - displayGroups.length
+
+  const links = displayGroups.map(group => {
+    if (group.length === 1) {
+      return `[L${group[0]}](${file.url}#L${group[0]})`
+    }
+    const start = group[0]
+    const end = group[group.length - 1]
+    return `[L${start}-L${end}](${file.url}#L${start}-L${end})`
+  })
+
+  if (remaining > 0) {
+    links.push(`[+${remaining} more](${file.url})`)
+  }
+
+  return links.join(', ')
+}
+
+function groupConsecutiveLines(lines: number[]): number[][] {
+  const groups: number[][] = []
+  let current: number[] = []
+  for (const line of lines) {
+    if (current.length === 0 || line === current[current.length - 1] + 1) {
+      current.push(line)
+    } else {
+      groups.push(current)
+      current = [line]
+    }
+  }
+  if (current.length > 0) {
+    groups.push(current)
+  }
+  return groups
 }
 
 function getCoverageDifference(

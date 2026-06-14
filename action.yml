@@ -58,6 +58,10 @@ inputs:
     description: 'If true, show coverage for all modules in the comment, not just those with changed files'
     required: false
     default: 'false'
+  show-missing-lines:
+    description: 'If true, show the line numbers of uncovered code in the Files table with hyperlinks'
+    required: false
+    default: 'true'
   debug-mode:
     description: 'Run the action in debug mode and get debug logs printed in console'
     required: false

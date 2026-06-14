@@ -52,6 +52,7 @@ export async function action(): Promise<void> {
     }
     const skipIfNoChanges = parseBooleans(core.getInput('skip-if-no-changes'))
     const showAllModules = parseBooleans(core.getInput('show-all-modules'))
+    const showMissingLines = parseBooleans(core.getInput('show-missing-lines'))
     const passEmoji = core.getInput('pass-emoji')
     const failEmoji = core.getInput('fail-emoji')
 
@@ -207,7 +208,8 @@ export async function action(): Promise<void> {
           changed: minCoverageChangedLines,
         },
         title,
-        emoji
+        emoji,
+        showMissingLines
       )
       switch (commentType) {
         case 'pr_comment':
