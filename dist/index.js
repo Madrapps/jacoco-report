@@ -44347,7 +44347,8 @@ async function action() {
         if (!isValidCommentType(commentType)) {
             setFailed(`'comment-type' ${commentType} is invalid`);
         }
-        let prNumber = Number(getInput('pr-number')) || undefined;
+        const prNumberInput = getInput('pr-number');
+        let prNumber = Number(prNumberInput) || undefined;
         const client = getOctokit(token);
         const sha = context.sha;
         let base = sha;
@@ -44392,10 +44393,33 @@ async function action() {
             case 'pull_request':
             case 'pull_request_target':
             case 'workflow_run':
-                if (headShaInput)
-                    head = headShaInput;
-                if (baseShaInput)
-                    base = baseShaInput;
+                if (headShaInput || baseShaInput) {
+                    if (headShaInput)
+                        head = headShaInput;
+                    if (baseShaInput)
+                        base = baseShaInput;
+                }
+                else if (prNumberInput && prNumber) {
+                    const pr = await client.rest.pulls.get({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        pull_number: prNumber,
+                    });
+                    base = pr.data.base.sha;
+                    head = pr.data.head.sha;
+                }
+                break;
+            case 'workflow_dispatch':
+            case 'schedule':
+                if (prNumberInput && prNumber) {
+                    const pr = await client.rest.pulls.get({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        pull_number: prNumber,
+                    });
+                    base = pr.data.base.sha;
+                    head = pr.data.head.sha;
+                }
                 break;
         }
         info(`base sha: ${base}`);

@@ -82,8 +82,8 @@ export async function action(): Promise<void> {
       core.setFailed(`'comment-type' ${commentType} is invalid`)
     }
 
-    let prNumber: number | undefined =
-      Number(core.getInput('pr-number')) || undefined
+    const prNumberInput = core.getInput('pr-number')
+    let prNumber: number | undefined = Number(prNumberInput) || undefined
 
     const client = github.getOctokit(token)
 
@@ -133,8 +133,30 @@ export async function action(): Promise<void> {
       case 'pull_request':
       case 'pull_request_target':
       case 'workflow_run':
-        if (headShaInput) head = headShaInput
-        if (baseShaInput) base = baseShaInput
+        if (headShaInput || baseShaInput) {
+          if (headShaInput) head = headShaInput
+          if (baseShaInput) base = baseShaInput
+        } else if (prNumberInput && prNumber) {
+          const pr = await client.rest.pulls.get({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            pull_number: prNumber,
+          })
+          base = pr.data.base.sha
+          head = pr.data.head.sha
+        }
+        break
+      case 'workflow_dispatch':
+      case 'schedule':
+        if (prNumberInput && prNumber) {
+          const pr = await client.rest.pulls.get({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            pull_number: prNumber,
+          })
+          base = pr.data.base.sha
+          head = pr.data.head.sha
+        }
         break
     }
 
