@@ -118,11 +118,13 @@ function disambiguateModuleNames(modules: LocalModule[]): void {
     const modulePaths = group.map(m =>
       m.filePath ? getModulePathFromFilePath(m.filePath) : null
     )
-    const allResolved = modulePaths.every(p => p !== null)
-    if (!allResolved) continue
-    const commonPrefix = getCommonPrefix(modulePaths)
+    const resolvedModulePaths = modulePaths.filter(
+      (p): p is string => p !== null
+    )
+    if (resolvedModulePaths.length !== modulePaths.length) continue
+    const commonPrefix = getCommonPrefix(resolvedModulePaths)
     for (let i = 0; i < group.length; i++) {
-      const fullPath = modulePaths[i]
+      const fullPath = resolvedModulePaths[i]
       const uniquePart = fullPath.substring(commonPrefix.length)
       if (uniquePart) {
         group[i].name = ':' + uniquePart.split('/').join(':')
