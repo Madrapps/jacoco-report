@@ -44145,14 +44145,14 @@ function sumReducer(total, value) {
 }
 
 const coverageAbsent = '> There is no coverage information present for the changed lines';
-function getPRComment(project, minCoverage, title, emoji, showMissingLines = false) {
+function getPRComment(project, minCoverage, title, emoji, showMissingLines = false, coverageCounterType = 'INSTRUCTION') {
     const heading = getTitle(title);
     if (!project.overall) {
         return `${heading + coverageAbsent}`;
     }
     const overallTable = getOverallTable(project.overall, project.changed, minCoverage, emoji);
     const moduleTable = getModuleTable(project.modules, minCoverage, emoji);
-    const filesTable = getFileTable(project, minCoverage, emoji, showMissingLines);
+    const filesTable = getFileTable(project, minCoverage, emoji, showMissingLines, coverageCounterType);
     const tables = project.modules.length === 0
         ? coverageAbsent
         : project.isMultiModule
@@ -44183,7 +44183,7 @@ function getModuleTable(modules, minCoverage, emoji) {
         table = `${table}\n${row}`;
     }
 }
-function getFileTable(project, minCoverage, emoji, showMissingLines) {
+function getFileTable(project, minCoverage, emoji, showMissingLines, coverageCounterType) {
     const missingLinesHeader = showMissingLines ? 'Lines missed|' : '';
     const missingLinesStructure = showMissingLines ? ':-|' : '';
     const tableHeader = project.isMultiModule
@@ -44214,7 +44214,9 @@ function getFileTable(project, minCoverage, emoji, showMissingLines) {
             coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`;
         }
         const fileName = `[${file.name}](${file.url})`;
-        const missingLinesCell = showMissingLines ? `${getMissingLines(file)}|` : '';
+        const missingLinesCell = showMissingLines
+            ? `${getMissingLines(file, coverageCounterType)}|`
+            : '';
         const row = isMultiModule
             ? `|${moduleName}|${fileName}|${coveragePercentage}|${missingLinesCell}${status}|`
             : `|${fileName}|${coveragePercentage}|${missingLinesCell}${status}|`;
@@ -44222,9 +44224,9 @@ function getFileTable(project, minCoverage, emoji, showMissingLines) {
     }
 }
 const MISSING_LINES_MAX_GROUPS = 10;
-function getMissingLines(file) {
+function getMissingLines(file, coverageCounterType) {
     const missedLines = file.lines
-        .filter(line => line.instruction.covered === 0 && line.instruction.missed > 0)
+        .filter(line => isLineMissed(line, coverageCounterType))
         .map(line => line.number);
     if (missedLines.length === 0)
         return '';
@@ -44260,6 +44262,12 @@ function groupConsecutiveLines(lines) {
         groups.push(current);
     }
     return groups;
+}
+function isLineMissed(line, coverageCounterType) {
+    if (coverageCounterType === 'BRANCH') {
+        return line.branch.covered === 0 && line.branch.missed > 0;
+    }
+    return line.instruction.covered === 0 && line.instruction.missed > 0;
 }
 function getCoverageDifference(overall, changed) {
     if (!changed)
@@ -44500,7 +44508,7 @@ async function action() {
             const bodyFormatted = getPRComment(project, {
                 overall: minCoverageOverall,
                 changed: minCoverageChangedLines,
-            }, title, emoji, showMissingLines);
+            }, title, emoji, showMissingLines, coverageCounterType);
             switch (commentType) {
                 case 'pr_comment':
                     await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);

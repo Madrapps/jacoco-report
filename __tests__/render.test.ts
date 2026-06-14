@@ -595,6 +595,26 @@ describe('Render', function () {
         )
       })
 
+      it('uses branch counter when coverageCounterType is BRANCH', function () {
+        const comment = render.getPRComment(
+          PROJECT.SINGLE_MODULE,
+          {overall: 30, changed: 60},
+          '',
+          emoji,
+          true,
+          'BRANCH'
+        )
+        // Line 13 has branch.missed=2, branch.covered=0 → fully missed
+        expect(comment).toContain(
+          '[L13](https://github.com/thsaravana/jacoco-playground/blob/14a554976c0e5909d8e69bc8cce72958c49a7dc5/src/main/kotlin/com/madrapps/jacoco/Math.kt#L13)'
+        )
+        // Lines 14, 16, 29, 43 have branch.missed=0 → should NOT appear
+        expect(comment).not.toContain('#L14)')
+        expect(comment).not.toContain('#L16)')
+        expect(comment).not.toContain('#L29)')
+        expect(comment).not.toContain('#L43)')
+      })
+
       it('disabled when showMissingLines is false', function () {
         const comment = render.getPRComment(
           PROJECT.SINGLE_MODULE,
