@@ -1,6 +1,6 @@
 {
   "name": "jacoco-report",
-  "version": "1.8.0",
+  "version": "2.0.0",
   "description": "Github action that publishes the JaCoCo report as a comment in the Pull Request",
   "type": "module",
   "private": true,

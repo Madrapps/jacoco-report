@@ -24,7 +24,7 @@ Note: When using `comment-type: pr_comment` or `comment-type: both` (the default
 - `paths` - [**required**] Comma separated paths of the generated jacoco xml files (supports wildcard glob pattern)
 - `token` - [*optional* {default: `github.token`}] Github token to add comments to Pull Request (ensure the job has `pull-requests: write` permission)
 - `min-coverage-overall` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for overall project
-- `min-coverage-changed-files` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for changed files
+- `min-coverage-changed-lines` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for changed lines
 - `update-comment` - [*optional* {default: false}] If true, updates the previous coverage report comment instead of creating new one.
   Requires `title` to work properly
 - `comment-type` - [*optional* {pr_comment, summary, both} {default: pr_comment}] Specifies where to add the comment, whether as a PR comment,
@@ -45,7 +45,6 @@ Note: When using `comment-type: pr_comment` or `comment-type: both` (the default
 ### Outputs
 
 - `coverage-overall` - The overall coverage of the project
-- `coverage-changed-files` - The total coverage of all changed files
 - `coverage-changed-lines` - The coverage of lines that were changed in the PR
 
 ### Example Workflow
@@ -82,7 +81,7 @@ jobs:
             ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 40
-          min-coverage-changed-files: 60
+          min-coverage-changed-lines: 60
 ```
 
 <br>
@@ -140,7 +139,7 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
        paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
        token: ${{ secrets.GITHUB_TOKEN }}
        min-coverage-overall: 40
-       min-coverage-changed-files: 60
+       min-coverage-changed-lines: 60
        title: Code Coverage
        update-comment: true
    ```
@@ -163,7 +162,7 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
          ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
        token: ${{ secrets.GITHUB_TOKEN }}
        min-coverage-overall: 40
-       min-coverage-changed-files: 60
+       min-coverage-changed-lines: 60
    ```
 
 4. When you need to customize the pass/fail emojis or the style of title in the comment
@@ -181,11 +180,16 @@ refer [jacoco-android-playground](https://github.com/thsaravana/jacoco-android-p
        paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
        token: ${{ secrets.GITHUB_TOKEN }}
        min-coverage-overall: 40
-       min-coverage-changed-files: 60
+       min-coverage-changed-lines: 60
        title: '# :lobster: Coverage Report'
        pass-emoji: ':green_circle:'
        fail-emoji: ':red_circle:'
    ```
+
+## Breaking Changes (v2.0)
+
+- `min-coverage-changed-files` input has been **renamed** to `min-coverage-changed-lines`. The threshold now clearly reflects what it checks — the coverage of lines that were changed in the PR.
+- `coverage-changed-files` output has been **removed**. Use `coverage-changed-lines` instead, which provides the coverage of the actual changed lines (not the overall coverage of files containing changes).
 
 ## Troubleshooting
 

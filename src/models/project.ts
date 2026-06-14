@@ -1,7 +1,6 @@
 export interface Project {
   modules: Module[]
   isMultiModule: boolean
-  'coverage-changed-files': number
   overall: Coverage | null
   changed: Coverage | null
 }

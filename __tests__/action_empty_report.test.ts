@@ -29,7 +29,7 @@ describe('Single Empty report', function () {
         return 'pr_comment'
       case 'min-coverage-overall':
         return 45
-      case 'min-coverage-changed-files':
+      case 'min-coverage-changed-lines':
         return 80
       case 'pass-emoji':
         return ':green_apple:'
@@ -133,21 +133,12 @@ describe('Single Empty report', function () {
       expect(out).toEqual(['coverage-overall', 100])
     })
 
-    it('set changed files coverage output', async () => {
-      initContext(eventName, payload)
-
-      await action.action()
-
-      const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 100])
-    })
-
     it('set changed lines coverage output', async () => {
       initContext(eventName, payload)
 
       await action.action()
 
-      const out = output.mock.calls[2]
+      const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-lines', 100])
     })
 
@@ -300,7 +291,7 @@ describe('Single Empty report', function () {
         await action.action()
 
         expect(createComment.mock.calls[0][0].body).toEqual(
-          `> There is no coverage information present for the Files changed`
+          `> There is no coverage information present for the changed lines`
         )
       })
     })
@@ -344,21 +335,12 @@ describe('Single Empty report', function () {
       expect(out).toEqual(['coverage-overall', 100])
     })
 
-    it('set changed files coverage output', async () => {
-      initContext('push', payload)
-
-      await action.action()
-
-      const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 100])
-    })
-
     it('set changed lines coverage output', async () => {
       initContext('push', payload)
 
       await action.action()
 
-      const out = output.mock.calls[2]
+      const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-lines', 100])
     })
   })
@@ -381,4 +363,4 @@ function initContext(eventName, payload): void {
   mockContext.repo = {owner: 'madrapps', repo: 'jacoco-playground'}
 }
 
-const PROPER_COMMENT = `> There is no coverage information present for the Files changed`
+const PROPER_COMMENT = `> There is no coverage information present for the changed lines`

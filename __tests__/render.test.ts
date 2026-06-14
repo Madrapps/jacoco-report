@@ -55,7 +55,6 @@ describe('Render', function () {
       const project: Project = {
         ...PROJECT.SINGLE_MODULE,
         modules: [],
-        'coverage-changed-files': 100,
         changed: null,
       }
       it('coverage greater than min coverage', function () {
@@ -72,7 +71,7 @@ describe('Render', function () {
           `|Overall Project|35.25%|:green_apple:|
 |:-|:-|:-:|
 
-> There is no coverage information present for the Files changed`
+> There is no coverage information present for the changed lines`
         )
       })
 
@@ -90,7 +89,7 @@ describe('Render', function () {
           `|Overall Project|35.25%|:x:|
 |:-|:-|:-:|
 
-> There is no coverage information present for the Files changed`
+> There is no coverage information present for the changed lines`
         )
       })
 
@@ -109,7 +108,7 @@ describe('Render', function () {
 |Overall Project|35.25%|:x:|
 |:-|:-|:-:|
 
-> There is no coverage information present for the Files changed`
+> There is no coverage information present for the changed lines`
         )
       })
     })
@@ -130,7 +129,7 @@ describe('Render', function () {
         expect(comment).toEqual(
           `|Overall Project|35.25% **\`-17.21%\`**|:green_apple:|
 |:-|:-|:-:|
-|Files changed|38.24%|:x:|
+|Changed lines|38.24%|:x:|
 <br>
 
 |File|Coverage||
@@ -154,7 +153,7 @@ describe('Render', function () {
         expect(comment).toEqual(
           `|Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
-|Files changed|38.24%|:x:|
+|Changed lines|38.24%|:x:|
 <br>
 
 |File|Coverage||
@@ -178,7 +177,7 @@ describe('Render', function () {
         expect(comment).toEqual(
           `|Overall Project|35.25% **\`-17.21%\`**|:green_apple:|
 |:-|:-|:-:|
-|Files changed|38.24%|:x:|
+|Changed lines|38.24%|:x:|
 <br>
 
 |File|Coverage||
@@ -202,7 +201,7 @@ describe('Render', function () {
         expect(comment).toEqual(
           `|Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
-|Files changed|38.24%|:green_apple:|
+|Changed lines|38.24%|:green_apple:|
 <br>
 
 |File|Coverage||
@@ -227,7 +226,7 @@ describe('Render', function () {
           `### Coverage
 |Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
-|Files changed|38.24%|:green_apple:|
+|Changed lines|38.24%|:green_apple:|
 <br>
 
 |File|Coverage||
@@ -255,7 +254,7 @@ describe('Render', function () {
         expect(comment).toEqual(
           `|Overall Project|20.41% **\`-19.39%\`**|:green_apple:|
 |:-|:-|:-:|
-|Files changed|7.32%|:x:|
+|Changed lines|7.32%|:x:|
 <br>
 
 |Module|Coverage||
@@ -293,7 +292,7 @@ describe('Render', function () {
         expect(comment).toEqual(
           `|Overall Project|20.41% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
-|Files changed|7.32%|:x:|
+|Changed lines|7.32%|:x:|
 <br>
 
 |Module|Coverage||
@@ -331,7 +330,7 @@ describe('Render', function () {
         expect(comment).toEqual(
           `|Overall Project|20.41% **\`-19.39%\`**|:green_apple:|
 |:-|:-|:-:|
-|Files changed|7.32%|:x:|
+|Changed lines|7.32%|:x:|
 <br>
 
 |Module|Coverage||
@@ -369,7 +368,7 @@ describe('Render', function () {
         expect(comment).toEqual(
           `|Overall Project|20.41% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
-|Files changed|7.32%|:green_apple:|
+|Changed lines|7.32%|:green_apple:|
 <br>
 
 |Module|Coverage||
@@ -408,7 +407,7 @@ describe('Render', function () {
           `### Coverage
 |Overall Project|20.41% **\`-19.39%\`**|:x:|
 |:-|:-|:-:|
-|Files changed|7.32%|:x:|
+|Changed lines|7.32%|:x:|
 <br>
 
 |Module|Coverage||
@@ -480,7 +479,7 @@ describe('Render', function () {
         expect(comment).toEqual(
           `|Overall Project|20.41% **\`-19.39%\`**|:green_apple:|
 |:-|:-|:-:|
-|Files changed|7.32%|:x:|
+|Changed lines|7.32%|:x:|
 <br>
 
 |Module|Coverage||
@@ -512,7 +511,6 @@ describe('Render', function () {
         const project: Project = {
           modules,
           isMultiModule: true,
-          'coverage-changed-files': 100,
           overall: {covered: 550, missed: 550, percentage: 50},
           changed: null,
         }
@@ -538,7 +536,6 @@ describe('Render', function () {
         const project: Project = {
           modules,
           isMultiModule: true,
-          'coverage-changed-files': 100,
           overall: {covered: 500, missed: 500, percentage: 50},
           changed: null,
         }

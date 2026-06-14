@@ -31,7 +31,7 @@ describe('Single report', function () {
         return 'pr_comment'
       case 'min-coverage-overall':
         return 45
-      case 'min-coverage-changed-files':
+      case 'min-coverage-changed-lines':
         return 80
       case 'pass-emoji':
         return ':green_apple:'
@@ -140,21 +140,12 @@ describe('Single report', function () {
       expect(out).toEqual(['coverage-overall', 35.25])
     })
 
-    it('set changed files coverage output', async () => {
-      initContext(eventName, payload)
-
-      await action.action()
-
-      const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 28.83])
-    })
-
     it('set changed lines coverage output', async () => {
       initContext(eventName, payload)
 
       await action.action()
 
-      const out = output.mock.calls[2]
+      const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-lines', 38.24])
     })
 
@@ -305,7 +296,7 @@ describe('Single report', function () {
         expect(createComment.mock.calls[0][0].body).toEqual(`### JaCoCo Report
 |Overall Project|35.25% **\`-17.21%\`**|red_circle|
 |:-|:-|:-:|
-|Files changed|38.24%|red_circle|
+|Changed lines|38.24%|red_circle|
 <br>
 
 |File|Coverage||
@@ -424,21 +415,12 @@ describe('Single report', function () {
       expect(out).toEqual(['coverage-overall', 35.25])
     })
 
-    it('set changed files coverage output', async () => {
-      initContext('push', payload)
-
-      await action.action()
-
-      const out = output.mock.calls[1]
-      expect(out).toEqual(['coverage-changed-files', 28.83])
-    })
-
     it('set changed lines coverage output', async () => {
       initContext('push', payload)
 
       await action.action()
 
-      const out = output.mock.calls[2]
+      const out = output.mock.calls[1]
       expect(out).toEqual(['coverage-changed-lines', 38.24])
     })
 
@@ -820,6 +802,28 @@ describe('Single report', function () {
     })
   })
 
+  describe('Deprecated inputs', function () {
+    it('Fail when min-coverage-changed-files is used', async () => {
+      initContext('pull_request', {
+        pull_request: {
+          number: '45',
+          base: {sha: 'guasft7asdtf78asfd87as6df7y2u3'},
+          head: {sha: 'aahsdflais76dfa78wrglghjkaghkj'},
+        },
+      })
+      mockCore.getInput.mockImplementation(key => {
+        if (key === 'min-coverage-changed-files') return '60'
+        return getInput(key)
+      })
+
+      await action.action()
+
+      expect(mockCore.setFailed).toHaveBeenCalledWith(
+        "'min-coverage-changed-files' is no longer supported. Please use 'min-coverage-changed-lines' instead."
+      )
+    })
+  })
+
   describe('Unsupported events', function () {
     it('Fail by throwing appropriate error', async () => {
       initContext('pr_review', {})
@@ -828,6 +832,41 @@ describe('Single report', function () {
       })
 
       await action.action()
+    })
+  })
+
+  describe('continue-on-error set to false', function () {
+    it('calls setFailed when an error occurs', async () => {
+      initContext('pull_request', {
+        pull_request: {
+          number: '45',
+          base: {sha: 'guasft7asdtf78asfd87as6df7y2u3'},
+          head: {sha: 'aahsdflais76dfa78wrglghjkaghkj'},
+        },
+      })
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      mockCore.setFailed.mockImplementation(() => {})
+      mockCore.getInput.mockImplementation(key => {
+        switch (key) {
+          case 'continue-on-error':
+            return 'false'
+          default:
+            return getInput(key)
+        }
+      })
+      mockGithub.getOctokit.mockReturnValue({
+        rest: {
+          repos: {
+            compareCommits: jest.fn(() => {
+              throw new Error('API failure')
+            }),
+          },
+        },
+      })
+
+      await action.action()
+
+      expect(mockCore.setFailed).toHaveBeenCalled()
     })
   })
 })
@@ -844,7 +883,7 @@ const TITLE = 'JaCoCo Report'
 const PROPER_COMMENT = `### JaCoCo Report
 |Overall Project|35.25% **\`-17.21%\`**|:x:|
 |:-|:-|:-:|
-|Files changed|38.24%|:x:|
+|Changed lines|38.24%|:x:|
 <br>
 
 |File|Coverage||
@@ -856,4 +895,4 @@ const ONLY_PROJECT_COMMENT = `### JaCoCo Report
 |Overall Project|35.25%|:x:|
 |:-|:-|:-:|
 
-> There is no coverage information present for the Files changed`
+> There is no coverage information present for the changed lines`

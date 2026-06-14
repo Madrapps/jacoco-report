@@ -236,6 +236,20 @@ describe('Util', function () {
       ])
     })
   })
+
+  describe('parseToReport', function () {
+    it('throws error for invalid XML without report tag', async () => {
+      await expect(parseToReport('<invalid>data</invalid>')).rejects.toThrow(
+        'Invalid report'
+      )
+    })
+
+    it('throws error for empty XML object', async () => {
+      await expect(parseToReport('<root></root>')).rejects.toThrow(
+        'Invalid report'
+      )
+    })
+  })
 })
 
 async function getSingleReport(): Promise<Report[]> {

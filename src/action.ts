@@ -31,9 +31,15 @@ export async function action(): Promise<void> {
     }
 
     const reportPaths = pathsString.split(',')
+    if (core.getInput('min-coverage-changed-files')) {
+      core.setFailed(
+        "'min-coverage-changed-files' is no longer supported. Please use 'min-coverage-changed-lines' instead."
+      )
+      return
+    }
     const minCoverageOverall = parseFloat(core.getInput('min-coverage-overall'))
-    const minCoverageChangedFiles = parseFloat(
-      core.getInput('min-coverage-changed-files')
+    const minCoverageChangedLines = parseFloat(
+      core.getInput('min-coverage-changed-lines')
     )
     const title = core.getInput('title')
     const updateComment = parseBooleans(core.getInput('update-comment'))
@@ -155,10 +161,6 @@ export async function action(): Promise<void> {
       project.overall ? parseFloat(project.overall.percentage.toFixed(2)) : 100
     )
     core.setOutput(
-      'coverage-changed-files',
-      parseFloat(project['coverage-changed-files'].toFixed(2))
-    )
-    core.setOutput(
       'coverage-changed-lines',
       project.changed ? parseFloat(project.changed.percentage.toFixed(2)) : 100
     )
@@ -176,7 +178,7 @@ export async function action(): Promise<void> {
         project,
         {
           overall: minCoverageOverall,
-          changed: minCoverageChangedFiles,
+          changed: minCoverageChangedLines,
         },
         title,
         emoji
