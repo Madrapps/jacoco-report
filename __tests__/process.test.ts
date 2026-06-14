@@ -370,6 +370,86 @@ describe('process', function () {
       })
     })
 
+    describe('show all modules', function () {
+      it('includes modules without changed files when enabled', async () => {
+        const reports = await getMultipleReports()
+        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
+          return file.filePath.endsWith('StringOp.java')
+        })
+        const actual = process.getProjectCoverage(
+          reports,
+          changedFiles,
+          'INSTRUCTION',
+          true
+        )
+        expect(actual.modules.length).toEqual(3)
+        const moduleNames = actual.modules.map(m => m.name)
+        expect(moduleNames).toContain('text')
+        expect(moduleNames).toContain('math')
+        expect(moduleNames).toContain('app')
+        const textModule = actual.modules.find(m => m.name === 'text')
+        expect(textModule).toBeDefined()
+        expect(textModule?.files.length).toEqual(1)
+        expect(textModule?.changed).not.toBeNull()
+        const mathModule = actual.modules.find(m => m.name === 'math')
+        expect(mathModule).toBeDefined()
+        expect(mathModule?.files.length).toEqual(0)
+        expect(mathModule?.changed).toBeNull()
+        const appModule = actual.modules.find(m => m.name === 'app')
+        expect(appModule).toBeDefined()
+        expect(appModule?.files.length).toEqual(0)
+        expect(appModule?.changed).toBeNull()
+      })
+
+      it('excludes modules without changed files when disabled', async () => {
+        const reports = await getMultipleReports()
+        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
+          return file.filePath.endsWith('StringOp.java')
+        })
+        const actual = process.getProjectCoverage(
+          reports,
+          changedFiles,
+          'INSTRUCTION',
+          false
+        )
+        expect(actual.modules.length).toEqual(1)
+        expect(actual.modules[0].name).toEqual('text')
+      })
+
+      it('shows all modules even with no changed files', async () => {
+        const reports = await getMultipleReports()
+        const changedFiles: ChangedFile[] = []
+        const actual = process.getProjectCoverage(
+          reports,
+          changedFiles,
+          'INSTRUCTION',
+          true
+        )
+        expect(actual.modules.length).toEqual(3)
+        for (const module of actual.modules) {
+          expect(module.files.length).toEqual(0)
+          expect(module.changed).toBeNull()
+          expect(module.overall.percentage).toBeGreaterThanOrEqual(0)
+        }
+      })
+
+      it('single report shows module when enabled and no files changed', async () => {
+        const reports = await getSingleReports()
+        const changedFiles: ChangedFile[] = []
+        const actual = process.getProjectCoverage(
+          reports,
+          changedFiles,
+          'INSTRUCTION',
+          true
+        )
+        expect(actual.modules.length).toEqual(1)
+        expect(actual.modules[0].name).toEqual('jacoco-playground')
+        expect(actual.modules[0].files.length).toEqual(0)
+        expect(actual.modules[0].changed).toBeNull()
+        expect(actual.modules[0].overall.percentage).toEqual(35.25)
+      })
+    })
+
     describe('aggregate reports', function () {
       it('no files changed', async () => {
         const reports = await getAggregateReport()

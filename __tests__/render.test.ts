@@ -433,5 +433,125 @@ describe('Render', function () {
         )
       })
     })
+
+    describe('multi module with show-all-modules', function () {
+      const project: Project = {
+        ...PROJECT.MULTI_MODULE,
+        modules: [
+          {
+            name: 'text',
+            files: [
+              {
+                name: 'StringOp.java',
+                url: 'https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java',
+                overall: {covered: 11, missed: 2, percentage: 84.62},
+                changed: {covered: 3, missed: 2, percentage: 60},
+                lines: [],
+              },
+            ],
+            overall: {covered: 11, missed: 2, percentage: 84.62},
+            changed: {covered: 3, missed: 2, percentage: 60},
+          },
+          {
+            name: 'math',
+            files: [],
+            overall: {covered: 19, missed: 18, percentage: 51.35},
+            changed: null,
+          },
+          {
+            name: 'app',
+            files: [],
+            overall: {covered: 10, missed: 136, percentage: 6.85},
+            changed: null,
+          },
+        ],
+      }
+
+      it('modules without changed files show overall coverage only', function () {
+        const comment = render.getPRComment(
+          project,
+          {
+            overall: 20,
+            changed: 60,
+          },
+          '',
+          emoji
+        )
+        expect(comment).toEqual(
+          `|Overall Project|20.41% **\`-19.39%\`**|:green_apple:|
+|:-|:-|:-:|
+|Files changed|7.32%|:x:|
+<br>
+
+|Module|Coverage||
+|:-|:-|:-:|
+|text|84.62% **\`-15.38%\`**|:green_apple:|
+|math|51.35%|:green_apple:|
+|app|6.85%|:green_apple:|
+
+<details>
+<summary>Files</summary>
+
+|Module|File|Coverage||
+|:-|:-|:-|:-:|
+|text|[StringOp.java](https://github.com/thsaravana/jacoco-android-playground/blob/63aa82c13d2a6aadccb7a06ac7cb6834351b8474/text/src/main/java/com/madrapps/text/StringOp.java)|84.62% **\`-15.38%\`**|:green_apple:|
+
+</details>`
+        )
+      })
+    })
+
+    describe('module table collapse', function () {
+      it('collapses module table when more than 10 modules', function () {
+        const modules = Array.from({length: 11}, (_, i) => ({
+          name: `module-${i + 1}`,
+          files: [],
+          overall: {covered: 50, missed: 50, percentage: 50},
+          changed: null,
+        }))
+        const project: Project = {
+          modules,
+          isMultiModule: true,
+          'coverage-changed-files': 100,
+          overall: {covered: 550, missed: 550, percentage: 50},
+          changed: null,
+        }
+        const comment = render.getPRComment(
+          project,
+          {overall: 40, changed: 60},
+          '',
+          emoji
+        )
+        expect(comment).toContain('<details>')
+        expect(comment).toContain('<summary>Modules (11)</summary>')
+        expect(comment).toContain('|module-1|50%|:green_apple:|')
+        expect(comment).toContain('|module-11|50%|:green_apple:|')
+      })
+
+      it('does not collapse module table when 10 or fewer modules', function () {
+        const modules = Array.from({length: 10}, (_, i) => ({
+          name: `module-${i + 1}`,
+          files: [],
+          overall: {covered: 50, missed: 50, percentage: 50},
+          changed: null,
+        }))
+        const project: Project = {
+          modules,
+          isMultiModule: true,
+          'coverage-changed-files': 100,
+          overall: {covered: 500, missed: 500, percentage: 50},
+          changed: null,
+        }
+        const comment = render.getPRComment(
+          project,
+          {overall: 40, changed: 60},
+          '',
+          emoji
+        )
+        expect(comment).not.toContain('<summary>Modules')
+        expect(comment).toContain('|module-1|50%|:green_apple:|')
+        expect(comment).toContain('|module-10|50%|:green_apple:|')
+      })
+    })
   })
 })

@@ -38,6 +38,8 @@ export function getPRComment(
   return `${heading + overallTable}\n\n${tables}`
 }
 
+const MODULE_COLLAPSE_THRESHOLD = 10
+
 function getModuleTable(
   modules: Module[],
   minCoverage: MinCoverage,
@@ -57,6 +59,9 @@ function getModuleTable(
       coverageDifference,
       module.changed?.percentage ?? null
     )
+  }
+  if (modules.length > MODULE_COLLAPSE_THRESHOLD) {
+    return `<details>\n<summary>Modules (${modules.length})</summary>\n\n${table}\n\n</details>`
   }
   return table
 
