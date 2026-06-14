@@ -1,18 +1,29 @@
 import {getFilesWithCoverage} from './util.js'
 import {ChangedFile} from './models/github.js'
 import {Coverage, File, Line, Module, Project} from './models/project.js'
-import {Counter, Group, Package, Report} from './models/jacoco-types.js'
+import {
+  Counter,
+  CoverageCounterType,
+  Group,
+  Package,
+  Report,
+} from './models/jacoco-types.js'
 
 export function getProjectCoverage(
   reports: Report[],
-  changedFiles: ChangedFile[]
+  changedFiles: ChangedFile[],
+  coverageCounterType: CoverageCounterType = 'INSTRUCTION'
 ): Project {
   const moduleCoverages: Module[] = []
   const modules = getModulesFromReports(reports)
   for (const module of modules) {
-    const files = getFileCoverageFromPackages(module.packages, changedFiles)
+    const files = getFileCoverageFromPackages(
+      module.packages,
+      changedFiles,
+      coverageCounterType
+    )
     if (files.length !== 0) {
-      const moduleCoverage = getModuleCoverage(module.root)
+      const moduleCoverage = getModuleCoverage(module.root, coverageCounterType)
       const changedCoverage = getCoverage(files)
       moduleCoverages.push({
         name: module.name,
@@ -32,7 +43,10 @@ export function getProjectCoverage(
   })
 
   const changedCoverage = getCoverage(moduleCoverages)
-  const projectCoverage = getOverallProjectCoverage(reports)
+  const projectCoverage = getOverallProjectCoverage(
+    reports,
+    coverageCounterType
+  )
   const totalPercentage = getTotalPercentage(totalFiles)
   return {
     modules: moduleCoverages,
@@ -88,7 +102,8 @@ function getModuleFromParent(parent: Report | Group): LocalModule | null {
 
 function getFileCoverageFromPackages(
   packages: Package[],
-  files: ChangedFile[]
+  files: ChangedFile[],
+  coverageCounterType: CoverageCounterType
 ): File[] {
   const resultFiles: File[] = []
   const jacocoFiles = getFilesWithCoverage(packages)
@@ -99,12 +114,12 @@ function getFileCoverageFromPackages(
       return f.filePath.endsWith(`${packageName}/${name}`)
     })
     if (githubFile) {
-      const instruction = jacocoFile.counters.find(
-        counter => counter.name === 'instruction'
+      const counter = jacocoFile.counters.find(
+        c => c.name === coverageCounterType.toLowerCase()
       )
-      if (instruction) {
-        const missed = instruction.missed
-        const covered = instruction.covered
+      if (counter) {
+        const missed = counter.missed
+        const covered = counter.covered
         const lines: Line[] = []
         for (const lineNumber of githubFile.lines) {
           const jacocoLine = jacocoFile.lines.find(
@@ -135,12 +150,26 @@ function getFileCoverageFromPackages(
             lines.push(line)
           }
         }
-        const changedMissed = lines
-          .map(line => toFloat(line.instruction.missed))
-          .reduce(sumReducer, 0.0)
-        const changedCovered = lines
-          .map(line => toFloat(line.instruction.covered))
-          .reduce(sumReducer, 0.0)
+        let changedMissed: number
+        let changedCovered: number
+        if (coverageCounterType === 'LINE') {
+          changedCovered = lines.filter(
+            line => line.instruction.covered > 0
+          ).length
+          changedMissed = lines.filter(
+            line =>
+              line.instruction.covered === 0 && line.instruction.missed > 0
+          ).length
+        } else {
+          const lineCounterKey: 'instruction' | 'branch' =
+            coverageCounterType === 'BRANCH' ? 'branch' : 'instruction'
+          changedMissed = lines
+            .map(line => toFloat(line[lineCounterKey].missed))
+            .reduce(sumReducer, 0.0)
+          changedCovered = lines
+            .map(line => toFloat(line[lineCounterKey].covered))
+            .reduce(sumReducer, 0.0)
+        }
         const changedPercentage = calculatePercentage(
           changedCovered,
           changedMissed
@@ -198,15 +227,21 @@ function getTotalPercentage(files: File[]): number | null {
   }
 }
 
-function getModuleCoverage(report: Report | Group): Coverage {
+function getModuleCoverage(
+  report: Report | Group,
+  coverageCounterType: CoverageCounterType
+): Coverage {
   const counters = report.counter ?? []
-  return getDetailedCoverage(counters, 'INSTRUCTION')
+  return getDetailedCoverage(counters, coverageCounterType)
 }
 
-function getOverallProjectCoverage(reports: Report[]): Coverage | null {
+function getOverallProjectCoverage(
+  reports: Report[],
+  coverageCounterType: CoverageCounterType
+): Coverage | null {
   const coverages = reports.map(report => {
     const counters = report.counter ?? []
-    return getDetailedCoverage(counters, 'INSTRUCTION')
+    return getDetailedCoverage(counters, coverageCounterType)
   })
   if (coverages.length === 0) return null
   const covered = coverages.reduce((acc, coverage) => acc + coverage.covered, 0)

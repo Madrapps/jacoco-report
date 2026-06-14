@@ -1,10 +1,10 @@
 import {describe, it, expect} from '@jest/globals'
 import fs from 'fs'
 import * as process from '../src/process'
-import {CHANGED_FILE, PROJECT} from './mocks.test'
 import {ChangedFile} from '../src/models/github'
 import {Report} from '../src/models/jacoco-types'
 import {parseToReport} from '../src/util'
+import {CHANGED_FILE, PROJECT} from './mocks.test'
 
 describe('process', function () {
   describe('get file coverage', function () {
@@ -172,6 +172,82 @@ describe('process', function () {
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual(PROJECT.SINGLE_MODULE)
       })
+
+      it('uses BRANCH counter type', async () => {
+        const reports = await getSingleReports()
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE.filter(file => {
+          return file.filePath.endsWith('Math.kt')
+        })
+        const actual = process.getProjectCoverage(
+          reports,
+          changedFiles,
+          'BRANCH'
+        )
+        expect(actual.overall?.percentage).toEqual(33.33)
+        expect(actual.modules[0].overall.percentage).toEqual(33.33)
+        expect(actual.modules[0].files[0].changed?.percentage).toEqual(33.33)
+      })
+
+      it('uses LINE counter type', async () => {
+        const reports = await getSingleReports()
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE.filter(file => {
+          return file.filePath.endsWith('Math.kt')
+        })
+        const actual = process.getProjectCoverage(reports, changedFiles, 'LINE')
+        expect(actual.overall?.percentage).toEqual(44.44)
+        expect(actual.modules[0].overall.percentage).toEqual(44.44)
+        expect(actual.modules[0].files[0].changed?.percentage).toEqual(37.5)
+      })
+
+      it('uses COMPLEXITY counter type', async () => {
+        const reports = await getSingleReports()
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE.filter(file => {
+          return file.filePath.endsWith('Math.kt')
+        })
+        const actual = process.getProjectCoverage(
+          reports,
+          changedFiles,
+          'COMPLEXITY'
+        )
+        expect(actual.overall?.percentage).toEqual(40)
+        expect(actual.modules[0].overall.percentage).toEqual(40)
+        expect(actual.modules[0].files[0].changed?.percentage).toEqual(32.26)
+      })
+
+      it('uses METHOD counter type', async () => {
+        const reports = await getSingleReports()
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE.filter(file => {
+          return file.filePath.endsWith('Math.kt')
+        })
+        const actual = process.getProjectCoverage(
+          reports,
+          changedFiles,
+          'METHOD'
+        )
+        expect(actual.overall?.percentage).toEqual(45.45)
+        expect(actual.modules[0].overall.percentage).toEqual(45.45)
+        expect(actual.modules[0].files[0].changed?.percentage).toEqual(32.26)
+      })
+
+      it('BRANCH excludes files without branch counters', async () => {
+        const reports = await getSingleReports()
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE
+        const actual = process.getProjectCoverage(
+          reports,
+          changedFiles,
+          'BRANCH'
+        )
+        expect(actual.modules[0].files.length).toEqual(1)
+        expect(actual.modules[0].files[0].name).toEqual('Math.kt')
+      })
+
+      it('LINE with multiple files changed', async () => {
+        const reports = await getSingleReports()
+        const changedFiles = CHANGED_FILE.SINGLE_MODULE
+        const actual = process.getProjectCoverage(reports, changedFiles, 'LINE')
+        expect(actual.overall?.percentage).toEqual(44.44)
+        expect(actual.modules[0].files.length).toEqual(3)
+      })
     })
 
     describe('multiple reports', function () {
@@ -262,6 +338,35 @@ describe('process', function () {
         const changedFiles = CHANGED_FILE.MULTI_MODULE
         const actual = process.getProjectCoverage(reports, changedFiles)
         expect(actual).toEqual(PROJECT.MULTI_MODULE)
+      })
+
+      it('uses LINE counter type', async () => {
+        const reports = await getMultipleReports()
+        const changedFiles = CHANGED_FILE.MULTI_MODULE.filter(file => {
+          return file.filePath.endsWith('StringOp.java')
+        })
+        const actual = process.getProjectCoverage(reports, changedFiles, 'LINE')
+        expect(actual.overall?.percentage).toEqual(28.57)
+        expect(actual.modules[0].overall.percentage).toEqual(75)
+        expect(actual.modules[0].files[0].name).toEqual('StringOp.java')
+        expect(actual.modules[0].files[0].changed?.percentage).toEqual(50)
+      })
+
+      it('BRANCH excludes files without branch counters', async () => {
+        const reports = await getMultipleReports()
+        const changedFiles = CHANGED_FILE.MULTI_MODULE
+        const actual = process.getProjectCoverage(
+          reports,
+          changedFiles,
+          'BRANCH'
+        )
+        expect(actual.modules.length).toEqual(1)
+        expect(actual.modules[0].name).toEqual('app')
+        expect(actual.modules[0].files.length).toEqual(1)
+        expect(actual.modules[0].files[0].name).toEqual('MainViewModel.kt')
+        expect(actual.modules[0].files[0].overall.percentage).toEqual(0)
+        expect(actual.modules[0].files[0].changed?.percentage).toEqual(0)
+        expect(actual.overall?.percentage).toEqual(0)
       })
     })
 

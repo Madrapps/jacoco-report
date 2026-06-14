@@ -37,6 +37,7 @@ Note: When using `comment-type: pr_comment` or `comment-type: both` (the default
   the files changed
 - `pass-emoji` - [*optional* {default: :green_apple:}] Emoji to use for pass status shown when 'coverage >= min coverage' (should be a Github supported emoji).
 - `fail-emoji` - [*optional* {default: :x:}] Emoji to use for fail status shown when 'coverage < min coverage' (should be a Github supported emoji).
+- `coverage-counter-type` - [*optional* {INSTRUCTION, BRANCH, LINE, COMPLEXITY, METHOD} {default: INSTRUCTION}] The type of JaCoCo counter to use for coverage calculation. Note: COMPLEXITY and METHOD are not available at per-line granularity, so changed-lines coverage will fall back to INSTRUCTION for those types.
 - `continue-on-error` - [*optional* {default: true}] If true, then do not fail the action on error, but log a warning
 - `debug-mode` - [*optional* {default: false}] If true, run the action in debug mode and get debug logs printed in console
 
