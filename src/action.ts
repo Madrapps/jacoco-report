@@ -227,9 +227,10 @@ async function getJsonReports(
 
   return Promise.all(
     files.map(async filePath => {
-      const reportXml = await fs.promises.readFile(filePath.trim(), 'utf-8')
+      const trimmedPath = filePath.trim()
+      const reportXml = await fs.promises.readFile(trimmedPath, 'utf-8')
       const report = await parseToReport(reportXml)
-      report.filePath = filePath.trim()
+      report.filePath = trimmedPath
       return report
     })
   )
