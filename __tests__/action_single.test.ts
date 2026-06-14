@@ -727,7 +727,7 @@ describe('Single report', function () {
       mockCore.getInput.mockImplementation(key => {
         switch (key) {
           case 'pr-number':
-            return 45
+            return '45'
           default:
             return getInput(key)
         }

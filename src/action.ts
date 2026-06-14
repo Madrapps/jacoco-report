@@ -83,7 +83,11 @@ export async function action(): Promise<void> {
     }
 
     const prNumberInput = core.getInput('pr-number')
-    let prNumber: number | undefined = Number(prNumberInput) || undefined
+    const parsedPrNumber = parseInt(prNumberInput, 10)
+    let prNumber: number | undefined =
+      Number.isInteger(parsedPrNumber) && parsedPrNumber > 0
+        ? parsedPrNumber
+        : undefined
 
     const client = github.getOctokit(token)
 

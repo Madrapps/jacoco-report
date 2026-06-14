@@ -44348,7 +44348,10 @@ async function action() {
             setFailed(`'comment-type' ${commentType} is invalid`);
         }
         const prNumberInput = getInput('pr-number');
-        let prNumber = Number(prNumberInput) || undefined;
+        const parsedPrNumber = parseInt(prNumberInput, 10);
+        let prNumber = Number.isInteger(parsedPrNumber) && parsedPrNumber > 0
+            ? parsedPrNumber
+            : undefined;
         const client = getOctokit(token);
         const sha = context.sha;
         let base = sha;
