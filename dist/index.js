@@ -44214,9 +44214,7 @@ function getFileTable(project, minCoverage, emoji, showMissingLines) {
             coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`;
         }
         const fileName = `[${file.name}](${file.url})`;
-        const missingLinesCell = showMissingLines
-            ? `${getMissingLines(file)}|`
-            : '';
+        const missingLinesCell = showMissingLines ? `${getMissingLines(file)}|` : '';
         const row = isMultiModule
             ? `|${moduleName}|${fileName}|${coveragePercentage}|${missingLinesCell}${status}|`
             : `|${fileName}|${coveragePercentage}|${missingLinesCell}${status}|`;
