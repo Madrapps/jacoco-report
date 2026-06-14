@@ -45,6 +45,7 @@ export async function action(): Promise<void> {
       }
     }
     const skipIfNoChanges = parseBooleans(core.getInput('skip-if-no-changes'))
+    const showAllModules = parseBooleans(core.getInput('show-all-modules'))
     const passEmoji = core.getInput('pass-emoji')
     const failEmoji = core.getInput('fail-emoji')
 
@@ -145,7 +146,8 @@ export async function action(): Promise<void> {
     const project: Project = getProjectCoverage(
       reports,
       changedFiles,
-      coverageCounterType
+      coverageCounterType,
+      showAllModules
     )
     if (debugMode) core.info(`project: ${debug(project)}`)
     core.setOutput(

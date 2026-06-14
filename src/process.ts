@@ -12,7 +12,8 @@ import {
 export function getProjectCoverage(
   reports: Report[],
   changedFiles: ChangedFile[],
-  coverageCounterType: CoverageCounterType = 'INSTRUCTION'
+  coverageCounterType: CoverageCounterType = 'INSTRUCTION',
+  showAllModules = false
 ): Project {
   const moduleCoverages: Module[] = []
   const modules = getModulesFromReports(reports)
@@ -34,6 +35,18 @@ export function getProjectCoverage(
           missed: moduleCoverage.missed,
         },
         changed: changedCoverage,
+      })
+    } else if (showAllModules) {
+      const moduleCoverage = getModuleCoverage(module.root, coverageCounterType)
+      moduleCoverages.push({
+        name: module.name,
+        files: [],
+        overall: {
+          percentage: moduleCoverage.percentage,
+          covered: moduleCoverage.covered,
+          missed: moduleCoverage.missed,
+        },
+        changed: null,
       })
     }
   }

@@ -43865,7 +43865,7 @@ function convertObjToReport(obj) {
     };
 }
 
-function getProjectCoverage(reports, changedFiles, coverageCounterType = 'INSTRUCTION') {
+function getProjectCoverage(reports, changedFiles, coverageCounterType = 'INSTRUCTION', showAllModules = false) {
     const moduleCoverages = [];
     const modules = getModulesFromReports(reports);
     for (const module of modules) {
@@ -43882,6 +43882,19 @@ function getProjectCoverage(reports, changedFiles, coverageCounterType = 'INSTRU
                     missed: moduleCoverage.missed,
                 },
                 changed: changedCoverage,
+            });
+        }
+        else if (showAllModules) {
+            const moduleCoverage = getModuleCoverage(module.root, coverageCounterType);
+            moduleCoverages.push({
+                name: module.name,
+                files: [],
+                overall: {
+                    percentage: moduleCoverage.percentage,
+                    covered: moduleCoverage.covered,
+                    missed: moduleCoverage.missed,
+                },
+                changed: null,
             });
         }
     }
@@ -43947,12 +43960,12 @@ function disambiguateModuleNames(modules) {
         if (group.length <= 1)
             continue;
         const modulePaths = group.map(m => m.filePath ? getModulePathFromFilePath(m.filePath) : null);
-        const allResolved = modulePaths.every(p => p !== null);
-        if (!allResolved)
+        const resolvedModulePaths = modulePaths.filter((p) => p !== null);
+        if (resolvedModulePaths.length !== modulePaths.length)
             continue;
-        const commonPrefix = getCommonPrefix(modulePaths);
+        const commonPrefix = getCommonPrefix(resolvedModulePaths);
         for (let i = 0; i < group.length; i++) {
-            const fullPath = modulePaths[i];
+            const fullPath = resolvedModulePaths[i];
             const uniquePart = fullPath.substring(commonPrefix.length);
             if (uniquePart) {
                 group[i].name = ':' + uniquePart.split('/').join(':');
@@ -44166,6 +44179,7 @@ function getPRComment(project, minCoverage, title, emoji) {
             : filesTable;
     return `${heading + overallTable}\n\n${tables}`;
 }
+const MODULE_COLLAPSE_THRESHOLD = 10;
 function getModuleTable(modules, minCoverage, emoji) {
     const tableHeader = '|Module|Coverage||';
     const tableStructure = '|:-|:-|:-:|';
@@ -44173,6 +44187,9 @@ function getModuleTable(modules, minCoverage, emoji) {
     for (const module of modules) {
         const coverageDifference = getCoverageDifference(module.overall, module.changed);
         renderRow(module.name, module.overall.percentage, coverageDifference, module.changed?.percentage ?? null);
+    }
+    if (modules.length > MODULE_COLLAPSE_THRESHOLD) {
+        return `<details>\n<summary>Modules (${modules.length})</summary>\n\n${table}\n\n</details>`;
     }
     return table;
     function renderRow(name, overallCoverage, coverageDiff, changedCoverage) {
@@ -44321,6 +44338,7 @@ async function action() {
             }
         }
         const skipIfNoChanges = processorsExports.parseBooleans(getInput('skip-if-no-changes'));
+        const showAllModules = processorsExports.parseBooleans(getInput('show-all-modules'));
         const passEmoji = getInput('pass-emoji');
         const failEmoji = getInput('fail-emoji');
         continueOnError = processorsExports.parseBooleans(getInput('continue-on-error'));
@@ -44406,7 +44424,7 @@ async function action() {
             info(`changedFiles: ${debug(changedFiles)}`);
         const reportsJsonAsync = getJsonReports(reportPaths, debugMode);
         const reports = await reportsJsonAsync;
-        const project = getProjectCoverage(reports, changedFiles, coverageCounterType);
+        const project = getProjectCoverage(reports, changedFiles, coverageCounterType, showAllModules);
         if (debugMode)
             info(`project: ${debug(project)}`);
         setOutput('coverage-overall', project.overall ? parseFloat(project.overall.percentage.toFixed(2)) : 100);
@@ -44458,9 +44476,10 @@ async function getJsonReports(xmlPaths, debugMode) {
     if (debugMode)
         info(`Resolved files: ${files}`);
     return Promise.all(files.map(async (filePath) => {
-        const reportXml = await fs.promises.readFile(filePath.trim(), 'utf-8');
+        const trimmedPath = filePath.trim();
+        const reportXml = await fs.promises.readFile(trimmedPath, 'utf-8');
         const report = await parseToReport(reportXml);
-        report.filePath = filePath.trim();
+        report.filePath = trimmedPath;
         return report;
     }));
 }
