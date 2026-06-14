@@ -44145,14 +44145,14 @@ function sumReducer(total, value) {
 }
 
 const coverageAbsent = '> There is no coverage information present for the changed lines';
-function getPRComment(project, minCoverage, title, emoji) {
+function getPRComment(project, minCoverage, title, emoji, showMissingLines = false, coverageCounterType = 'INSTRUCTION') {
     const heading = getTitle(title);
     if (!project.overall) {
         return `${heading + coverageAbsent}`;
     }
     const overallTable = getOverallTable(project.overall, project.changed, minCoverage, emoji);
     const moduleTable = getModuleTable(project.modules, minCoverage, emoji);
-    const filesTable = getFileTable(project, minCoverage, emoji);
+    const filesTable = getFileTable(project, minCoverage, emoji, showMissingLines, coverageCounterType);
     const tables = project.modules.length === 0
         ? coverageAbsent
         : project.isMultiModule
@@ -44183,13 +44183,15 @@ function getModuleTable(modules, minCoverage, emoji) {
         table = `${table}\n${row}`;
     }
 }
-function getFileTable(project, minCoverage, emoji) {
+function getFileTable(project, minCoverage, emoji, showMissingLines, coverageCounterType) {
+    const missingLinesHeader = showMissingLines ? 'Lines missed|' : '';
+    const missingLinesStructure = showMissingLines ? ':-|' : '';
     const tableHeader = project.isMultiModule
-        ? '|Module|File|Coverage||'
-        : '|File|Coverage||';
+        ? `|Module|File|Coverage|${missingLinesHeader}|`
+        : `|File|Coverage|${missingLinesHeader}|`;
     const tableStructure = project.isMultiModule
-        ? '|:-|:-|:-|:-:|'
-        : '|:-|:-|:-:|';
+        ? `|:-|:-|:-|${missingLinesStructure}:-:|`
+        : `|:-|:-|${missingLinesStructure}:-:|`;
     let table = `${tableHeader}\n${tableStructure}`;
     for (const module of project.modules) {
         for (let index = 0; index < module.files.length; index++) {
@@ -44199,23 +44201,73 @@ function getFileTable(project, minCoverage, emoji) {
                 moduleName = '';
             }
             const coverageDifference = getCoverageDifference(file.overall, file.changed);
-            renderRow(moduleName, `[${file.name}](${file.url})`, file.overall.percentage, coverageDifference, file.changed?.percentage ?? null, project.isMultiModule);
+            renderRow(moduleName, file, coverageDifference, file.changed?.percentage ?? null, project.isMultiModule);
         }
     }
     return project.isMultiModule
         ? `<details>\n<summary>Files</summary>\n\n${table}\n\n</details>`
         : table;
-    function renderRow(moduleName, fileName, overallCoverage, coverageDiff, changedCoverage, isMultiModule) {
+    function renderRow(moduleName, file, coverageDiff, changedCoverage, isMultiModule) {
         const status = getStatus(changedCoverage, minCoverage.changed, emoji);
-        let coveragePercentage = `${formatCoverage(overallCoverage)}`;
+        let coveragePercentage = `${formatCoverage(file.overall.percentage)}`;
         if (shouldShow(coverageDiff)) {
             coveragePercentage += ` **\`${formatCoverage(coverageDiff)}\`**`;
         }
+        const fileName = `[${file.name}](${file.url})`;
+        const missingLinesCell = showMissingLines
+            ? `${getMissingLines(file, coverageCounterType)}|`
+            : '';
         const row = isMultiModule
-            ? `|${moduleName}|${fileName}|${coveragePercentage}|${status}|`
-            : `|${fileName}|${coveragePercentage}|${status}|`;
+            ? `|${moduleName}|${fileName}|${coveragePercentage}|${missingLinesCell}${status}|`
+            : `|${fileName}|${coveragePercentage}|${missingLinesCell}${status}|`;
         table = `${table}\n${row}`;
     }
+}
+const MISSING_LINES_MAX_GROUPS = 10;
+function getMissingLines(file, coverageCounterType) {
+    const missedLines = file.lines
+        .filter(line => isLineMissed(line, coverageCounterType))
+        .map(line => line.number);
+    if (missedLines.length === 0)
+        return '';
+    const groups = groupConsecutiveLines(missedLines);
+    const displayGroups = groups.slice(0, MISSING_LINES_MAX_GROUPS);
+    const remaining = groups.length - displayGroups.length;
+    const links = displayGroups.map(group => {
+        if (group.length === 1) {
+            return `[L${group[0]}](${file.url}#L${group[0]})`;
+        }
+        const start = group[0];
+        const end = group[group.length - 1];
+        return `[L${start}-L${end}](${file.url}#L${start}-L${end})`;
+    });
+    if (remaining > 0) {
+        links.push(`[+${remaining} more](${file.url})`);
+    }
+    return links.join(', ');
+}
+function groupConsecutiveLines(lines) {
+    const groups = [];
+    let current = [];
+    for (const line of lines) {
+        if (current.length === 0 || line === current[current.length - 1] + 1) {
+            current.push(line);
+        }
+        else {
+            groups.push(current);
+            current = [line];
+        }
+    }
+    if (current.length > 0) {
+        groups.push(current);
+    }
+    return groups;
+}
+function isLineMissed(line, coverageCounterType) {
+    if (coverageCounterType === 'BRANCH') {
+        return line.branch.covered === 0 && line.branch.missed > 0;
+    }
+    return line.instruction.covered === 0 && line.instruction.missed > 0;
 }
 function getCoverageDifference(overall, changed) {
     if (!changed)
@@ -44324,6 +44376,7 @@ async function action() {
         }
         const skipIfNoChanges = processorsExports.parseBooleans(getInput('skip-if-no-changes'));
         const showAllModules = processorsExports.parseBooleans(getInput('show-all-modules'));
+        const showMissingLines = processorsExports.parseBooleans(getInput('show-missing-lines'));
         const passEmoji = getInput('pass-emoji');
         const failEmoji = getInput('fail-emoji');
         continueOnError = processorsExports.parseBooleans(getInput('continue-on-error'));
@@ -44455,7 +44508,7 @@ async function action() {
             const bodyFormatted = getPRComment(project, {
                 overall: minCoverageOverall,
                 changed: minCoverageChangedLines,
-            }, title, emoji);
+            }, title, emoji, showMissingLines, coverageCounterType);
             switch (commentType) {
                 case 'pr_comment':
                     await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
