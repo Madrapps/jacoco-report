@@ -52,7 +52,7 @@
     "rimraf": "^6.0.1",
     "rollup": "^4.62.2",
     "ts-jest": "^29.4.11",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.64.0"
   }
 }
