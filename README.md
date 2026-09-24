@@ -101,6 +101,10 @@ jobs:
 <img src="/preview/single-module-screenshot.png" alt="single module screenshot" title="single module screenshot" width="700" />
 <br>
 <img src="/preview/multi-module-screenshot.png" alt="multi-module screenshot" title="multi-module screenshot" width="700" />
+<br>
+<img src="/preview/checks-summary.png" alt="checks summary screenshot" title="checks summary screenshot" width="700" />
+<br>
+<img src="/preview/checks-detail.png" alt="checks detail screenshot" title="checks detail screenshot" width="700" />
 
 ### Understanding the Coverage Report
 
