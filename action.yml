@@ -1,5 +1,5 @@
 name: 'JaCoCo Report'
-description: 'Publishes the JaCoCo report as a comment in the Pull Request'
+description: 'Publishes the JaCoCo report as a comment and/or check run in the Pull Request'
 inputs:
   paths:
     description: 'Comma separated paths of the generated jacoco xml files (supports wildcard glob pattern)'
@@ -24,18 +24,27 @@ inputs:
     required: false
     default: 'false'
   comment-type:
-    description: 'Specifies where to add the comment, whether as a PR comment, workflow summary, or both.'
+    description: 'Specifies where to add the comment, whether as a PR comment, workflow summary, both, or none. When none, add-check must be true.'
     required: false
     default: 'pr_comment'
     options:
       - 'pr_comment'
       - 'summary'
       - 'both'
+      - 'none'
+  add-check:
+    description: 'If true, publishes the coverage report as a check run on the head commit (requires checks: write permission). The check title shows the overall coverage and, when coverage dropped, the delta (e.g. Overall 69.09% (-1.07%)).'
+    required: false
+    default: 'false'
+  fail-check-below-threshold:
+    description: 'If true, the check run is marked as failed when overall or changed-lines coverage is below the configured minimum. Requires add-check.'
+    required: false
+    default: 'false'
   pr-number:
     description: 'The PR number to add the comment to. If not provided, the action will try to get it from the environment.'
     required: false
   skip-if-no-changes:
-    description: "Comment won't be added if there is no coverage information present for the files changed"
+    description: "Comment and workflow summary won't be added if there is no coverage information present for the files changed. The check run (add-check) is still published"
     required: false
     default: 'false'
   pass-emoji:

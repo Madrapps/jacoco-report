@@ -19,29 +19,39 @@ Note: When using `comment-type: pr_comment` or `comment-type: both` (the default
 - `pull-requests: write` (or `issues: write`)
 - `contents: read`
 
+When using `add-check: true`, the job additionally requires:
+
+- `checks: write`
+
 ### Inputs
 
 - `paths` - [**required**] Comma separated paths of the generated jacoco xml files (supports wildcard glob pattern)
-- `token` - [*optional* {default: `github.token`}] Github token to add comments to Pull Request (ensure the job has `pull-requests: write` permission)
-- `min-coverage-overall` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for overall project
-- `min-coverage-changed-lines` - [*optional* {default: 80%}] The minimum code coverage that is required to pass for changed lines
-- `update-comment` - [*optional* {default: false}] If true, updates the previous coverage report comment instead of creating new one.
+- `token` - [_optional_ {default: `github.token`}] Github token to add comments to Pull Request (ensure the job has `pull-requests: write` permission)
+- `min-coverage-overall` - [_optional_ {default: 80%}] The minimum code coverage that is required to pass for overall project
+- `min-coverage-changed-lines` - [_optional_ {default: 80%}] The minimum code coverage that is required to pass for changed lines
+- `update-comment` - [_optional_ {default: false}] If true, updates the previous coverage report comment instead of creating new one.
   Requires `title` to work properly
-- `comment-type` - [*optional* {pr_comment, summary, both} {default: pr_comment}] Specifies where to add the comment, whether as a PR comment,
-  workflow summary, or both.
-- `pr-number` - [*optional*] The PR number to add the comment to. If not provided, the action will try to get it from the environment.
-- `title` - [*optional*] Title for the Pull Request comment
-- `head-sha` - [*optional*] The head SHA to use for comparing changes. Useful when the head SHA is not available in the context (e.g. PRs from forks via `workflow_run`).
-- `base-sha` - [*optional*] The base SHA to use for comparing changes. Useful when the base SHA is not available in the context (e.g. PRs from forks via `workflow_run`).
-- `skip-if-no-changes` - [*optional* {default: false}] If true, comment won't be added if there is no coverage information present for
-  the files changed
-- `pass-emoji` - [*optional* {default: :green_apple:}] Emoji to use for pass status shown when 'coverage >= min coverage' (should be a Github supported emoji).
-- `fail-emoji` - [*optional* {default: :x:}] Emoji to use for fail status shown when 'coverage < min coverage' (should be a Github supported emoji).
-- `coverage-counter-type` - [*optional* {INSTRUCTION, BRANCH, LINE, COMPLEXITY, METHOD} {default: INSTRUCTION}] The type of JaCoCo counter to use for coverage calculation. Note: COMPLEXITY and METHOD are not available at per-line granularity, so changed-lines coverage will fall back to INSTRUCTION for those types.
-- `show-all-modules` - [*optional* {default: false}] If true, show coverage for all modules in the comment, not just those with changed files
-- `show-missing-lines` - [*optional* {default: true}] If true, show the line numbers of uncovered code in the Files table with hyperlinks to the exact lines in the source
-- `continue-on-error` - [*optional* {default: true}] If true, then do not fail the action on error, but log a warning
-- `debug-mode` - [*optional* {default: false}] If true, run the action in debug mode and get debug logs printed in console
+- `comment-type` - [_optional_ {pr_comment, summary, both, none} {default: pr_comment}] Specifies where to add the comment, whether as a PR comment,
+  workflow summary, both, or none. `none` requires `add-check: true`
+- `add-check` - [_optional_ {default: false}] If true, publishes the coverage report as a check run on the head commit. The check title
+  shows the overall coverage and, when coverage dropped, the delta (e.g. `Overall 69.09% (-1.07%)`); the check passes only when
+  both overall and changed-lines thresholds are met.
+  Requires the `checks: write` permission
+- `fail-check-below-threshold` - [_optional_ {default: false}] If true, the check run is marked as failed when coverage is below the
+  configured minimum. Requires `add-check`
+- `pr-number` - [_optional_] The PR number to add the comment to. If not provided, the action will try to get it from the environment.
+- `title` - [_optional_] Title for the Pull Request comment
+- `head-sha` - [_optional_] The head SHA to use for comparing changes. Useful when the head SHA is not available in the context (e.g. PRs from forks via `workflow_run`).
+- `base-sha` - [_optional_] The base SHA to use for comparing changes. Useful when the base SHA is not available in the context (e.g. PRs from forks via `workflow_run`).
+- `skip-if-no-changes` - [_optional_ {default: false}] If true, comment and workflow summary won't be added if there is no coverage
+  information present for the files changed. The check run (`add-check`) is still published
+- `pass-emoji` - [_optional_ {default: :green_apple:}] Emoji to use for pass status shown when 'coverage >= min coverage' (should be a Github supported emoji).
+- `fail-emoji` - [_optional_ {default: :x:}] Emoji to use for fail status shown when 'coverage < min coverage' (should be a Github supported emoji).
+- `coverage-counter-type` - [_optional_ {INSTRUCTION, BRANCH, LINE, COMPLEXITY, METHOD} {default: INSTRUCTION}] The type of JaCoCo counter to use for coverage calculation. Note: COMPLEXITY and METHOD are not available at per-line granularity, so changed-lines coverage will fall back to INSTRUCTION for those types.
+- `show-all-modules` - [_optional_ {default: false}] If true, show coverage for all modules in the comment, not just those with changed files
+- `show-missing-lines` - [_optional_ {default: true}] If true, show the line numbers of uncovered code in the Files table with hyperlinks to the exact lines in the source
+- `continue-on-error` - [_optional_ {default: true}] If true, then do not fail the action on error, but log a warning
+- `debug-mode` - [_optional_ {default: false}] If true, run the action in debug mode and get debug logs printed in console
 
 ### Outputs
 
@@ -61,6 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      checks: write
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -83,6 +94,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 40
           min-coverage-changed-lines: 60
+          add-check: true
 ```
 
 <br>

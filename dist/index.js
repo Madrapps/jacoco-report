@@ -2564,7 +2564,13 @@ function requireRequest$1 () {
 	      } else if (typeof val[i] === 'object') {
 	        throw new InvalidArgumentError(`invalid ${key} header`)
 	      } else {
-	        arr.push(`${val[i]}`);
+	        // Coerce primitives (and reject unsafe coercions such as functions
+	        // with a crafted toString/Symbol.toPrimitive).
+	        const str = `${val[i]}`;
+	        if (!isValidHeaderValue(str)) {
+	          throw new InvalidArgumentError(`invalid ${key} header`)
+	        }
+	        arr.push(str);
 	      }
 	    }
 	    val = arr;
@@ -2575,7 +2581,12 @@ function requireRequest$1 () {
 	  } else if (val === null) {
 	    val = '';
 	  } else {
+	    // Coerce primitives (and reject unsafe coercions such as functions
+	    // with a crafted toString/Symbol.toPrimitive).
 	    val = `${val}`;
+	    if (!isValidHeaderValue(val)) {
+	      throw new InvalidArgumentError(`invalid ${key} header`)
+	    }
 	  }
 
 	  if (headerName === 'host') {
@@ -2726,6 +2737,7 @@ function requireDispatcherBase () {
 
 	  get webSocketOptions () {
 	    return {
+	      maxFragments: this[kWebSocketOptions].maxFragments ?? 131072,
 	      maxPayloadSize: this[kWebSocketOptions].maxPayloadSize ?? 128 * 1024 * 1024
 	    }
 	  }
@@ -8630,6 +8642,7 @@ function requireClientH1 () {
 	  RequestContentLengthMismatchError,
 	  ResponseContentLengthMismatchError,
 	  RequestAbortedError,
+	  InvalidArgumentError,
 	  HeadersTimeoutError,
 	  HeadersOverflowError,
 	  SocketError,
@@ -8677,6 +8690,9 @@ function requireClientH1 () {
 	const FastBuffer = Buffer[Symbol.species];
 	const addListener = util.addListener;
 	const removeAllListeners = util.removeAllListeners;
+	const kIdleSocketValidation = Symbol('kIdleSocketValidation');
+	const kIdleSocketValidationTimeout = Symbol('kIdleSocketValidationTimeout');
+	const kSocketUsed = Symbol('kSocketUsed');
 
 	let extractBody;
 
@@ -8991,6 +9007,11 @@ function requireClientH1 () {
 	      return -1
 	    }
 
+	    if (client[kRunning] === 0) {
+	      util.destroy(socket, new SocketError('bad response', util.getSocketInfo(socket)));
+	      return -1
+	    }
+
 	    const request = client[kQueue][client[kRunningIdx]];
 	    if (!request) {
 	      return -1
@@ -9091,6 +9112,11 @@ function requireClientH1 () {
 
 	    /* istanbul ignore next: difficult to make a test case for */
 	    if (socket.destroyed) {
+	      return -1
+	    }
+
+	    if (client[kRunning] === 0) {
+	      util.destroy(socket, new SocketError('bad response', util.getSocketInfo(socket)));
 	      return -1
 	    }
 
@@ -9267,6 +9293,7 @@ function requireClientH1 () {
 	    request.onComplete(headers);
 
 	    client[kQueue][client[kRunningIdx]++] = null;
+	    socket[kSocketUsed] = true;
 
 	    if (socket[kWriting]) {
 	      assert(client[kRunning] === 0);
@@ -9325,6 +9352,9 @@ function requireClientH1 () {
 	  socket[kWriting] = false;
 	  socket[kReset] = false;
 	  socket[kBlocking] = false;
+	  socket[kIdleSocketValidation] = 0;
+	  socket[kIdleSocketValidationTimeout] = null;
+	  socket[kSocketUsed] = false;
 	  socket[kParser] = new Parser(client, socket, llhttpInstance);
 
 	  addListener(socket, 'error', function (err) {
@@ -9370,6 +9400,8 @@ function requireClientH1 () {
 	  addListener(socket, 'close', function () {
 	    const client = this[kClient];
 	    const parser = this[kParser];
+
+	    clearIdleSocketValidation(this);
 
 	    if (parser) {
 	      if (!this[kError] && parser.statusCode && !parser.shouldKeepAlive) {
@@ -9436,7 +9468,7 @@ function requireClientH1 () {
 	      return socket.destroyed
 	    },
 	    busy (request) {
-	      if (socket[kWriting] || socket[kReset] || socket[kBlocking]) {
+	      if (socket[kWriting] || socket[kReset] || socket[kBlocking] || socket[kIdleSocketValidation] === 1) {
 	        return true
 	      }
 
@@ -9474,6 +9506,31 @@ function requireClientH1 () {
 	  }
 	}
 
+	function clearIdleSocketValidation (socket) {
+	  if (socket[kIdleSocketValidationTimeout]) {
+	    clearTimeout(socket[kIdleSocketValidationTimeout]);
+	    socket[kIdleSocketValidationTimeout] = null;
+	  }
+
+	  socket[kIdleSocketValidation] = 0;
+	}
+
+	function scheduleIdleSocketValidation (client, socket) {
+	  socket[kIdleSocketValidation] = 1;
+	  socket[kIdleSocketValidationTimeout] = setTimeout(() => {
+	    socket[kIdleSocketValidationTimeout] = null;
+	    socket[kIdleSocketValidation] = 2;
+
+	    if (client[kSocket] === socket && !socket.destroyed) {
+	      client[kResume]();
+	    }
+	  }, 0);
+	  socket[kIdleSocketValidationTimeout].unref?.();
+	}
+
+	/**
+	 * @param {import('./client.js')} client
+	 */
 	function resumeH1 (client) {
 	  const socket = client[kSocket];
 
@@ -9486,6 +9543,32 @@ function requireClientH1 () {
 	    } else if (socket[kNoRef] && socket.ref) {
 	      socket.ref();
 	      socket[kNoRef] = false;
+	    }
+
+	    if (client[kRunning] === 0 && client[kPending] > 0 && socket[kSocketUsed]) {
+	      if (socket[kIdleSocketValidation] === 0) {
+	        scheduleIdleSocketValidation(client, socket);
+	        socket[kParser].readMore();
+	        if (socket.destroyed) {
+	          return
+	        }
+	        return
+	      }
+
+	      if (socket[kIdleSocketValidation] === 1) {
+	        socket[kParser].readMore();
+	        if (socket.destroyed) {
+	          return
+	        }
+	        return
+	      }
+	    }
+
+	    if (client[kRunning] === 0) {
+	      socket[kParser].readMore();
+	      if (socket.destroyed) {
+	        return
+	      }
 	    }
 
 	    if (client[kSize] === 0) {
@@ -9543,8 +9626,16 @@ function requireClientH1 () {
 	    }
 	    body = bodyStream.stream;
 	    contentLength = bodyStream.length;
-	  } else if (util.isBlobLike(body) && request.contentType == null && body.type) {
-	    headers.push('content-type', body.type);
+	  } else if (util.isBlobLike(body) && request.contentType == null) {
+	    const contentType = body.type;
+	    if (contentType) {
+	      const contentTypeValue = `${contentType}`;
+	      if (!util.isValidHeaderValue(contentTypeValue)) {
+	        util.errorRequest(client, request, new InvalidArgumentError('invalid content-type header'));
+	        return false
+	      }
+	      headers.push('content-type', contentTypeValue);
+	    }
 	  }
 
 	  if (body && typeof body.read === 'function') {
@@ -9581,6 +9672,7 @@ function requireClientH1 () {
 	  }
 
 	  const socket = client[kSocket];
+	  clearIdleSocketValidation(socket);
 
 	  const abort = (err) => {
 	    if (request.aborted || request.completed) {
@@ -12978,6 +13070,28 @@ function requireRetryHandler () {
 	  return new Date(retryAfter).getTime() - current
 	}
 
+	function validatePartialResponseContentLength (headers, range, statusCode, retryCount) {
+	  const contentLength = headers['content-length'];
+	  if (contentLength == null) {
+	    return null
+	  }
+
+	  if (!Number.isFinite(range.start) || !Number.isFinite(range.end)) {
+	    return null
+	  }
+
+	  const length = Number(contentLength);
+	  const expectedLength = range.end - range.start + 1;
+	  if (!Number.isFinite(length) || length !== expectedLength) {
+	    return new RequestRetryError('Content-Length mismatch', statusCode, {
+	      headers,
+	      data: { count: retryCount }
+	    })
+	  }
+
+	  return null
+	}
+
 	class RetryHandler {
 	  constructor (opts, handlers) {
 	    const { retryOptions, ...dispatchOpts } = opts;
@@ -13192,6 +13306,12 @@ function requireRetryHandler () {
 	        return false
 	      }
 
+	      const contentLengthError = validatePartialResponseContentLength(headers, contentRange, statusCode, this.retryCount);
+	      if (contentLengthError != null) {
+	        this.abort(contentLengthError);
+	        return false
+	      }
+
 	      const { start, size, end = size - 1 } = contentRange;
 
 	      assert(this.start === start, 'content-range mismatch');
@@ -13213,6 +13333,12 @@ function requireRetryHandler () {
 	            resume,
 	            statusMessage
 	          )
+	        }
+
+	        const contentLengthError = validatePartialResponseContentLength(headers, range, statusCode, this.retryCount);
+	        if (contentLengthError != null) {
+	          this.abort(contentLengthError);
+	          return false
 	        }
 
 	        const { start, size, end = size - 1 } = range;
@@ -23603,7 +23729,7 @@ function requireUtil$2 () {
 
 	    if (
 	      code < 0x20 || // exclude CTLs (0-31)
-	      code === 0x7F || // DEL
+	      code > 0x7E || // exclude DEL and non-ascii
 	      code === 0x3B // ;
 	    ) {
 	      throw new Error('Invalid cookie path')
@@ -23612,16 +23738,80 @@ function requireUtil$2 () {
 	}
 
 	/**
-	 * I have no idea why these values aren't allowed to be honest,
-	 * but Deno tests these. - Khafra
+	 * <let-dig> ::= <letter> | <digit>
+	 *
+	 * <letter> ::= any one of the 52 alphabetic characters A through Z in
+	 * upper case and a through z in lower case
+	 *
+	 * <digit> ::= any one of the ten digits 0 through 9r
+	 *
+	 * @see https://www.rfc-editor.org/rfc/rfc1034#section-3.5
+	 * @param {number} code
+	 */
+	function isLetterOrDigit (code) {
+	  return (
+	    (code >= 0x30 && code <= 0x39) || // 0-9
+	    (code >= 0x41 && code <= 0x5A) || // A-Z
+	    (code >= 0x61 && code <= 0x7A) // a-z
+	  )
+	}
+
+	/**
+	 * Validates a cookie domain against the "preferred name syntax".
+	 *
+	 * <domain>      ::= <subdomain> | " "
+	 * <subdomain>   ::= <label> | <subdomain> "." <label>
+	 * <label>       ::= <let-dig> [ [ <ldh-str> ] <let-dig> ]
+	 * <ldh-str>     ::= <let-dig-hyp> | <let-dig-hyp> <ldh-str>
+	 * <let-dig-hyp> ::= <let-dig> | "-"
+	 *
+	 * @see https://www.rfc-editor.org/rfc/rfc1034#section-3.5
+	 * @see https://www.rfc-editor.org/rfc/rfc1123#section-2.1
+	 * @see https://www.rfc-editor.org/rfc/rfc1035#section-2.3.4
 	 * @param {string} domain
 	 */
 	function validateCookieDomain (domain) {
-	  if (
-	    domain.startsWith('-') ||
-	    domain.endsWith('.') ||
-	    domain.endsWith('-')
-	  ) {
+	  // <domain> ::= <subdomain> | " "
+	  if (domain === ' ') {
+	    return
+	  }
+
+	  if (domain.length > 255) {
+	    throw new Error('Invalid cookie domain')
+	  }
+
+	  let labelLength = 0;
+
+	  for (let i = 0; i < domain.length; ++i) {
+	    const code = domain.charCodeAt(i);
+
+	    if (code === 0x2E) {
+	      if (labelLength === 0) {
+	        throw new Error('Invalid cookie domain')
+	      }
+
+	      if (domain.charCodeAt(i - 1) === 0x2D) { // "-"
+	        throw new Error('Invalid cookie domain')
+	      }
+
+	      labelLength = 0;
+	      continue
+	    }
+
+	    if (labelLength === 0 && !isLetterOrDigit(code)) {
+	      throw new Error('Invalid cookie domain')
+	    }
+
+	    if (!isLetterOrDigit(code) && code !== 0x2D) { // "-"
+	      throw new Error('Invalid cookie domain')
+	    }
+
+	    if (++labelLength > 63) {
+	      throw new Error('Invalid cookie domain')
+	    }
+	  }
+
+	  if (labelLength === 0 || domain.charCodeAt(domain.length - 1) === 0x2D) { // "-"
 	    throw new Error('Invalid cookie domain')
 	  }
 	}
@@ -23764,7 +23954,13 @@ function requireUtil$2 () {
 
 	    const [key, ...value] = part.split('=');
 
-	    out.push(`${key.trim()}=${value.join('=')}`);
+	    const trimmedKey = key.trim();
+	    const joinedValue = value.join('=');
+
+	    validateCookieName(trimmedKey);
+	    validateCookieValue(joinedValue);
+
+	    out.push(`${trimmedKey}=${joinedValue}`);
 	  }
 
 	  return out.join('; ')
@@ -24063,32 +24259,25 @@ function requireParse () {
 	    // If the attribute-name case-insensitively matches the string
 	    // "SameSite", the user agent MUST process the cookie-av as follows:
 
-	    // 1. Let enforcement be "Default".
-	    let enforcement = 'Default';
-
 	    const attributeValueLowercase = attributeValue.toLowerCase();
-	    // 2. If cookie-av's attribute-value is a case-insensitive match for
-	    //    "None", set enforcement to "None".
-	    if (attributeValueLowercase.includes('none')) {
-	      enforcement = 'None';
-	    }
 
-	    // 3. If cookie-av's attribute-value is a case-insensitive match for
-	    //    "Strict", set enforcement to "Strict".
-	    if (attributeValueLowercase.includes('strict')) {
-	      enforcement = 'Strict';
+	    // 1. If cookie-av's attribute-value is a case-insensitive match for
+	    //    "None", append an attribute to the cookie-attribute-list with an
+	    //    attribute-name of "SameSite" and an attribute-value of "None".
+	    if (attributeValueLowercase === 'none') {
+	      cookieAttributeList.sameSite = 'None';
+	    } else if (attributeValueLowercase === 'strict') {
+	      // 2. If cookie-av's attribute-value is a case-insensitive match for
+	      //    "Strict", append an attribute to the cookie-attribute-list with
+	      //    an attribute-name of "SameSite" and an attribute-value of
+	      //    "Strict".
+	      cookieAttributeList.sameSite = 'Strict';
+	    } else if (attributeValueLowercase === 'lax') {
+	      // 3. If cookie-av's attribute-value is a case-insensitive match for
+	      //    "Lax", append an attribute to the cookie-attribute-list with an
+	      //    attribute-name of "SameSite" and an attribute-value of "Lax".
+	      cookieAttributeList.sameSite = 'Lax';
 	    }
-
-	    // 4. If cookie-av's attribute-value is a case-insensitive match for
-	    //    "Lax", set enforcement to "Lax".
-	    if (attributeValueLowercase.includes('lax')) {
-	      enforcement = 'Lax';
-	    }
-
-	    // 5. Append an attribute to the cookie-attribute-list with an
-	    //    attribute-name of "SameSite" and an attribute-value of
-	    //    enforcement.
-	    cookieAttributeList.sameSite = enforcement;
 	  } else {
 	    cookieAttributeList.unparsed ??= [];
 
@@ -25674,6 +25863,11 @@ function requireReceiver () {
 	const { PerMessageDeflate } = requirePermessageDeflate();
 	const { MessageSizeExceededError } = requireErrors();
 
+	function failWebsocketConnectionWithCode (ws, code, reason) {
+	  closeWebSocketConnection(ws, code, reason, Buffer.byteLength(reason));
+	  failWebsocketConnection(ws, reason);
+	}
+
 	// This code was influenced by ws released under the MIT license.
 	// Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>
 	// Copyright (c) 2013 Arnout Kazemier and contributors
@@ -25694,18 +25888,22 @@ function requireReceiver () {
 	  #extensions
 
 	  /** @type {number} */
+	  #maxFragments
+
+	  /** @type {number} */
 	  #maxPayloadSize
 
 	  /**
 	   * @param {import('./websocket').WebSocket} ws
 	   * @param {Map<string, string>|null} extensions
-	   * @param {{ maxPayloadSize?: number }} [options]
+	   * @param {{ maxFragments?: number, maxPayloadSize?: number }} [options]
 	   */
 	  constructor (ws, extensions, options = {}) {
 	    super();
 
 	    this.ws = ws;
 	    this.#extensions = extensions == null ? new Map() : extensions;
+	    this.#maxFragments = options.maxFragments ?? 0;
 	    this.#maxPayloadSize = options.maxPayloadSize ?? 0;
 
 	    if (this.#extensions.has('permessage-deflate')) {
@@ -25729,9 +25927,9 @@ function requireReceiver () {
 	    if (
 	      this.#maxPayloadSize > 0 &&
 	      !isControlFrame(this.#info.opcode) &&
-	      this.#info.payloadLength > this.#maxPayloadSize
+	      this.#info.payloadLength + this.#fragmentsBytes > this.#maxPayloadSize
 	    ) {
-	      failWebsocketConnection(this.ws, 'Payload size exceeds maximum allowed size');
+	      failWebsocketConnectionWithCode(this.ws, 1009, 'Payload size exceeds maximum allowed size');
 	      return false
 	    }
 
@@ -25896,10 +26094,12 @@ function requireReceiver () {
 	          this.#state = parserStates.INFO;
 	        } else {
 	          if (!this.#info.compressed) {
-	            this.writeFragments(body);
+	            if (!this.writeFragments(body)) {
+	              return
+	            }
 
 	            if (this.#maxPayloadSize > 0 && this.#fragmentsBytes > this.#maxPayloadSize) {
-	              failWebsocketConnection(this.ws, new MessageSizeExceededError().message);
+	              failWebsocketConnectionWithCode(this.ws, 1009, new MessageSizeExceededError().message);
 	              return
 	            }
 
@@ -25918,14 +26118,17 @@ function requireReceiver () {
 	              this.#info.fin,
 	              (error, data) => {
 	                if (error) {
-	                  failWebsocketConnection(this.ws, error.message);
+	                  const code = error instanceof MessageSizeExceededError ? 1009 : 1007;
+	                  failWebsocketConnectionWithCode(this.ws, code, error.message);
 	                  return
 	                }
 
-	                this.writeFragments(data);
+	                if (!this.writeFragments(data)) {
+	                  return
+	                }
 
 	                if (this.#maxPayloadSize > 0 && this.#fragmentsBytes > this.#maxPayloadSize) {
-	                  failWebsocketConnection(this.ws, new MessageSizeExceededError().message);
+	                  failWebsocketConnectionWithCode(this.ws, 1009, new MessageSizeExceededError().message);
 	                  return
 	                }
 
@@ -25995,8 +26198,17 @@ function requireReceiver () {
 	  }
 
 	  writeFragments (fragment) {
+	    if (
+	      this.#maxFragments > 0 &&
+	      this.#fragments.length === this.#maxFragments
+	    ) {
+	      failWebsocketConnectionWithCode(this.ws, 1008, 'Too many message fragments');
+	      return false
+	    }
+
 	    this.#fragmentsBytes += fragment.length;
 	    this.#fragments.push(fragment);
+	    return true
 	  }
 
 	  consumeFragments () {
@@ -26699,9 +26911,12 @@ function requireWebsocket () {
 	    // once this happens, the connection is open
 	    this[kResponse] = response;
 
-	    const maxPayloadSize = this[kController]?.dispatcher?.webSocketOptions?.maxPayloadSize;
+	    const webSocketOptions = this[kController]?.dispatcher?.webSocketOptions;
+	    const maxFragments = webSocketOptions?.maxFragments;
+	    const maxPayloadSize = webSocketOptions?.maxPayloadSize;
 
 	    const parser = new ByteParser(this, parsedExtensions, {
+	      maxFragments,
 	      maxPayloadSize
 	    });
 	    parser.on('drain', onParserDrain);
@@ -33422,51 +33637,6 @@ function getOctokit(token, options, ...additionalPlugins) {
     return new GitHubWithPlugins(getOctokitOptions(token));
 }
 
-var processors = {};
-
-var hasRequiredProcessors;
-
-function requireProcessors () {
-	if (hasRequiredProcessors) return processors;
-	hasRequiredProcessors = 1;
-	// Generated by CoffeeScript 1.12.7
-	(function() {
-	  var prefixMatch;
-
-	  prefixMatch = new RegExp(/(?!xmlns)^.*:/);
-
-	  processors.normalize = function(str) {
-	    return str.toLowerCase();
-	  };
-
-	  processors.firstCharLowerCase = function(str) {
-	    return str.charAt(0).toLowerCase() + str.slice(1);
-	  };
-
-	  processors.stripPrefix = function(str) {
-	    return str.replace(prefixMatch, '');
-	  };
-
-	  processors.parseNumbers = function(str) {
-	    if (!isNaN(str)) {
-	      str = str % 1 === 0 ? parseInt(str, 10) : parseFloat(str);
-	    }
-	    return str;
-	  };
-
-	  processors.parseBooleans = function(str) {
-	    if (/^(?:true|false)$/i.test(str)) {
-	      str = str.toLowerCase() === 'true';
-	    }
-	    return str;
-	  };
-
-	}).call(processors);
-	return processors;
-}
-
-var processorsExports = requireProcessors();
-
 /**
  * Returns a copy with defaults filled in.
  */
@@ -33818,6 +33988,17 @@ const closePattern = /\\}/g;
 const commaPattern = /\\,/g;
 const periodPattern = /\\\./g;
 const EXPANSION_MAX = 100_000;
+// `EXPANSION_MAX` caps the *number* of expansions, but not their length. An
+// input like `'{a,b}'.repeat(1500)` stays under that count - its output is
+// truncated to 100k results - while making every result ~1500 characters
+// long. The result set, and the intermediate arrays built while combining
+// brace sets, then grow large enough to exhaust memory and crash the process
+// (CVE-2026-14257). `EXPANSION_MAX_LENGTH` bounds the total number of
+// characters the accumulator may hold at any point, so memory stays flat no
+// matter how many brace groups are chained. The limit sits well above any
+// realistic expansion (100k results hitting `EXPANSION_MAX` measure ~1M
+// characters) so legitimate input is unaffected.
+const EXPANSION_MAX_LENGTH = 4_000_000;
 function numeric(str) {
     return !isNaN(str) ? parseInt(str, 10) : str.charCodeAt(0);
 }
@@ -33866,7 +34047,7 @@ function expand(str, options = {}) {
     if (!str) {
         return [];
     }
-    const { max = EXPANSION_MAX } = options;
+    const { max = EXPANSION_MAX, maxLength = EXPANSION_MAX_LENGTH } = options;
     // I don't know why Bash 4.3 does this, but it does.
     // Anything starting with {} will have the first two bytes preserved
     // but *only* at the top level, so {},a}b will not expand to anything,
@@ -33876,7 +34057,7 @@ function expand(str, options = {}) {
     if (str.slice(0, 2) === '{}') {
         str = '\\{\\}' + str.slice(2);
     }
-    return expand_(escapeBraces(str), max, true).map(unescapeBraces);
+    return expand_(escapeBraces(str), max, maxLength, true).map(unescapeBraces);
 }
 function embrace(str) {
     return '{' + str + '}';
@@ -33890,22 +34071,117 @@ function lte(i, y) {
 function gte(i, y) {
     return i >= y;
 }
-function expand_(str, max, isTop) {
-    /** @type {string[]} */
-    const expansions = [];
-    const m = balanced('{', '}', str);
-    if (!m)
-        return [str];
-    // no need to expand pre, since it is guaranteed to be free of brace-sets
-    const pre = m.pre;
-    const post = m.post.length ? expand_(m.post, max, false) : [''];
-    if (/\$$/.test(m.pre)) {
-        for (let k = 0; k < post.length && k < max; k++) {
-            const expansion = pre + '{' + m.body + '}' + post[k];
-            expansions.push(expansion);
+// Build `{ acc[a] + pre + values[v] }` for every combination, capping the
+// number of results at `max` and the total number of characters at `maxLength`.
+// This is the one place output grows, so bounding it here keeps the single
+// accumulator - and therefore memory - flat regardless of how many brace groups
+// are combined (CVE-2026-14257).
+function combine(acc, pre, values, max, maxLength, dropEmpties) {
+    const out = [];
+    let length = 0;
+    for (let a = 0; a < acc.length; a++) {
+        for (let v = 0; v < values.length; v++) {
+            if (out.length >= max)
+                return out;
+            const expansion = acc[a] + pre + values[v];
+            // Bash drops empty results at the top level. Skip them before they count
+            // against `max`, so `max` bounds the number of *kept* results.
+            if (dropEmpties && !expansion)
+                continue;
+            if (length + expansion.length > maxLength)
+                return out;
+            out.push(expansion);
+            length += expansion.length;
         }
     }
-    else {
+    return out;
+}
+// The expansion values of a single numeric (`1..5`) or alphabetic (`a..e..2`)
+// sequence body.
+function expandSequence(body, isAlphaSequence, max, maxLength) {
+    const n = body.split(/\.\./);
+    const N = [];
+    // A sequence body always splits into two or three parts, but the compiler
+    // can't know that.
+    /* c8 ignore start */
+    if (n[0] === undefined || n[1] === undefined) {
+        return N;
+    }
+    /* c8 ignore stop */
+    const x = numeric(n[0]);
+    const y = numeric(n[1]);
+    const width = Math.max(n[0].length, n[1].length);
+    let incr = n.length === 3 && n[2] !== undefined ?
+        Math.max(Math.abs(numeric(n[2])), 1)
+        : 1;
+    let test = lte;
+    const reverse = y < x;
+    if (reverse) {
+        incr *= -1;
+        test = gte;
+    }
+    const pad = n.some(isPadded);
+    let length = 0;
+    for (let i = x; test(i, y) && N.length < max; i += incr) {
+        let c;
+        if (isAlphaSequence) {
+            c = String.fromCharCode(i);
+            if (c === '\\') {
+                c = '';
+            }
+        }
+        else {
+            c = String(i);
+            if (pad) {
+                const need = width - c.length;
+                if (need > 0) {
+                    const z = new Array(need + 1).join('0');
+                    if (i < 0) {
+                        c = '-' + z + c.slice(1);
+                    }
+                    else {
+                        c = z + c;
+                    }
+                }
+            }
+        }
+        if (length + c.length > maxLength)
+            break;
+        N.push(c);
+        length += c.length;
+    }
+    return N;
+}
+function expand_(str, max, maxLength, isTop) {
+    // Consume the string's top-level brace groups left to right, threading a
+    // running set of combined prefixes (`acc`). Expanding the tail iteratively -
+    // rather than recursing on `m.post` once per group - keeps the native stack
+    // depth constant, so deeply chained input (`'{a,b}'.repeat(3000)`) can no
+    // longer overflow the stack, and leaves a single accumulator whose size
+    // `maxLength` bounds directly (CVE-2026-14257).
+    let acc = [''];
+    // Bash drops empty results, but only when the *first* top-level group is a
+    // comma set - a sequence like `{a..\}` may legitimately yield ''. The drop
+    // is on the final strings, so it is applied to whichever `combine` produces
+    // them (the one with no brace set left in the tail).
+    let dropEmpties = false;
+    let firstGroup = true;
+    for (;;) {
+        const m = balanced('{', '}', str);
+        // No brace set left: the rest of the string is literal.
+        if (!m) {
+            return combine(acc, str, [''], max, maxLength, dropEmpties);
+        }
+        // no need to expand pre, since it is guaranteed to be free of brace-sets
+        const pre = m.pre;
+        if (/\$$/.test(pre)) {
+            acc = combine(acc, pre + '{' + m.body + '}', [''], max, maxLength, dropEmpties && !m.post.length);
+            firstGroup = false;
+            if (!m.post.length)
+                break;
+            str = m.post;
+            continue;
+        }
         const isNumericSequence = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/.test(m.body);
         const isAlphaSequence = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/.test(m.body);
         const isSequence = isNumericSequence || isAlphaSequence;
@@ -33914,87 +34190,69 @@ function expand_(str, max, isTop) {
             // {a},b}
             if (m.post.match(/,(?!,).*\}/)) {
                 str = m.pre + '{' + m.body + escClose + m.post;
-                return expand_(str, max, true);
+                isTop = true;
+                continue;
             }
-            return [str];
+            // Nothing here expands, so the whole remaining string is literal.
+            return combine(acc, pre + '{' + m.body + '}' + m.post, [''], max, maxLength, dropEmpties);
         }
-        let n;
+        if (firstGroup) {
+            dropEmpties = isTop && !isSequence;
+            firstGroup = false;
+        }
+        let values;
         if (isSequence) {
-            n = m.body.split(/\.\./);
+            values = expandSequence(m.body, isAlphaSequence, max, maxLength);
         }
         else {
-            n = parseCommaParts(m.body);
+            let n = parseCommaParts(m.body);
             if (n.length === 1 && n[0] !== undefined) {
                 // x{{a,b}}y ==> x{a}y x{b}y
-                n = expand_(n[0], max, false).map(embrace);
+                n = expand_(n[0], max, maxLength, false).map(embrace);
                 //XXX is this necessary? Can't seem to hit it in tests.
                 /* c8 ignore start */
                 if (n.length === 1) {
-                    return post.map(p => m.pre + n[0] + p);
+                    acc = combine(acc, pre + n[0], [''], max, maxLength, dropEmpties && !m.post.length);
+                    if (!m.post.length)
+                        break;
+                    str = m.post;
+                    continue;
                 }
                 /* c8 ignore stop */
             }
-        }
-        // at this point, n is the parts, and we know it's not a comma set
-        // with a single entry.
-        let N;
-        if (isSequence && n[0] !== undefined && n[1] !== undefined) {
-            const x = numeric(n[0]);
-            const y = numeric(n[1]);
-            const width = Math.max(n[0].length, n[1].length);
-            let incr = n.length === 3 && n[2] !== undefined ?
-                Math.max(Math.abs(numeric(n[2])), 1)
-                : 1;
-            let test = lte;
-            const reverse = y < x;
-            if (reverse) {
-                incr *= -1;
-                test = gte;
+            // Values that `combine` is going to drop as empty produce no result, so
+            // they must not count against `max` - otherwise `{a,,b}` with `max: 2`
+            // would stop at `['a', '']` and yield one result instead of two. Skipping
+            // them outright keeps `values` bounded while leaving `max` a bound on
+            // *kept* results.
+            let dropsEmpties = dropEmpties && !m.post.length && !pre;
+            for (let d = 0; dropsEmpties && d < acc.length; d++) {
+                if (acc[d]) {
+                    dropsEmpties = false;
+                }
             }
-            const pad = n.some(isPadded);
-            N = [];
-            for (let i = x; test(i, y) && N.length < max; i += incr) {
-                let c;
-                if (isAlphaSequence) {
-                    c = String.fromCharCode(i);
-                    if (c === '\\') {
-                        c = '';
+            values = [];
+            let valuesLength = 0;
+            outer: for (let j = 0; j < n.length; j++) {
+                const expanded = expand_(n[j], max, maxLength, false);
+                for (let k = 0; k < expanded.length; k++) {
+                    const v = expanded[k];
+                    if (dropsEmpties && !v)
+                        continue;
+                    if (values.length >= max || valuesLength + v.length > maxLength) {
+                        break outer;
                     }
-                }
-                else {
-                    c = String(i);
-                    if (pad) {
-                        const need = width - c.length;
-                        if (need > 0) {
-                            const z = new Array(need + 1).join('0');
-                            if (i < 0) {
-                                c = '-' + z + c.slice(1);
-                            }
-                            else {
-                                c = z + c;
-                            }
-                        }
-                    }
-                }
-                N.push(c);
-            }
-        }
-        else {
-            N = [];
-            for (let j = 0; j < n.length; j++) {
-                N.push.apply(N, expand_(n[j], max, false));
-            }
-        }
-        for (let j = 0; j < N.length; j++) {
-            for (let k = 0; k < post.length && expansions.length < max; k++) {
-                const expansion = pre + N[j] + post[k];
-                if (!isTop || isSequence || expansion) {
-                    expansions.push(expansion);
+                    values.push(v);
+                    valuesLength += v.length;
                 }
             }
         }
+        acc = combine(acc, pre, values, max, maxLength, dropEmpties && !m.post.length);
+        if (!m.post.length)
+            break;
+        str = m.post;
     }
-    return expansions;
+    return acc;
 }
 
 const MAX_PATTERN_LENGTH = 1024 * 64;
@@ -43261,6 +43519,49 @@ function requireBom () {
 	return bom;
 }
 
+var processors = {};
+
+var hasRequiredProcessors;
+
+function requireProcessors () {
+	if (hasRequiredProcessors) return processors;
+	hasRequiredProcessors = 1;
+	// Generated by CoffeeScript 1.12.7
+	(function() {
+	  var prefixMatch;
+
+	  prefixMatch = new RegExp(/(?!xmlns)^.*:/);
+
+	  processors.normalize = function(str) {
+	    return str.toLowerCase();
+	  };
+
+	  processors.firstCharLowerCase = function(str) {
+	    return str.charAt(0).toLowerCase() + str.slice(1);
+	  };
+
+	  processors.stripPrefix = function(str) {
+	    return str.replace(prefixMatch, '');
+	  };
+
+	  processors.parseNumbers = function(str) {
+	    if (!isNaN(str)) {
+	      str = str % 1 === 0 ? parseInt(str, 10) : parseFloat(str);
+	    }
+	    return str;
+	  };
+
+	  processors.parseBooleans = function(str) {
+	    if (/^(?:true|false)$/i.test(str)) {
+	      str = str.toLowerCase() === 'true';
+	    }
+	    return str;
+	  };
+
+	}).call(processors);
+	return processors;
+}
+
 var hasRequiredParser;
 
 function requireParser () {
@@ -44338,6 +44639,8 @@ function toFloat(value) {
     return parseFloat(value.toFixed(2));
 }
 
+var processorsExports = requireProcessors();
+
 const VALID_COVERAGE_COUNTER_TYPES = [
     'INSTRUCTION',
     'BRANCH',
@@ -44346,61 +44649,200 @@ const VALID_COVERAGE_COUNTER_TYPES = [
     'METHOD',
 ];
 
+const VALID_COMMENT_TYPES = [
+    'pr_comment',
+    'summary',
+    'both',
+    'none',
+];
+const isValidCommentType = (value) => VALID_COMMENT_TYPES.includes(value);
+/**
+ * Reads and validates all action inputs. On a validation error the failure is
+ * reported through core.setFailed and undefined is returned.
+ */
+function parseInputs() {
+    const token = getInput('token');
+    if (!token) {
+        setFailed("'token' is missing");
+        return undefined;
+    }
+    const pathsString = getInput('paths');
+    if (!pathsString) {
+        setFailed("'paths' is missing");
+        return undefined;
+    }
+    if (getInput('min-coverage-changed-files')) {
+        setFailed("'min-coverage-changed-files' is no longer supported. Please use 'min-coverage-changed-lines' instead.");
+        return undefined;
+    }
+    const coverageCounterType = getInput('coverage-counter-type')
+        .toUpperCase();
+    if (!VALID_COVERAGE_COUNTER_TYPES.includes(coverageCounterType)) {
+        setFailed(`'coverage-counter-type' ${coverageCounterType} is invalid. Valid values: ${VALID_COVERAGE_COUNTER_TYPES.join(', ')}`);
+        return undefined;
+    }
+    const commentType = getInput('comment-type');
+    if (!isValidCommentType(commentType)) {
+        setFailed(`'comment-type' ${commentType} is invalid. Valid values: ${VALID_COMMENT_TYPES.join(', ')}`);
+        return undefined;
+    }
+    const addCheck = processorsExports.parseBooleans(getInput('add-check'));
+    const failCheckBelowThreshold = processorsExports.parseBooleans(getInput('fail-check-below-threshold'));
+    if (failCheckBelowThreshold && !addCheck) {
+        setFailed("'fail-check-below-threshold' requires 'add-check' to be true");
+        return undefined;
+    }
+    if (commentType === 'none' && !addCheck) {
+        setFailed("'comment-type' is none and 'add-check' is false: nothing to publish");
+        return undefined;
+    }
+    const title = getInput('title');
+    const updateComment = processorsExports.parseBooleans(getInput('update-comment'));
+    if (updateComment && !title) {
+        info("'title' is not set. 'update-comment' does not work without 'title'");
+    }
+    return {
+        token,
+        reportPaths: pathsString.split(','),
+        minCoverage: {
+            overall: parseFloat(getInput('min-coverage-overall')),
+            changed: parseFloat(getInput('min-coverage-changed-lines')),
+        },
+        title,
+        updateComment,
+        commentType,
+        prNumber: getInput('pr-number'),
+        headSha: getInput('head-sha'),
+        baseSha: getInput('base-sha'),
+        skipIfNoChanges: processorsExports.parseBooleans(getInput('skip-if-no-changes')),
+        showAllModules: processorsExports.parseBooleans(getInput('show-all-modules')),
+        showMissingLines: processorsExports.parseBooleans(getInput('show-missing-lines')),
+        emoji: {
+            pass: getInput('pass-emoji'),
+            fail: getInput('fail-emoji'),
+        },
+        continueOnError: processorsExports.parseBooleans(getInput('continue-on-error')),
+        debugMode: processorsExports.parseBooleans(getInput('debug-mode')),
+        coverageCounterType,
+        addCheck,
+        failCheckBelowThreshold,
+    };
+}
+
+function getCoverageStatus(project, minCoverage) {
+    const overall = project.overall?.percentage ?? 100;
+    const changed = project.changed?.percentage ?? null;
+    const difference = project.overall
+        ? getCoverageDifference(project.overall, project.changed)
+        : null;
+    const passed = overall >= minCoverage.overall &&
+        (changed === null || changed >= minCoverage.changed);
+    return { overall, changed, difference, passed };
+}
+function getCheckTitle(status) {
+    const title = `Overall ${formatCoverage(status.overall)}`;
+    return shouldShow(status.difference)
+        ? `${title} (${formatCoverage(status.difference)})`
+        : title;
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
+async function publishComment({ client, prNumber, update, title, body, debugMode, }) {
+    if (prNumber === undefined) {
+        if (debugMode)
+            info('prNumber not present');
+        return;
+    }
+    let commentUpdated = false;
+    if (debugMode)
+        info(`update: ${update}`);
+    if (debugMode)
+        info(`title: ${title}`);
+    if (debugMode)
+        info(`JaCoCo Comment: ${body}`);
+    if (update && title) {
+        if (debugMode)
+            info('Listing all comments');
+        const comments = await client.rest.issues.listComments({
+            issue_number: prNumber,
+            ...context.repo,
+        });
+        const comment = comments.data.find((it) => it.body.startsWith(title));
+        if (comment) {
+            if (debugMode)
+                info(`Updating existing comment: id=${comment.id} \n body=${comment.body}`);
+            await client.rest.issues.updateComment({
+                comment_id: comment.id,
+                body,
+                ...context.repo,
+            });
+            commentUpdated = true;
+        }
+    }
+    if (!commentUpdated) {
+        if (debugMode)
+            info('Creating a new comment');
+        await client.rest.issues.createComment({
+            issue_number: prNumber,
+            body,
+            ...context.repo,
+        });
+    }
+}
+
+async function publishSummary(body) {
+    await summary.addRaw(body, true).write();
+}
+
+const DEFAULT_CHECK_NAME = 'JaCoCo Report';
+class MissingChecksPermissionError extends Error {
+    constructor() {
+        super("'add-check' requires the 'checks: write' permission. Add `checks: write` to the job permissions.");
+        this.name = 'MissingChecksPermissionError';
+    }
+}
+async function publishCheck({ client, name, headSha, status, body, failBelowThreshold, debugMode, }) {
+    const checkName = name.trim() || DEFAULT_CHECK_NAME;
+    const conclusion = failBelowThreshold && !status.passed ? 'failure' : 'success';
+    const title = getCheckTitle(status);
+    if (debugMode)
+        info(`check: name=${checkName} title=${title} conclusion=${conclusion}`);
+    try {
+        await client.rest.checks.create({
+            ...context.repo,
+            name: checkName,
+            head_sha: headSha,
+            status: 'completed',
+            conclusion,
+            output: { title, summary: body },
+        });
+    }
+    catch (error) {
+        if (isForbidden(error))
+            throw new MissingChecksPermissionError();
+        throw error;
+    }
+}
+function isForbidden(error) {
+    return (typeof error === 'object' &&
+        error !== null &&
+        error.status === 403);
+}
+
 async function action() {
     let continueOnError = true;
     try {
-        const token = getInput('token');
-        if (!token) {
-            setFailed("'token' is missing");
+        const inputs = parseInputs();
+        if (!inputs)
             return;
-        }
-        const pathsString = getInput('paths');
-        if (!pathsString) {
-            setFailed("'paths' is missing");
-            return;
-        }
-        const reportPaths = pathsString.split(',');
-        if (getInput('min-coverage-changed-files')) {
-            setFailed("'min-coverage-changed-files' is no longer supported. Please use 'min-coverage-changed-lines' instead.");
-            return;
-        }
-        const minCoverageOverall = parseFloat(getInput('min-coverage-overall'));
-        const minCoverageChangedLines = parseFloat(getInput('min-coverage-changed-lines'));
-        const title = getInput('title');
-        const updateComment = processorsExports.parseBooleans(getInput('update-comment'));
-        if (updateComment) {
-            if (!title) {
-                info("'title' is not set. 'update-comment' does not work without 'title'");
-            }
-        }
-        const skipIfNoChanges = processorsExports.parseBooleans(getInput('skip-if-no-changes'));
-        const showAllModules = processorsExports.parseBooleans(getInput('show-all-modules'));
-        const showMissingLines = processorsExports.parseBooleans(getInput('show-missing-lines'));
-        const passEmoji = getInput('pass-emoji');
-        const failEmoji = getInput('fail-emoji');
-        continueOnError = processorsExports.parseBooleans(getInput('continue-on-error'));
-        const debugMode = processorsExports.parseBooleans(getInput('debug-mode'));
-        const coverageCounterType = getInput('coverage-counter-type')
-            .toUpperCase();
-        if (!VALID_COVERAGE_COUNTER_TYPES.includes(coverageCounterType)) {
-            setFailed(`'coverage-counter-type' ${coverageCounterType} is invalid. Valid values: ${VALID_COVERAGE_COUNTER_TYPES.join(', ')}`);
-            return;
-        }
+        continueOnError = inputs.continueOnError;
+        const { token, reportPaths, skipIfNoChanges, showAllModules, debugMode, coverageCounterType, } = inputs;
         const event = context.eventName;
         info(`Event is ${event}`);
         if (debugMode) {
-            info(`passEmoji: ${passEmoji}`);
-            info(`failEmoji: ${failEmoji}`);
+            info(`inputs: ${debug({ ...inputs, token: '***' })}`);
         }
-        const commentType = getInput('comment-type');
-        if (debugMode) {
-            info(`commentType: ${commentType}`);
-        }
-        if (!isValidCommentType(commentType)) {
-            setFailed(`'comment-type' ${commentType} is invalid`);
-        }
-        const prNumberInput = getInput('pr-number');
+        const prNumberInput = inputs.prNumber;
         const parsedPrNumber = parseInt(prNumberInput, 10);
         let prNumber = Number.isInteger(parsedPrNumber) && parsedPrNumber > 0
             ? parsedPrNumber
@@ -44443,8 +44885,8 @@ async function action() {
                 setFailed(`The event ${context.eventName} is not supported.`);
                 return;
         }
-        const headShaInput = getInput('head-sha');
-        const baseShaInput = getInput('base-sha');
+        const headShaInput = inputs.headSha;
+        const baseShaInput = inputs.baseSha;
         switch (event) {
             case 'pull_request':
             case 'pull_request_target':
@@ -44499,32 +44941,13 @@ async function action() {
             info(`skip: ${skip}`);
         if (debugMode)
             info(`prNumber: ${prNumber}`);
-        if (!skip) {
-            const emoji = {
-                pass: passEmoji,
-                fail: failEmoji,
-            };
-            const titleFormatted = getTitle(title);
-            const bodyFormatted = getPRComment(project, {
-                overall: minCoverageOverall,
-                changed: minCoverageChangedLines,
-            }, title, emoji, showMissingLines, coverageCounterType);
-            switch (commentType) {
-                case 'pr_comment':
-                    await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
-                    break;
-                case 'summary':
-                    await addWorkflowSummary(bodyFormatted);
-                    break;
-                case 'both':
-                    await addComment(prNumber, updateComment, titleFormatted, bodyFormatted, client, debugMode);
-                    await addWorkflowSummary(bodyFormatted);
-                    break;
-            }
-        }
+        await publish(inputs, project, head, prNumber, client, skip);
     }
     catch (error$1) {
-        if (error$1 instanceof Error) {
+        if (error$1 instanceof MissingChecksPermissionError) {
+            setFailed(error$1);
+        }
+        else if (error$1 instanceof Error) {
             if (continueOnError) {
                 error(error$1);
             }
@@ -44568,55 +44991,36 @@ async function getChangedFiles(base, head, client, debugMode) {
     }
     return changedFiles;
 }
-async function addComment(prNumber, update, title, body, client, debugMode) {
-    if (prNumber === undefined) {
-        if (debugMode)
-            info('prNumber not present');
-        return;
-    }
-    let commentUpdated = false;
-    if (debugMode)
-        info(`update: ${update}`);
-    if (debugMode)
-        info(`title: ${title}`);
-    if (debugMode)
-        info(`JaCoCo Comment: ${body}`);
-    if (update && title) {
-        if (debugMode)
-            info('Listing all comments');
-        const comments = await client.rest.issues.listComments({
-            issue_number: prNumber,
-            ...context.repo,
+async function publish(inputs, project, headSha, prNumber, client, skipComment) {
+    const { minCoverage, title, emoji, showMissingLines, coverageCounterType } = inputs;
+    const render = (heading) => getPRComment(project, minCoverage, heading, emoji, showMissingLines, coverageCounterType);
+    const wantsComment = inputs.commentType === 'pr_comment' || inputs.commentType === 'both';
+    const wantsSummary = inputs.commentType === 'summary' || inputs.commentType === 'both';
+    if (wantsComment && !skipComment) {
+        await publishComment({
+            client,
+            prNumber,
+            update: inputs.updateComment,
+            title: getTitle(title),
+            body: render(title),
+            debugMode: inputs.debugMode,
         });
-        const comment = comments.data.find((it) => it.body.startsWith(title));
-        if (comment) {
-            if (debugMode)
-                info(`Updating existing comment: id=${comment.id} \n body=${comment.body}`);
-            await client.rest.issues.updateComment({
-                comment_id: comment.id,
-                body,
-                ...context.repo,
-            });
-            commentUpdated = true;
-        }
     }
-    if (!commentUpdated) {
-        if (debugMode)
-            info('Creating a new comment');
-        await client.rest.issues.createComment({
-            issue_number: prNumber,
-            body,
-            ...context.repo,
+    if (wantsSummary && !skipComment) {
+        await publishSummary(render(title));
+    }
+    if (inputs.addCheck) {
+        await publishCheck({
+            client,
+            name: title,
+            headSha,
+            status: getCoverageStatus(project, minCoverage),
+            body: render(''),
+            failBelowThreshold: inputs.failCheckBelowThreshold,
+            debugMode: inputs.debugMode,
         });
     }
 }
-async function addWorkflowSummary(body) {
-    await summary.addRaw(body, true).write();
-}
-const validCommentTypes = ['pr_comment', 'summary', 'both'];
-const isValidCommentType = (value) => {
-    return validCommentTypes.includes(value);
-};
 async function getPrNumberAssociatedWithCommit(client, commitSha) {
     const response = await client.rest.repos.listPullRequestsAssociatedWithCommit({
         commit_sha: commitSha,
