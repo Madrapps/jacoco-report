@@ -214,7 +214,7 @@ function isLineMissed(
   return line.instruction.covered === 0 && line.instruction.missed > 0
 }
 
-function getCoverageDifference(
+export function getCoverageDifference(
   overall: Coverage,
   changed: Coverage | null
 ): number | null {
@@ -271,7 +271,7 @@ function round(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100
 }
 
-function shouldShow(value: number | null): boolean {
+export function shouldShow(value: number | null): boolean {
   if (value === null) return false
   const rounded = Math.abs(round(value))
   return rounded !== 0 && rounded !== 100
@@ -298,7 +298,7 @@ function getStatus(
   return status
 }
 
-function formatCoverage(coverage: number | null): string {
+export function formatCoverage(coverage: number | null): string {
   if (coverage == null) return 'NaN%'
   return `${toFloat(coverage)}%`
 }

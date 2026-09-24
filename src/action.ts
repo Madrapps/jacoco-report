@@ -1,89 +1,42 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as fs from 'fs'
-import {parseBooleans} from 'xml2js/lib/processors'
 import * as glob from '@actions/glob'
 import {getProjectCoverage} from './process.js'
 import {getPRComment, getTitle} from './render.js'
 import {debug, getChangedLines, parseToReport} from './util.js'
 import {Project} from './models/project.js'
 import {ChangedFile} from './models/github.js'
-import {
-  CoverageCounterType,
-  Report,
-  VALID_COVERAGE_COUNTER_TYPES,
-} from './models/jacoco-types.js'
+import {Report} from './models/jacoco-types.js'
 import {GitHub} from '@actions/github/lib/utils'
+import {Inputs, parseInputs} from './inputs.js'
+import {getCoverageStatus} from './status.js'
+import {publishComment} from './publish/comment.js'
+import {publishSummary} from './publish/summary.js'
+import {MissingChecksPermissionError, publishCheck} from './publish/check.js'
 
 export async function action(): Promise<void> {
   let continueOnError = true
   try {
-    const token = core.getInput('token')
-    if (!token) {
-      core.setFailed("'token' is missing")
-      return
-    }
-    const pathsString = core.getInput('paths')
-    if (!pathsString) {
-      core.setFailed("'paths' is missing")
-      return
-    }
-
-    const reportPaths = pathsString.split(',')
-    if (core.getInput('min-coverage-changed-files')) {
-      core.setFailed(
-        "'min-coverage-changed-files' is no longer supported. Please use 'min-coverage-changed-lines' instead."
-      )
-      return
-    }
-    const minCoverageOverall = parseFloat(core.getInput('min-coverage-overall'))
-    const minCoverageChangedLines = parseFloat(
-      core.getInput('min-coverage-changed-lines')
-    )
-    const title = core.getInput('title')
-    const updateComment = parseBooleans(core.getInput('update-comment'))
-    if (updateComment) {
-      if (!title) {
-        core.info(
-          "'title' is not set. 'update-comment' does not work without 'title'"
-        )
-      }
-    }
-    const skipIfNoChanges = parseBooleans(core.getInput('skip-if-no-changes'))
-    const showAllModules = parseBooleans(core.getInput('show-all-modules'))
-    const showMissingLines = parseBooleans(core.getInput('show-missing-lines'))
-    const passEmoji = core.getInput('pass-emoji')
-    const failEmoji = core.getInput('fail-emoji')
-
-    continueOnError = parseBooleans(core.getInput('continue-on-error'))
-    const debugMode = parseBooleans(core.getInput('debug-mode'))
-    const coverageCounterType = core
-      .getInput('coverage-counter-type')
-      .toUpperCase() as CoverageCounterType
-    if (!VALID_COVERAGE_COUNTER_TYPES.includes(coverageCounterType)) {
-      core.setFailed(
-        `'coverage-counter-type' ${coverageCounterType} is invalid. Valid values: ${VALID_COVERAGE_COUNTER_TYPES.join(', ')}`
-      )
-      return
-    }
+    const inputs = parseInputs()
+    if (!inputs) return
+    continueOnError = inputs.continueOnError
+    const {
+      token,
+      reportPaths,
+      skipIfNoChanges,
+      showAllModules,
+      debugMode,
+      coverageCounterType,
+    } = inputs
 
     const event = github.context.eventName
     core.info(`Event is ${event}`)
     if (debugMode) {
-      core.info(`passEmoji: ${passEmoji}`)
-      core.info(`failEmoji: ${failEmoji}`)
+      core.info(`inputs: ${debug({...inputs, token: '***'})}`)
     }
 
-    const commentType: string = core.getInput('comment-type')
-    if (debugMode) {
-      core.info(`commentType: ${commentType}`)
-    }
-    if (!isValidCommentType(commentType)) {
-      core.setFailed(`'comment-type' ${commentType} is invalid`)
-    }
-
-    const prNumberInput = core.getInput('pr-number')
+    const prNumberInput = inputs.prNumber
     const parsedPrNumber = parseInt(prNumberInput, 10)
     let prNumber: number | undefined =
       Number.isInteger(parsedPrNumber) && parsedPrNumber > 0
@@ -132,8 +85,8 @@ export async function action(): Promise<void> {
         return
     }
 
-    const headShaInput = core.getInput('head-sha')
-    const baseShaInput = core.getInput('base-sha')
+    const headShaInput = inputs.headSha
+    const baseShaInput = inputs.baseSha
     switch (event) {
       case 'pull_request':
       case 'pull_request_target':
@@ -195,52 +148,11 @@ export async function action(): Promise<void> {
     const skip = skipIfNoChanges && project.modules.length === 0
     if (debugMode) core.info(`skip: ${skip}`)
     if (debugMode) core.info(`prNumber: ${prNumber}`)
-    if (!skip) {
-      const emoji = {
-        pass: passEmoji,
-        fail: failEmoji,
-      }
-      const titleFormatted = getTitle(title)
-      const bodyFormatted = getPRComment(
-        project,
-        {
-          overall: minCoverageOverall,
-          changed: minCoverageChangedLines,
-        },
-        title,
-        emoji,
-        showMissingLines,
-        coverageCounterType
-      )
-      switch (commentType) {
-        case 'pr_comment':
-          await addComment(
-            prNumber,
-            updateComment,
-            titleFormatted,
-            bodyFormatted,
-            client,
-            debugMode
-          )
-          break
-        case 'summary':
-          await addWorkflowSummary(bodyFormatted)
-          break
-        case 'both':
-          await addComment(
-            prNumber,
-            updateComment,
-            titleFormatted,
-            bodyFormatted,
-            client,
-            debugMode
-          )
-          await addWorkflowSummary(bodyFormatted)
-          break
-      }
-    }
+    await publish(inputs, project, head, prNumber, client, skip)
   } catch (error) {
-    if (error instanceof Error) {
+    if (error instanceof MissingChecksPermissionError) {
+      core.setFailed(error)
+    } else if (error instanceof Error) {
       if (continueOnError) {
         core.error(error)
       } else {
@@ -296,65 +208,55 @@ async function getChangedFiles(
   return changedFiles
 }
 
-async function addComment(
+async function publish(
+  inputs: Inputs,
+  project: Project,
+  headSha: string,
   prNumber: number | undefined,
-  update: boolean,
-  title: string,
-  body: string,
   client: InstanceType<typeof GitHub>,
-  debugMode: boolean
+  skipComment: boolean
 ): Promise<void> {
-  if (prNumber === undefined) {
-    if (debugMode) core.info('prNumber not present')
-    return
-  }
-  let commentUpdated = false
+  const {minCoverage, title, emoji, showMissingLines, coverageCounterType} =
+    inputs
+  const render = (heading: string): string =>
+    getPRComment(
+      project,
+      minCoverage,
+      heading,
+      emoji,
+      showMissingLines,
+      coverageCounterType
+    )
 
-  if (debugMode) core.info(`update: ${update}`)
-  if (debugMode) core.info(`title: ${title}`)
-  if (debugMode) core.info(`JaCoCo Comment: ${body}`)
-  if (update && title) {
-    if (debugMode) core.info('Listing all comments')
-    const comments = await client.rest.issues.listComments({
-      issue_number: prNumber,
-      ...github.context.repo,
-    })
-    const comment = comments.data.find((it: any) => it.body.startsWith(title))
+  const wantsComment =
+    inputs.commentType === 'pr_comment' || inputs.commentType === 'both'
+  const wantsSummary =
+    inputs.commentType === 'summary' || inputs.commentType === 'both'
 
-    if (comment) {
-      if (debugMode)
-        core.info(
-          `Updating existing comment: id=${comment.id} \n body=${comment.body}`
-        )
-      await client.rest.issues.updateComment({
-        comment_id: comment.id,
-        body,
-        ...github.context.repo,
-      })
-      commentUpdated = true
-    }
-  }
-
-  if (!commentUpdated) {
-    if (debugMode) core.info('Creating a new comment')
-    await client.rest.issues.createComment({
-      issue_number: prNumber,
-      body,
-      ...github.context.repo,
+  if (wantsComment && !skipComment) {
+    await publishComment({
+      client,
+      prNumber,
+      update: inputs.updateComment,
+      title: getTitle(title),
+      body: render(title),
+      debugMode: inputs.debugMode,
     })
   }
-}
-
-async function addWorkflowSummary(body: string): Promise<void> {
-  await core.summary.addRaw(body, true).write()
-}
-
-type Options = (typeof validCommentTypes)[number]
-
-const validCommentTypes = ['pr_comment', 'summary', 'both'] as const
-
-const isValidCommentType = (value: any): value is Options => {
-  return validCommentTypes.includes(value)
+  if (wantsSummary && !skipComment) {
+    await publishSummary(render(title))
+  }
+  if (inputs.addCheck) {
+    await publishCheck({
+      client,
+      name: title,
+      headSha,
+      status: getCoverageStatus(project, minCoverage),
+      body: render(''),
+      failBelowThreshold: inputs.failCheckBelowThreshold,
+      debugMode: inputs.debugMode,
+    })
+  }
 }
 
 async function getPrNumberAssociatedWithCommit(
