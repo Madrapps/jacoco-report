@@ -29,7 +29,7 @@ Note: When using `comment-type: pr_comment` or `comment-type: both` (the default
   Requires `title` to work properly
 - `comment-type` - [*optional* {pr_comment, summary, both} {default: pr_comment}] Specifies where to add the comment, whether as a PR comment,
   workflow summary, or both.
-- `pr-number` - [*optional*] The PR number to add the comment to. If not provided, the action will try to get it from the environment.
+- `pr-number` - [*optional*] The PR number to add the comment to. If not provided, the action will try to get it from the environment. For the `merge_group` event, it is read from the merge queue branch name.
 - `title` - [*optional*] Title for the Pull Request comment
 - `head-sha` - [*optional*] The head SHA to use for comparing changes. Useful when the head SHA is not available in the context (e.g. PRs from forks via `workflow_run`).
 - `base-sha` - [*optional*] The base SHA to use for comparing changes. Useful when the base SHA is not available in the context (e.g. PRs from forks via `workflow_run`).
