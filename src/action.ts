@@ -108,6 +108,15 @@ export async function action(): Promise<void> {
         prNumber =
           prNumber ?? (await getPrNumberAssociatedWithCommit(client, sha))
         break
+      case 'merge_group':
+        base = github.context.payload.merge_group?.base_sha
+        head = github.context.payload.merge_group?.head_sha
+        prNumber =
+          prNumber ??
+          getPrNumberFromMergeGroupRef(
+            github.context.payload.merge_group?.head_ref
+          )
+        break
       case 'workflow_dispatch':
       case 'schedule':
         prNumber =
@@ -355,6 +364,12 @@ const validCommentTypes = ['pr_comment', 'summary', 'both'] as const
 
 const isValidCommentType = (value: any): value is Options => {
   return validCommentTypes.includes(value)
+}
+
+// A merge queue ref is `refs/heads/gh-readonly-queue/<base>/pr-<number>-<sha>`.
+function getPrNumberFromMergeGroupRef(ref?: string): number | undefined {
+  const match = ref?.match(/\/pr-(\d+)-[0-9a-f]+$/)
+  return match ? Number(match[1]) : undefined
 }
 
 async function getPrNumberAssociatedWithCommit(

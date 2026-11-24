@@ -532,6 +532,79 @@ describe('Single report', function () {
     })
   })
 
+  describe('Merge Group event', function () {
+    const eventName = 'merge_group'
+    const payload = {
+      merge_group: {
+        base_sha: 'guasft7asdtf78asfd87as6df7y2u3',
+        head_sha: 'aahsdflais76dfa78wrglghjkaghkj',
+        head_ref:
+          'refs/heads/gh-readonly-queue/main/pr-45-14a554976c0e5909d8e69bc8cce72958c49a7dc5',
+      },
+    }
+
+    it('publish proper comment in the pr from the merge queue ref', async () => {
+      initContext(eventName, payload)
+
+      await action.action()
+
+      expect(createComment.mock.calls[0][0].issue_number).toEqual(45)
+      expect(createComment.mock.calls[0][0].body).toEqual(PROPER_COMMENT)
+    })
+
+    it('when pr-number present, add the comment in that pr', async () => {
+      mockCore.getInput.mockImplementation(c => {
+        switch (c) {
+          case 'pr-number':
+            return '46'
+          default:
+            return getInput(c)
+        }
+      })
+      initContext(eventName, payload)
+
+      await action.action()
+
+      expect(createComment.mock.calls[0][0].issue_number).toEqual(46)
+    })
+
+    it('set overall coverage output', async () => {
+      initContext(eventName, payload)
+
+      await action.action()
+
+      const out = output.mock.calls[0]
+      expect(out).toEqual(['coverage-overall', 35.25])
+    })
+
+    it('set changed lines coverage output', async () => {
+      initContext(eventName, payload)
+
+      await action.action()
+
+      const out = output.mock.calls[1]
+      expect(out).toEqual(['coverage-changed-lines', 38.24])
+    })
+
+    it('when comment-type is summary, add the comment as workflow summary', async () => {
+      mockCore.getInput.mockImplementation(c => {
+        switch (c) {
+          case 'comment-type':
+            return 'summary'
+          default:
+            return getInput(c)
+        }
+      })
+      initContext(eventName, payload)
+
+      await action.action()
+
+      expect(mockCore.summary.addRaw.mock.calls[0][0]).toEqual(PROPER_COMMENT)
+      expect(mockCore.summary.write).toHaveBeenCalledTimes(1)
+      expect(createComment).toHaveBeenCalledTimes(0)
+    })
+  })
+
   describe('Schedule event', function () {
     const eventName = 'schedule'
     const payload = {}
